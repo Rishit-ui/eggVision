@@ -29,8 +29,9 @@ async def create_scan(
     if not is_valid:
         raise HTTPException(status_code=400, detail=msg)
         
-    filename = f"{uuid.uuid4()}_{image.filename}"
-    original_image_url = await storage_service.upload_image(file_data, filename, image.content_type)
+    content_type, extension = image_service.canonical_upload_details(file_data)
+    filename = f"{uuid.uuid4()}{extension}"
+    original_image_url = await storage_service.upload_image(file_data, filename, content_type)
     
     # Run Computer Vision Quality, Detection, Segmentation & Normalization Pipeline
     cv_res = await cv_service.process_scan_image(file_data, image.filename)

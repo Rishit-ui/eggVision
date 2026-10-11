@@ -2,6 +2,12 @@ import { ScanResponse, PredictionResponse, PaginatedResponse, HealthResponse, Mo
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
+export function apiAssetUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (/^https?:\/\//.test(path)) return path;
+  return `${API_BASE_URL.replace(/\/api\/v1\/?$/, '')}${path}`;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);

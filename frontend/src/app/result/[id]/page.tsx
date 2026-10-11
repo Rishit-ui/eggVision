@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { api } from "@/lib/api";
+import { api, apiAssetUrl } from "@/lib/api";
 import { ScanResponse } from "@/lib/types";
 
 export default function ResultPage({ params }: { params: { id: string } }) {
@@ -55,8 +55,8 @@ export default function ResultPage({ params }: { params: { id: string } }) {
 
   const isQualityGood = scan?.image_quality === "GOOD" || scan?.image_quality === "ACCEPTABLE";
   const geo = scan?.egg_geometry;
-  const originalUrl = scan?.original_image_url ? `http://localhost:8000${scan.original_image_url}` : null;
-  const processedUrl = scan?.processed_image_url ? `http://localhost:8000${scan.processed_image_url}` : originalUrl;
+  const originalUrl = apiAssetUrl(scan?.original_image_url);
+  const processedUrl = apiAssetUrl(scan?.processed_image_url) || originalUrl;
   const currentImageUrl = viewMode === "normalized" && processedUrl ? processedUrl : originalUrl;
 
   return (
@@ -215,10 +215,12 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                   <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="space-y-1 text-sm">
                     <p className="font-semibold text-foreground">
-                      Baseline Models Scheduled for Milestone 4 &amp; 5
+                      {scan?.prediction?.status === "MODEL_NOT_READY"
+                        ? "Freshness classification is unavailable"
+                        : "Freshness inference status pending"}
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Per the project philosophy, no fabricated predictions are generated. The computer vision preprocessing pipeline has segmented the egg, extracted geometric properties, and normalized optical resolution.
+                      No freshness, age, Haugh Unit, crack, or blood-spot result is shown until a model has been trained and validated against representative held-out ground truth. This scan contains only measured image-quality and geometric observations.
                     </p>
                   </div>
                 </div>

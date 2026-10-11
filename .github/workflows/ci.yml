@@ -22,6 +22,7 @@ jobs:
           ruff check backend
       - name: Test
         run: |
+          export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/backend"
           pytest tests/ -v
 
   frontend:
@@ -49,6 +50,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build backend image
-        run: docker build -f docker/backend.Dockerfile -t eggvision-backend ./backend
+        run: docker build -f docker/backend.Dockerfile -t eggvision-backend .
       - name: Build frontend image
         run: docker build -f docker/frontend.Dockerfile -t eggvision-frontend ./frontend

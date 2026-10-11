@@ -25,5 +25,8 @@ Normalization → Feature Extraction → Vision Model → Fusion Model → API �
 ## Technology Choices
 FastAPI and PyTorch provide a performant ML backend, while Next.js offers a responsive user interface.
 
-## Deployment & Security
-Deployed via Docker Compose. Data is segmented by user/farm with basic auth to be implemented.
+## Trust boundary and release gate
+
+The OpenCV pipeline is an image-quality and geometry pre-processing component, not a clinically or food-safety validated freshness classifier. It may reject unusable images, but it does not establish edible quality, pathogen absence, exact egg age, Haugh Unit, yolk state, crack absence, or blood-spot absence.
+
+`MODEL_NOT_READY` is the required response until a model is registered with a versioned dataset, held-out evaluation report, calibrated uncertainty thresholds, and documented operating limits. Quality-gate failures must never be sent to inference. A production release also requires authentication/authorization, secret rotation, TLS termination, private database/object-storage networking, backups, monitoring, and an incident-response owner.

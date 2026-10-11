@@ -1,12 +1,12 @@
 # 🥚 EggVision AI
 ### AI-Powered Non-Destructive Egg Freshness Detection Platform
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Project status](https://img.shields.io/badge/status-model%20validation%20pending-amber)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Node](https://img.shields.io/badge/node-20-green)
 
-EggVision AI is an intelligent platform designed for non-destructive assessment of egg freshness. By combining affordable hardware scanning chambers with advanced computer vision models, it can predict egg freshness and physical traits.
+EggVision AI is a production-oriented research platform for controlled egg-candling capture, image-quality gating, and future validated quality estimation. It currently performs image-quality and egg-geometry processing; it deliberately returns `MODEL_NOT_READY` rather than producing a freshness, age, Haugh Unit, crack, or safety claim until a trained model has passed the documented release gate.
 
 ## Architecture Overview
 ```
@@ -64,7 +64,7 @@ npm run dev
 | `/api/v1/predict` | POST | Run model inference |
 
 ## Limitations and Disclaimer
-This system is an experimental AI tool. It is **not a guarantee of food safety**. Do not consume eggs that appear spoiled regardless of the model's prediction.
+This system is an experimental AI tool. It is **not a guarantee of food safety** and does not detect pathogens or establish that an egg is edible. Do not consume eggs that appear spoiled regardless of a future model prediction. See [research validation requirements](docs/research.md) before enabling any prediction model.
 
 ## License
 MIT

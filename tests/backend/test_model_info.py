@@ -10,5 +10,6 @@ async def test_get_model_info():
         assert response.status_code == 200
         data = response.json()
         assert data['is_ready'] is False
-        assert data['description'] == 'no model loaded'
+        assert data['model_type'] == 'placeholder'
+        assert 'No trained model' in data['description']
 

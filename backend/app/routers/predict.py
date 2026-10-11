@@ -16,6 +16,11 @@ async def predict_scan(
     scan = await scan_service.get_scan(db, request.scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-        
+    if scan.image_quality not in {"GOOD", "ACCEPTABLE"}:
+        raise HTTPException(
+            status_code=409,
+            detail="Prediction blocked: image quality did not pass the required scan gate. Retake the image before analysis.",
+        )
+
     prediction = await prediction_service.create_prediction(db, request.scan_id)
     return prediction

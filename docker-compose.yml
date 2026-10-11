@@ -18,16 +18,17 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: ../docker/backend.Dockerfile
+      context: .
+      dockerfile: docker/backend.Dockerfile
     container_name: eggvision-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      - DATABASE_URL=postgresql+asyncpg://eggvision:eggvision@postgres:5432/eggvision
+      - DATABASE_URL=postgresql+asyncpg://eggvision:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-eggvision}
       - REDIS_URL=redis://redis:6379/0
       - S3_ENDPOINT=http://minio:9000
     depends_on:
@@ -56,8 +57,8 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: eggvision
-      POSTGRES_PASSWORD: eggvision
-      POSTGRES_DB: eggvision
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-eggvision}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -94,8 +95,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data

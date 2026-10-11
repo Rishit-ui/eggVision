@@ -59,7 +59,7 @@ class CVService:
             norm_img = result.normalization.normalized_image
             success, encoded_buf = cv2.imencode(".jpg", norm_img, [cv2.IMWRITE_JPEG_QUALITY, 95])
             if success:
-                norm_filename = f"normalized_{uuid.uuid4()}_{original_filename}"
+                norm_filename = f"normalized_{uuid.uuid4()}.jpg"
                 processed_url = await storage_service.upload_image(
                     encoded_buf.tobytes(),
                     norm_filename,
