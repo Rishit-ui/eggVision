@@ -19,3 +19,8 @@ class PaginatedResponse(BaseModel, Generic[T]):
     pages: int
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class CountByLabel(BaseModel):
+    label: str
+    count: int

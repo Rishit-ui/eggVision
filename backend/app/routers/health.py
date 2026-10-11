@@ -1,4 +1,3 @@
-import os
 from time import perf_counter
 
 import redis.asyncio as redis
@@ -35,9 +34,9 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     except Exception:
         redis_status = "error"
 
-    storage_status = "ok" if os.access(storage_service.upload_dir, os.W_OK) else "error"
+    storage_status = await storage_service.health_status()
     model_status = "ready" if inference_engine.is_ready() else "not_ready"
-    overall = "ok" if db_status == "ok" and storage_status == "ok" else "error"
+    overall = "error" if db_status != "ok" or storage_status == "error" else "degraded" if storage_status == "degraded" else "ok"
 
     return HealthResponse(
         status=overall,

@@ -1,79 +1,96 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { AlertCircle, BarChart3, CheckCircle2, Database, RefreshCw } from "lucide-react";
+
+import { api } from "@/lib/api";
+import { DashboardResponse } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, TrendingUp, AlertCircle, PieChart } from "lucide-react";
+
+function CountList({ items, empty }: { items: DashboardResponse["image_quality_distribution"]; empty: string }) {
+  if (!items.length) return <p className="text-sm text-muted-foreground">{empty}</p>;
+  return (
+    <div className="space-y-2">
+      {items.map((item) => (
+        <div key={item.label} className="flex items-center justify-between border-b border-border/50 pb-2 text-sm last:border-0">
+          <span>{item.label.replaceAll("_", " ")}</span>
+          <span className="font-semibold tabular-nums">{item.count}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
+  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setData(await api.getDashboard());
+    } catch (err: any) {
+      setError(err.message || "Unable to load dashboard data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadDashboard();
+  }, []);
+
+  const stats = data ? [
+    { title: "Captured scans", value: data.total_scans, icon: BarChart3 },
+    { title: "Quality-gated scans", value: data.usable_scans, icon: CheckCircle2 },
+    { title: "Retake recommended", value: data.retake_scans, icon: AlertCircle },
+    { title: "Model state", value: data.model_ready ? "READY" : "NOT READY", icon: Database },
+  ] : [];
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Quality Dashboard</h1>
-        <p className="text-muted-foreground">Aggregated metrics and trends from all scanned eggs.</p>
+    <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Research Operations Dashboard</h1>
+          <p className="mt-2 text-muted-foreground">Observed capture and image-quality data. Freshness results remain unavailable until model validation is complete.</p>
+        </div>
+        <Button variant="outline" onClick={() => void loadDashboard()} disabled={loading}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+        </Button>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { title: "Total Scans", icon: BarChart3 },
-          { title: "Avg Freshness Score", icon: TrendingUp },
-          { title: "Low Confidence Rate", icon: AlertCircle },
-          { title: "Cracked Egg Rate", icon: PieChart }
-        ].map((stat, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="w-4 h-4 text-muted-foreground" />
+      {error && <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
+
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {loading ? <p className="text-sm text-muted-foreground">Loading recorded scan data…</p> : stats.map((stat) => (
+          <Card key={stat.title}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">--</div>
-              <Skeleton className="h-3 w-16 mt-2" />
-            </CardContent>
+            <CardContent><div className="text-2xl font-bold">{stat.value}</div></CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Freshness Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 w-full flex items-end justify-between gap-2 border-b border-l border-border p-4">
-              {[40, 70, 100, 60, 30, 80, 50].map((h, i) => (
-                <Skeleton key={i} className="w-full rounded-t-sm rounded-b-none bg-primary/20" style={{ height: `${h}%` }} />
-              ))}
-            </div>
-          </CardContent>
+      {data && !data.model_ready && (
+        <div className="mb-8 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+          <strong>Freshness model disabled.</strong> The dashboard intentionally does not infer freshness, age, Haugh Unit, cracks, or blood spots without a validated model artifact.
+        </div>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle>Image-quality outcomes</CardTitle></CardHeader>
+          <CardContent><CountList items={data?.image_quality_distribution || []} empty="No scans have been recorded." /></CardContent>
         </Card>
-
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Quality Trend (Last 7 Days)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 w-full flex items-center justify-center border-b border-l border-border">
-              <Skeleton className="w-full h-1 bg-primary/30 rotate-3 transform origin-left" />
-            </div>
-          </CardContent>
+        <Card>
+          <CardHeader><CardTitle>Prediction service outcomes</CardTitle></CardHeader>
+          <CardContent><CountList items={data?.prediction_status_distribution || []} empty="No prediction requests have been recorded." /></CardContent>
         </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Egg Type Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center h-64">
-          <div className="relative w-48 h-48">
-            <Skeleton className="absolute inset-0 rounded-full" />
-            <div className="absolute inset-4 rounded-full bg-card" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>Dashboard metrics will populate as scan data is collected.</p>
       </div>
     </div>
   );

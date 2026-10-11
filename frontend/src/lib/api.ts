@@ -1,4 +1,4 @@
-import { ScanResponse, PredictionResponse, PaginatedResponse, HealthResponse, ModelInfoResponse } from './types';
+import { ScanResponse, PredictionResponse, PaginatedResponse, HealthResponse, ModelInfoResponse, DashboardResponse, TokenResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -16,10 +16,13 @@ export class ApiError extends Error {
 }
 
 async function fetchWithHandler(endpoint: string, options?: RequestInit) {
+  const token = typeof window === 'undefined' ? null : window.sessionStorage.getItem('eggvision_access_token');
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: 'include',
     headers: {
       ...options?.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 
@@ -38,6 +41,19 @@ async function fetchWithHandler(endpoint: string, options?: RequestInit) {
 }
 
 export const api = {
+  async login(email: string, password: string): Promise<TokenResponse> {
+    const result = await fetchWithHandler('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (typeof window !== 'undefined') window.sessionStorage.setItem('eggvision_access_token', result.access_token);
+    return result;
+  },
+
+  logout(): void {
+    if (typeof window !== 'undefined') window.sessionStorage.removeItem('eggvision_access_token');
+  },
   async uploadScan(image: File, metadata?: object): Promise<ScanResponse> {
     const formData = new FormData();
     formData.append('image', image);
@@ -73,5 +89,9 @@ export const api = {
 
   async getModelInfo(): Promise<ModelInfoResponse> {
     return fetchWithHandler('/model/info');
+  },
+
+  async getDashboard(): Promise<DashboardResponse> {
+    return fetchWithHandler('/dashboard');
   },
 };

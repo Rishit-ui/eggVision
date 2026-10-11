@@ -76,3 +76,23 @@ export interface ModelInfoResponse {
   metrics?: Record<string, any> | null;
   trained_at?: string | null;
 }
+
+export interface CountByLabel {
+  label: string;
+  count: number;
+}
+
+export interface DashboardResponse {
+  total_scans: number;
+  usable_scans: number;
+  retake_scans: number;
+  model_ready: boolean;
+  image_quality_distribution: CountByLabel[];
+  prediction_status_distribution: CountByLabel[];
+  freshness_distribution: CountByLabel[];
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+}

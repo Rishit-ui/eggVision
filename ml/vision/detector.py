@@ -85,21 +85,13 @@ class EggDetector:
                     })
 
         if not valid_candidates:
-            # Fallback: check if the whole frame is the egg (e.g. tightly cropped)
-            mean_lum = np.mean(l_channel)
-            if mean_lum > 40:
-                # Egg fills almost the entire frame
-                return DetectionResult(
-                    found=True,
-                    bbox=(0, 0, w, h),
-                    confidence=0.70,
-                    egg_count=1,
-                    message="Full frame egg detected."
-                )
+            # A full-frame bright image is not sufficient evidence of a single egg.
+            # Accepting it made trays, hands, and arbitrary photographs appear as eggs.
+            # The controlled chamber contract requires an isolated, egg-shaped contour.
             return DetectionResult(
                 found=False,
                 egg_count=0,
-                message="No valid egg contour identified in chamber image."
+                message="No isolated egg contour identified. Use one egg in a dark candling chamber."
             )
 
         # Sort candidates by area descending

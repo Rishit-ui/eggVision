@@ -23,9 +23,9 @@ Normalization → Feature Extraction → AI Model → API → Web UI → Databas
 | Infrastructure | Docker, Docker Compose, GitHub Actions |
 
 ## Quick Start
-To start the entire stack locally using Docker Compose:
+For Windows installation and launch instructions, see [the local run guide](docs/run-local-windows.md). To start the local stack after configuring `.env`:
 ```bash
-docker-compose up -d
+docker compose up --build
 ```
 
 ## Development Setup
@@ -46,6 +46,10 @@ npm run dev
 
 ## Project Structure
 ```
+
+## Delivery status
+
+See [project status](docs/project-status.md) for an evidence-based completion estimate, current capabilities, and the model-validation work required before freshness predictions can be enabled.
 .
 ├── backend/       # FastAPI application
 ├── frontend/      # Next.js frontend

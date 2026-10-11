@@ -37,6 +37,12 @@ async def create_scan(
     cv_res = await cv_service.process_scan_image(file_data, image.filename)
 
     camera_metadata = scan_create.camera_metadata or {}
+    camera_metadata["capture_context"] = {
+        "egg_type": scan_create.egg_type,
+        "storage_condition": scan_create.storage_condition,
+        "temperature_c": scan_create.temperature,
+        "humidity_percent": scan_create.humidity,
+    }
     if cv_res.get("geometry"):
         camera_metadata["egg_geometry"] = cv_res["geometry"]
     if cv_res.get("metrics"):

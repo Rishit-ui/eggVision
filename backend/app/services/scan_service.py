@@ -1,7 +1,10 @@
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
+from app.models.batch import Batch
 from app.models.scan import Scan
+from app.models.prediction import Prediction
+from app.models.sensor_reading import SensorReading
 from app.schemas.scan import ScanCreate
 
 class ScanService:
@@ -29,6 +32,23 @@ class ScanService:
         )
         db.add(scan)
         await db.commit()
+        if metadata.batch_id:
+            await db.execute(
+                update(Batch)
+                .where(Batch.id == metadata.batch_id)
+                .values(scanned_eggs=Batch.scanned_eggs + 1, status="in_progress")
+            )
+            await db.commit()
+        if metadata.temperature is not None or metadata.humidity is not None:
+            db.add(
+                SensorReading(
+                    scan_id=scan.id,
+                    device_id=metadata.device_id,
+                    temperature=metadata.temperature,
+                    humidity=metadata.humidity,
+                )
+            )
+            await db.commit()
         await db.refresh(scan)
         return scan
         
@@ -37,15 +57,22 @@ class ScanService:
         return result.scalar_one_or_none()
         
     async def list_scans(self, db: AsyncSession, page: int = 1, per_page: int = 10, filters: dict = None) -> tuple[list[Scan], int]:
-        query = select(Scan)
-        # Apply filters here if needed
-        total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+        total_result = await db.execute(select(func.count()).select_from(Scan))
         total = total_result.scalar_one()
-        
-        query = query.offset((page - 1) * per_page).limit(per_page)
+
+        query = (
+            select(Scan, Prediction)
+            .outerjoin(Prediction, Prediction.scan_id == Scan.id)
+            .order_by(Scan.created_at.desc())
+            .offset((page - 1) * per_page)
+            .limit(per_page)
+        )
         result = await db.execute(query)
-        items = result.scalars().all()
+        items = []
+        for scan, prediction in result.all():
+            scan.prediction = prediction
+            items.append(scan)
         
-        return list(items), total
+        return items, total
 
 scan_service = ScanService()

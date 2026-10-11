@@ -10,6 +10,8 @@ class ScanCreate(BaseModel):
     camera_metadata: dict[str, Any] | None = None
     temperature: float | None = None
     humidity: float | None = None
+    egg_type: str | None = None
+    storage_condition: str | None = None
     
     model_config = ConfigDict(from_attributes=True)
 

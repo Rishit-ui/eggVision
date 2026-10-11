@@ -13,11 +13,11 @@ export default function Home() {
         
         <div className="container mx-auto max-w-5xl text-center relative z-10">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6">
-            AI-Powered Non-Destructive <br className="hidden md:block" />
-            <span className="text-primary">Egg Freshness</span> Detection
+            Controlled Egg Candling <br className="hidden md:block" />
+            <span className="text-primary">Research Platform</span>
           </h1>
           <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Analyze egg freshness using controlled optical imaging and AI — without breaking the egg. Fast, reliable, and data-driven quality assessment for agriculture.
+            Capture, quality-check, and trace candling images without breaking the egg. Freshness predictions remain disabled until a model passes laboratory validation.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="h-12 px-8 text-base">
@@ -54,15 +54,15 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight mb-4">How It Works</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Our four-step workflow combines physical imaging with advanced computer vision to assess internal egg quality.</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">The current workflow produces controlled, traceable records for the validation study.</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8">
             {[
               { icon: Camera, title: "1. Capture", desc: "Place egg in scanning chamber and capture image" },
-              { icon: Search, title: "2. Analyze", desc: "AI processes image for freshness indicators" },
-              { icon: BarChart3, title: "3. Results", desc: "Get freshness score, confidence, and analysis" },
-              { icon: Clock, title: "4. Track", desc: "Monitor egg quality trends over time" }
+              { icon: Search, title: "2. Quality gate", desc: "The system checks focus, exposure, framing, and egg detection" },
+              { icon: BarChart3, title: "3. Record", desc: "Store a normalized scan, geometry, and capture metadata" },
+              { icon: Clock, title: "4. Validate", desc: "Link later laboratory measurements for model training" }
             ].map((step, i) => (
               <div key={i} className="flex flex-col items-center text-center relative group">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -84,14 +84,14 @@ export default function Home() {
       <section className="py-20 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Key Features</h2>
-            <p className="text-muted-foreground">Comprehensive optical analysis powered by deep learning.</p>
+            <h2 className="text-3xl font-bold tracking-tight mb-4">Platform roadmap</h2>
+            <p className="text-muted-foreground">Current data-capture capabilities and model outputs planned after validation.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              "Air Cell Analysis", "Yolk Assessment", "Crack Detection", "Freshness Scoring",
-              "Confidence Rating", "Explainable AI", "Batch Processing", "Edge Deployment"
+              "Image Quality Gate", "Egg Geometry", "Traceable Ground Truth", "Batch Registration",
+              "Air Cell Analysis (planned)", "Freshness Scoring (planned)", "Explainable AI (planned)", "Edge Inference (planned)"
             ].map((feature, i) => (
               <Card key={i} className="border-border/50 hover:shadow-md transition-shadow bg-background/50 backdrop-blur">
                 <CardHeader className="p-4 pb-2">
@@ -115,21 +115,21 @@ export default function Home() {
                   <div className="mt-1 bg-muted p-2 rounded-lg h-fit"><Cpu className="h-5 w-5 text-primary" /></div>
                   <div>
                     <h4 className="font-medium">Computer Vision</h4>
-                    <p className="text-sm text-muted-foreground mt-1">PyTorch-based CNNs optimized for morphological feature extraction.</p>
+                    <p className="text-sm text-muted-foreground mt-1">OpenCV quality checks and geometry extraction, with a versioned interface for a future validated model.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="mt-1 bg-muted p-2 rounded-lg h-fit"><Database className="h-5 w-5 text-primary" /></div>
                   <div>
                     <h4 className="font-medium">FastAPI Backend</h4>
-                    <p className="text-sm text-muted-foreground mt-1">High-performance async inference server managing model weights.</p>
+                    <p className="text-sm text-muted-foreground mt-1">Async API for capture records, quality gating, ground truth, and future model serving.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="mt-1 bg-muted p-2 rounded-lg h-fit"><Network className="h-5 w-5 text-primary" /></div>
                   <div>
                     <h4 className="font-medium">Next.js Frontend</h4>
-                    <p className="text-sm text-muted-foreground mt-1">React Server Components, edge-ready architecture, responsive design.</p>
+                    <p className="text-sm text-muted-foreground mt-1">Responsive capture and research-operations interface for desktop, tablet, and mobile.</p>
                   </div>
                 </li>
               </ul>

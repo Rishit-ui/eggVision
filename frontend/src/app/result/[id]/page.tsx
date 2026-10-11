@@ -229,11 +229,11 @@ export default function ResultPage({ params }: { params: { id: string } }) {
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 rounded-lg border border-border/40">
                   <span className="text-muted-foreground block mb-0.5">Air Cell Analysis</span>
-                  <span className="font-medium text-foreground">Milestone 3 Pipeline Ready</span>
+                  <span className="font-medium text-foreground">Unavailable: annotated candling data and a validated method are required</span>
                 </div>
                 <div className="p-3 rounded-lg border border-border/40">
                   <span className="text-muted-foreground block mb-0.5">Haugh Unit Regression</span>
-                  <span className="font-medium text-foreground">Pending Ground-Truth Calibration</span>
+                  <span className="font-medium text-foreground">Unavailable: reference measurements can be recorded, but no validated regression model exists</span>
                 </div>
               </div>
             </CardContent>

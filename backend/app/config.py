@@ -9,11 +9,14 @@ class Settings(BaseSettings):
     S3_BUCKET: str | None = None
     S3_ACCESS_KEY: str | None = None
     S3_SECRET_KEY: str | None = None
+    S3_REQUIRED: bool = False
     
     # A development-only value. Production startup is blocked if this is not replaced.
     JWT_SECRET: str = "development-only-change-me-before-production"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRY_MINUTES: int = 60
+    AUTH_REQUIRED: bool = False
+    BOOTSTRAP_TOKEN: str | None = None
     
     MODEL_PATH: str | None = None
     INFERENCE_DEVICE: str = "cpu"
@@ -43,6 +46,12 @@ class Settings(BaseSettings):
                 raise ValueError("DEBUG must be false in production")
             if not self.cors_origins or any(origin == "*" for origin in self.cors_origins):
                 raise ValueError("CORS_ORIGINS must explicitly list trusted origins in production")
+            if not self.AUTH_REQUIRED:
+                raise ValueError("AUTH_REQUIRED must be true in production")
+            if not self.BOOTSTRAP_TOKEN or len(self.BOOTSTRAP_TOKEN) < 32:
+                raise ValueError("BOOTSTRAP_TOKEN must be a unique value of at least 32 characters in production")
+            if not self.S3_REQUIRED or not all((self.S3_ENDPOINT, self.S3_BUCKET, self.S3_ACCESS_KEY, self.S3_SECRET_KEY)):
+                raise ValueError("S3-compatible object storage must be configured in production")
         return self
 
 settings = Settings()

@@ -45,7 +45,7 @@ export function Navbar() {
               </Link>
             ))}
             <Button asChild size="sm" className="ml-4">
-              <Link href="/scan">Quick Scan</Link>
+              <Link href="/login">Sign in</Link>
             </Button>
           </div>
 

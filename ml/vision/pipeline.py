@@ -89,6 +89,12 @@ class VisionPipeline:
             quality.warnings.append(QualityWarning.MULTIPLE_EGGS)
             quality.retake_recommended = True
             quality.recommendation = "Place only one egg in the candling chamber at a time."
+            return PipelineResult(
+                quality=quality,
+                detection=detection,
+                can_proceed_to_inference=False,
+                error=quality.recommendation,
+            )
 
         # If image quality is POOR or egg not found: DO NOT FORCE PREDICTION
         if quality.image_quality == "POOR" or not detection.found:

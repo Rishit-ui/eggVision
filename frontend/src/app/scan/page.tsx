@@ -53,8 +53,8 @@ export default function ScanPage() {
 
     try {
       const metadata = {
-        eggType,
-        storageCondition: storageCond,
+        egg_type: eggType,
+        storage_condition: storageCond,
         temperature: temperature ? parseFloat(temperature) : null,
         humidity: humidity ? parseFloat(humidity) : null,
       };

@@ -26,11 +26,15 @@ async def get_result(
         "egg_id": scan.egg_id,
         "batch_id": scan.batch_id,
         "original_image_url": scan.original_image_url,
+        "processed_image_url": scan.processed_image_url,
         "image_quality": scan.image_quality,
         "image_quality_score": scan.image_quality_score,
+        "image_quality_warnings": scan.image_quality_warnings or [],
         "capture_date": scan.capture_date,
         "created_at": scan.created_at,
     }
+    if scan.camera_metadata:
+        scan_response_data["egg_geometry"] = scan.camera_metadata.get("egg_geometry")
     
     if prediction:
         scan_response_data["prediction"] = prediction

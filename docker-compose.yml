@@ -1,4 +1,4 @@
-services:
+﻿services:
   frontend:
     build:
       context: ./frontend
@@ -28,6 +28,7 @@ services:
       - path: .env
         required: false
     environment:
+      - PYTHONPATH=/app/backend:/app
       - DATABASE_URL=postgresql+asyncpg://eggvision:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-eggvision}
       - REDIS_URL=redis://redis:6379/0
       - S3_ENDPOINT=http://minio:9000
@@ -88,26 +89,30 @@ services:
       - eggvision-network
 
   minio:
-    image: minio/minio
+    image: rustfs/rustfs:latest
     container_name: eggvision-minio
     restart: unless-stopped
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
-    command: server /data --console-address ":9001"
+      RUSTFS_ACCESS_KEY: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      RUSTFS_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_LOGGER_LEVEL: "error"
+    command: ["/data"]
     volumes:
-      - minio_data:/data
+      - rustfs_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || mc ready local || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 20s
     networks:
       - eggvision-network
-
 networks:
   eggvision-network:
     driver: bridge
@@ -116,4 +121,5 @@ volumes:
   postgres_data:
   redis_data:
   minio_data:
+  rustfs_data:
   upload_data:
