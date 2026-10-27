@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+
+# ML Models & Data
+*.onnx
+*.pt
+*.pth
+*.h5
+*.tflite
+*.pkl
+mlruns/
+mlartifacts/
+
+# Dataset
+dataset/images/
+dataset/raw/
+dataset/processed/
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+htmlcov/
+.coverage
+coverage/
+
+# Misc
+*.bak
+*.tmp
+*.tsbuildinfo
