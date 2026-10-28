@@ -1,5 +1,15 @@
-# 🥚 EggVision AI
-### Controlled Candling Research and Data-Collection Platform
+# EggVision 🥚
+
+**AI-Powered Egg Quality Detection System**
+
+🌐 **Live Website:** [Visit EggVision](https://egg-vision-1n2a.vercel.app/)
+
+EggVision uses AI and computer vision to analyze egg quality and help identify visible defects.
+
+## Features
+- AI-powered egg quality detection
+- Interactive web interface
+- Automated image analysisatform
 
 ![Project status](https://img.shields.io/badge/status-model%20validation%20pending-amber)
 ![License](https://img.shields.io/badge/license-MIT-blue)
