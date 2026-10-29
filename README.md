@@ -1,15 +1,15 @@
 # EggVision 🥚
 
-**AI-Powered Egg Quality Detection System**
+**Controlled Candling Research and Data-Collection Platform**
 
-🌐 **Live Website:** [Visit EggVision](https://egg-vision-1n2a.vercel.app/)
+> The former public Vercel URL was removed because it displayed fabricated egg-quality results and is not a deployment of this source. Do not publish a replacement URL until it passes the deployment checks below.
 
-EggVision uses AI and computer vision to analyze egg quality and help identify visible defects.
+EggVision currently records controlled capture quality and research evidence. It does not claim to identify eggs, visible defects, freshness, spoilage, or safety until those tasks have trained and independently evaluated models.
 
 ## Features
-- AI-powered egg quality detection
-- Interactive web interface
-- Automated image analysisatform
+- Capture-quality checks and controlled-chamber candidate-contour screening
+- Traceable scan, batch, and ground-truth research records
+- Transparent unavailable states for unsupported model tasks
 
 ![Project status](https://img.shields.io/badge/status-model%20validation%20pending-amber)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -20,8 +20,8 @@ EggVision AI is a production-oriented research platform for controlled egg-candl
 
 ## Architecture Overview
 ```
-Camera → Image Quality → Egg Detection → Segmentation → 
-Normalization → Feature Extraction → AI Model → API → Web UI → Database
+Camera → File Validation → Capture Quality → Candidate-Contour Screen →
+Research Record → Ground Truth → Future Validated Model → API → Web UI
 ```
 
 ## Tech Stack
@@ -37,6 +37,8 @@ For Windows installation and launch instructions, see [the local run guide](docs
 ```bash
 docker compose up --build
 ```
+
+For the public Next.js frontend, use [the Vercel deployment guide](docs/vercel-frontend-deployment.md). The FastAPI backend is deployed separately.
 
 ## Development Setup
 ### Backend
