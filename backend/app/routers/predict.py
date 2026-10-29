@@ -16,6 +16,12 @@ async def predict_scan(
     scan = await scan_service.get_scan(db, request.scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
+    evidence = (scan.camera_metadata or {}).get("analysis_evidence", {})
+    if evidence.get("status") != "EGG_DETECTED":
+        raise HTTPException(
+            status_code=409,
+            detail="Prediction blocked: egg presence has not been established by a validated detector.",
+        )
     if scan.image_quality not in {"GOOD", "ACCEPTABLE"} or "MULTIPLE_EGGS_DETECTED" in (scan.image_quality_warnings or []):
         raise HTTPException(
             status_code=409,

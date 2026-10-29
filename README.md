@@ -50,6 +50,7 @@ npm run dev
 ## Delivery status
 
 See [project status](docs/project-status.md) for an evidence-based completion estimate, current capabilities, and the model-validation work required before freshness predictions can be enabled.
+See the [engineering audit](docs/engineering-audit.md) for the actual current inference path and the safety constraints on model claims.
 .
 ├── backend/       # FastAPI application
 ├── frontend/      # Next.js frontend

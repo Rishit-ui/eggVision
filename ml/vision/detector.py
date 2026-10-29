@@ -1,6 +1,9 @@
-"""Egg Detection Module for Controlled Candling Enclosure.
+"""Candidate-contour screen for controlled candling images.
 
-Detects intact egg position, bounding box, and count from optical candling images.
+This module is *not* a trained egg detector.  It finds contours compatible with
+the chamber's expected silhouette to reject clearly unusable captures and to
+produce research candidates.  It must never be represented as proof that an
+image contains an egg or as a calibrated model confidence.
 """
 
 from dataclasses import dataclass
@@ -11,17 +14,20 @@ import numpy as np
 
 @dataclass
 class DetectionResult:
-    """Output from the EggDetector."""
+    """Output from the controlled-chamber candidate-contour screen."""
     found: bool
     bbox: Optional[Tuple[int, int, int, int]] = None  # (x, y, w, h)
-    confidence: float = 0.0
+    # Kept for backwards-compatible callers; always None because no model is loaded.
+    confidence: Optional[float] = None
     egg_count: int = 0
     contour: Optional[np.ndarray] = None
     message: Optional[str] = None
+    status: str = "UNCERTAIN"
+    algorithm: str = "opencv_candling_contour_gate_v1"
 
 
 class EggDetector:
-    """Robust OpenCV candling egg detector for chamber-captured imagery."""
+    """Non-ML candidate-contour screen for a single controlled chamber frame."""
 
     def __init__(
         self,
@@ -38,7 +44,11 @@ class EggDetector:
     def detect(self, image_bgr: np.ndarray) -> DetectionResult:
         """Detect the egg candidate in the input candling image."""
         if image_bgr is None or image_bgr.size == 0:
-            return DetectionResult(found=False, message="Empty image provided.")
+            return DetectionResult(
+                found=False,
+                status="INVALID_IMAGE",
+                message="Empty image provided.",
+            )
 
         h, w = image_bgr.shape[:2]
         total_area = float(h * w)
@@ -91,7 +101,8 @@ class EggDetector:
             return DetectionResult(
                 found=False,
                 egg_count=0,
-                message="No isolated egg contour identified. Use one egg in a dark candling chamber."
+                status="NO_EGG_DETECTED",
+                message="No candidate contour was found by the controlled-chamber screen. Use one object in a dark candling chamber."
             )
 
         # Sort candidates by area descending
@@ -106,22 +117,18 @@ class EggDetector:
                 return DetectionResult(
                     found=True,
                     bbox=valid_candidates[0]["bbox"],
-                    confidence=0.65,
                     egg_count=egg_count,
                     contour=valid_candidates[0]["contour"],
-                    message="Warning: Multiple egg candidates detected in scanning frame."
+                    status="UNCERTAIN",
+                    message="Multiple candidate contours found. This screen cannot establish egg identity."
                 )
 
         best = valid_candidates[0]
-        # Calculate confidence based on solidity and aspect ratio conformity
-        confidence = float(np.clip(best["solidity"] * 0.7 + (1.0 - abs(best["aspect"] - 1.35) * 0.25) * 0.3, 0.5, 0.99))
-        confidence = round(confidence, 3)
-
         return DetectionResult(
             found=True,
             bbox=best["bbox"],
-            confidence=confidence,
             egg_count=1,
             contour=best["contour"],
-            message="Single egg successfully located."
+            status="UNCERTAIN",
+            message="One contour is compatible with the chamber silhouette, but no validated egg-detection model is installed."
         )

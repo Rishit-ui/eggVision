@@ -76,5 +76,9 @@ async def test_scan_with_cv_pipeline():
             assert body["image_quality_score"] > 0.60
             assert isinstance(body["image_quality_warnings"], list)
             assert body["retake_recommended"] is False
+            assert body["analysis"]["status"] == "UNCERTAIN"
+            assert body["analysis"]["model"]["validated_egg_detector"] is False
+            assert body["egg_geometry"] is None
+            assert body["candidate_contour_geometry"] is not None
     finally:
         app.dependency_overrides.clear()

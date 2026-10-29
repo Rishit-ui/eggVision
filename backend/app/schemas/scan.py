@@ -49,6 +49,8 @@ class ScanResponse(BaseModel):
     image_quality_warnings: list[str] = []
     retake_recommended: bool = False
     recommendation: str | None = None
+    analysis: dict[str, Any] | None = None
+    candidate_contour_geometry: dict[str, Any] | None = None
     egg_geometry: dict[str, Any] | None = None
     capture_date: datetime
     created_at: datetime

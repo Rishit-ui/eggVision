@@ -38,10 +38,26 @@ class PipelineResult:
             "recommendation": self.quality.recommendation,
             "can_proceed_to_inference": self.can_proceed_to_inference,
             "metrics": self.quality.metrics,
+            "analysis": {
+                "status": self.detection.status,
+                "model": {
+                    "name": self.detection.algorithm,
+                    "version": "1",
+                    "task": "controlled_chamber_candidate_contour_screen",
+                    "validated_egg_detector": False,
+                },
+                "detections": [],
+                "limitations": [
+                    "No trained, validated egg detector is installed.",
+                    "A contour compatible with the chamber silhouette is not proof that an egg is present.",
+                    "No defect, freshness, spoilage, contamination, or food-safety assessment was performed.",
+                ],
+                "message": self.detection.message,
+            },
         }
         if self.segmentation and self.segmentation.success:
             geo = self.segmentation.geometry
-            out["geometry"] = {
+            out["candidate_geometry"] = {
                 "area": geo.area,
                 "width": geo.width,
                 "height": geo.height,
@@ -71,7 +87,7 @@ class VisionPipeline:
         """Run the end-to-end vision pipeline."""
         if image_bgr is None or image_bgr.size == 0:
             quality = self.assessor.assess(image_bgr, has_egg=False)
-            detection = DetectionResult(found=False, message="Empty image.")
+            detection = DetectionResult(found=False, status="INVALID_IMAGE", message="Empty image.")
             return PipelineResult(quality=quality, detection=detection, can_proceed_to_inference=False)
 
         # 1. Egg Detection
@@ -96,7 +112,7 @@ class VisionPipeline:
                 error=quality.recommendation,
             )
 
-        # If image quality is POOR or egg not found: DO NOT FORCE PREDICTION
+        # If image quality is POOR or no candidate was found: do not normalize or infer.
         if quality.image_quality == "POOR" or not detection.found:
             return PipelineResult(
                 quality=quality,
@@ -123,10 +139,14 @@ class VisionPipeline:
             geometry=segmentation.geometry
         )
 
+        # The contour is retained only as a research candidate.  Its geometry is
+        # deliberately not used as evidence of egg identity and never permits
+        # egg-specific inference without a validated detection model.
         return PipelineResult(
             quality=quality,
             detection=detection,
             segmentation=segmentation,
             normalization=normalization,
-            can_proceed_to_inference=True
+            can_proceed_to_inference=False,
+            error="A candidate contour was found, but egg identity is unverified because no validated egg detector is installed.",
         )

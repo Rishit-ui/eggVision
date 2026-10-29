@@ -2,13 +2,13 @@
 
 ## Current release: research data-collection MVP
 
-The application can launch as a controlled candling capture and research-data platform. It stores scans, rejects poor images, extracts an egg contour and geometry, records storage metadata, registers batches, supports lab ground-truth entry through the API, and exposes real operational counts.
+The application can launch as a controlled candling capture and research-data platform. It stores scans, rejects poor images, records candidate contours and capture metadata, registers batches, supports lab ground-truth entry through the API, and exposes real operational counts. A candidate contour is not treated as proof of egg presence.
 
 ## Completed software capabilities
 
 - Next.js web application with landing, scan, result, history, dashboard, batch, about, and sign-in pages.
 - FastAPI API with OpenAPI documentation, image upload validation, image-quality gating, scan records, batch registration, health reporting, and model status reporting.
-- OpenCV baseline pipeline for image decoding, egg detection, contour segmentation, geometry extraction, orientation normalization, blur/exposure/contrast/glare checks, and retake guidance.
+- OpenCV baseline pipeline for image decoding, controlled-chamber candidate-contour screening, contour segmentation, normalization, blur/exposure/contrast/glare checks, and retake guidance. It is not a trained egg detector.
 - PostgreSQL schema and Alembic migration for scans, eggs, batches, devices, sensor readings, ground truth, models, users, and audit-log storage.
 - Laboratory data APIs for traceable egg registration and Haugh Unit, pH, weight, and observations after capture.
 - Docker Compose local stack, migration entrypoint, environment template, CI workflow, and Windows run instructions.

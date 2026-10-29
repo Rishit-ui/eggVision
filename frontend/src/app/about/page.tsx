@@ -10,7 +10,7 @@ export default function AboutPage() {
         <section>
           <h2 className="text-2xl font-bold mb-4 text-primary border-b pb-2">Project Overview</h2>
           <p className="text-lg leading-relaxed text-muted-foreground">
-            EggVision AI is an open research initiative exploring the use of computer vision and deep learning to assess the internal quality and freshness of eggs non-destructively. By analyzing images captured under controlled lighting conditions, our system aims to predict key freshness indicators such as air cell size, yolk displacement, and overall Haugh unit correlates.
+            EggVision is an open research initiative for collecting controlled candling images and building evidence for future computer-vision models. This release does not predict air-cell size, yolk displacement, Haugh Unit, freshness, defects, spoilage, or safety.
           </p>
         </section>
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
               <strong>Computer Vision:</strong> We use Convolutional Neural Networks (CNNs) to extract morphological features from the captured images, robust to variations in shell color (white, brown) and subtle lighting differences.
             </p>
             <p>
-              <strong>Multi-modal AI Fusion:</strong> Beyond visual data, the inference engine can incorporate metadata such as ambient storage temperature, humidity, and egg type to refine its freshness predictions.
+              <strong>Research metadata:</strong> Capture metadata such as ambient storage temperature, humidity, and egg type can be recorded for a future, separately validated research model. They are not used to produce freshness predictions in this release.
             </p>
           </div>
         </section>
@@ -65,7 +65,7 @@ export default function AboutPage() {
             Limitations & Disclaimers
           </h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li><strong>Not a safety guarantee:</strong> This system estimates freshness-related quality indicators based on visual characteristics. It <strong>cannot</strong> detect microbiological contamination (like Salmonella) and cannot guarantee eggs are safe for consumption.</li>
+            <li><strong>Not a safety guarantee:</strong> This system does not detect microbiological contamination (like Salmonella), cannot establish internal quality from an ordinary image, and cannot guarantee eggs are safe for consumption.</li>
             <li><strong>Hardware dependency:</strong> Accuracy is heavily dependent on consistent imaging conditions. Extreme variations in camera quality or lighting will affect results.</li>
             <li><strong>Research status:</strong> EggVision AI is a research prototype. All models are currently pending rigorous external validation against industry standards.</li>
           </ul>

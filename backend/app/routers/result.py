@@ -34,7 +34,8 @@ async def get_result(
         "created_at": scan.created_at,
     }
     if scan.camera_metadata:
-        scan_response_data["egg_geometry"] = scan.camera_metadata.get("egg_geometry")
+        scan_response_data["analysis"] = scan.camera_metadata.get("analysis_evidence")
+        scan_response_data["candidate_contour_geometry"] = scan.camera_metadata.get("candidate_contour_geometry")
     
     if prediction:
         scan_response_data["prediction"] = prediction

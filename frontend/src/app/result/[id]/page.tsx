@@ -54,7 +54,9 @@ export default function ResultPage({ params }: { params: { id: string } }) {
   }
 
   const isQualityGood = scan?.image_quality === "GOOD" || scan?.image_quality === "ACCEPTABLE";
-  const geo = scan?.egg_geometry;
+  const analysis = scan?.analysis;
+  const candidateGeo = scan?.candidate_contour_geometry;
+  const eggEstablished = analysis?.status === "EGG_DETECTED";
   const originalUrl = apiAssetUrl(scan?.original_image_url);
   const processedUrl = apiAssetUrl(scan?.processed_image_url) || originalUrl;
   const currentImageUrl = viewMode === "normalized" && processedUrl ? processedUrl : originalUrl;
@@ -68,13 +70,13 @@ export default function ResultPage({ params }: { params: { id: string } }) {
             <Link href="/scan"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Candling Inspection Report</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Candling Capture Evidence Report</h1>
             <p className="text-xs text-muted-foreground font-mono">Scan ID: {params.id}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant={isQualityGood ? "default" : "destructive"}>
-            Image Quality: {scan?.image_quality || "UNKNOWN"}
+            Capture Quality: {scan?.image_quality || "UNKNOWN"}
           </Badge>
           <Badge variant="outline" className="text-xs">
             Score: {Math.round((scan?.image_quality_score || 0) * 100)}%
@@ -157,52 +159,66 @@ export default function ResultPage({ params }: { params: { id: string } }) {
 
         {/* Right Column: Morphometry & Freshness Prediction */}
         <div className="md:col-span-7 space-y-6">
-          {/* Morphometric Geometry Card */}
+          {/* Evidence state */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Scale className="w-4 h-4 text-primary" /> Egg Morphometry &amp; Optical Geometry
+                <Scale className="w-4 h-4 text-primary" /> Egg Presence Evidence
               </CardTitle>
               <CardDescription className="text-xs">
-                Extracted via pixel-level contour segmentation and major-axis fitting.
+                Status from the actual capture-analysis pipeline; no trained egg detector is currently installed.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm">
+                <p className="font-semibold">{analysis?.status || "INFERENCE_ERROR"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{analysis?.message || "Analysis evidence was unavailable."}</p>
+              </div>
+              {analysis?.limitations && analysis.limitations.length > 0 && (
+                <ul className="mb-4 list-disc pl-5 space-y-1 text-xs text-muted-foreground">
+                  {analysis.limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}
+                </ul>
+              )}
+              {candidateGeo && !eggEstablished && (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  A candidate contour was recorded for research only. Its geometry is not presented as an egg measurement.
+                </p>
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Egg Area</span>
                   <span className="text-base font-bold text-foreground">
-                    {geo?.area ? `${Math.round(geo.area).toLocaleString()} px²` : "N/A"}
+                    {eggEstablished && scan?.egg_geometry?.area ? `${Math.round(scan.egg_geometry.area).toLocaleString()} px²` : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Aspect Ratio</span>
                   <span className="text-base font-bold text-foreground">
-                    {geo?.aspect_ratio ? geo.aspect_ratio.toFixed(2) : "N/A"}
+                    {eggEstablished && scan?.egg_geometry?.aspect_ratio ? scan.egg_geometry.aspect_ratio.toFixed(2) : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Orientation</span>
                   <span className="text-base font-bold text-foreground">
-                    {geo?.orientation_deg !== undefined ? `${geo.orientation_deg}°` : "N/A"}
+                    {eggEstablished && scan?.egg_geometry?.orientation_deg !== undefined ? `${scan.egg_geometry.orientation_deg}°` : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Centroid</span>
                   <span className="text-base font-bold text-foreground">
-                    {geo?.centroid ? `(${Math.round(geo.centroid[0])}, ${Math.round(geo.centroid[1])})` : "N/A"}
+                    {eggEstablished && scan?.egg_geometry?.centroid ? `(${Math.round(scan.egg_geometry.centroid[0])}, ${Math.round(scan.egg_geometry.centroid[1])})` : "Not established"}
                   </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* AI Freshness Inference Status */}
+          {/* Unsupported analysis status */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" /> AI Freshness Classification
+                  <Sparkles className="w-4 h-4 text-primary" /> Quality and Defect Assessment
                 </CardTitle>
                 <Badge variant="outline" className="text-xs font-mono">
                   {scan?.prediction?.status || "MODEL_NOT_READY"}
@@ -215,12 +231,10 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                   <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="space-y-1 text-sm">
                     <p className="font-semibold text-foreground">
-                      {scan?.prediction?.status === "MODEL_NOT_READY"
-                        ? "Freshness classification is unavailable"
-                        : "Freshness inference status pending"}
+                      No validated quality or defect model is available
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      No freshness, age, Haugh Unit, crack, or blood-spot result is shown until a model has been trained and validated against representative held-out ground truth. This scan contains only measured image-quality and geometric observations.
+                      No freshness, age, Haugh Unit, crack, broken-shell, leakage, spoilage, or food-safety result is shown. These require task-specific models trained and evaluated against representative held-out ground truth.
                     </p>
                   </div>
                 </div>
@@ -244,7 +258,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
       {/* Scientific Disclaimer */}
       <div className="bg-muted/40 border border-border rounded-lg p-4 text-xs text-muted-foreground flex items-center justify-between">
         <span>
-          <strong>Scientific Disclaimer:</strong> This system estimates freshness-related optical and physical indicators. It does not detect microbiological pathogens or guarantee safety for human consumption.
+          <strong>Scientific Disclaimer:</strong> This research build records capture quality and candidate-contour evidence only. It does not establish egg identity, visible defects, freshness, microbiological contamination, or food safety.
         </span>
         <Button variant="outline" size="sm" asChild className="shrink-0 ml-4">
           <Link href="/scan">Scan Another Egg</Link>

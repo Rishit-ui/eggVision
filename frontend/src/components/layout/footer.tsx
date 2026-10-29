@@ -15,7 +15,7 @@ export function Footer() {
               AI-Powered Non-Destructive Egg Freshness Detection using controlled optical imaging.
             </p>
             <div className="p-4 bg-muted rounded-lg border border-border mt-4 text-xs text-muted-foreground">
-              <strong>Disclaimer:</strong> This system estimates freshness-related quality indicators based on visual characteristics. It does not guarantee microbiological safety and is a research prototype.
+              <strong>Disclaimer:</strong> This research build records capture-quality and candidate-contour evidence. It does not establish freshness, defects, microbiological safety, or edibility.
             </div>
           </div>
           

@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="EggVision AI API",
-    description="Backend API for EggVision AI freshness detection",
+    description="Backend API for controlled candling capture and research evidence collection",
     version="1.0.0",
     lifespan=lifespan
 )

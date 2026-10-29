@@ -76,10 +76,9 @@ export default function ScanPage() {
         return; // DO NOT FORCE PREDICTION
       }
 
-      // 2. Request prediction if quality is acceptable
-      await api.requestPrediction(scanResponse.id);
-
-      // 3. Redirect to results
+      // This research build has no validated egg detector/model. The report
+      // presents the evidence state instead of forcing an egg prediction.
+      // 2. Redirect to the transparent capture report.
       router.push(`/result/${scanResponse.id}`);
 
     } catch (err: any) {
@@ -92,8 +91,8 @@ export default function ScanPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl min-h-[calc(100vh-4rem)]">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Egg Freshness Scanner</h1>
-        <p className="text-muted-foreground">Upload or capture an egg image for AI analysis.</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Candling Capture Review</h1>
+        <p className="text-muted-foreground">Upload a controlled-chamber image for capture-quality review and research evidence recording.</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -124,7 +123,7 @@ export default function ScanPage() {
                   </Badge>
                 </div>
                 <CardDescription className="text-sm">
-                  {qualityReport.recommendation || "Controlled candling quality conditions must be satisfied before AI freshness classification can proceed."}
+                  {qualityReport.recommendation || "Controlled candling quality conditions must be satisfied before the capture can be retained for research."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-0">

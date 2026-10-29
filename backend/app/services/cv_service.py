@@ -46,6 +46,14 @@ class CVService:
                 "recommendation": "The uploaded file could not be parsed as a valid image.",
                 "processed_image_url": None,
                 "geometry": None,
+                "candidate_geometry": None,
+                "analysis": {
+                    "status": "INVALID_IMAGE",
+                    "model": None,
+                    "detections": [],
+                    "limitations": ["The uploaded bytes could not be decoded as an image."],
+                    "message": "The uploaded file could not be parsed as a valid image.",
+                },
                 "can_proceed_to_inference": False
             }
 

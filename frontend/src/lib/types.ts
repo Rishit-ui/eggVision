@@ -10,6 +10,21 @@ export interface EggGeometry {
   orientation_deg: number;
 }
 
+export type AnalysisStatus = 'EGG_DETECTED' | 'NO_EGG_DETECTED' | 'UNCERTAIN' | 'INVALID_IMAGE' | 'INFERENCE_ERROR';
+
+export interface AnalysisEvidence {
+  status: AnalysisStatus | string;
+  model?: {
+    name?: string;
+    version?: string;
+    task?: string;
+    validated_egg_detector?: boolean;
+  } | null;
+  detections?: unknown[];
+  limitations?: string[];
+  message?: string | null;
+}
+
 export interface PredictionResponse {
   id: string;
   scan_id: string;
@@ -43,6 +58,8 @@ export interface ScanResponse {
   image_quality_warnings?: string[];
   retake_recommended?: boolean;
   recommendation?: string | null;
+  analysis?: AnalysisEvidence | null;
+  candidate_contour_geometry?: EggGeometry | null;
   egg_geometry?: EggGeometry | null;
   capture_date?: string;
   created_at?: string;

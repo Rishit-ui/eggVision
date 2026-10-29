@@ -60,8 +60,8 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             {[
               { icon: Camera, title: "1. Capture", desc: "Place egg in scanning chamber and capture image" },
-              { icon: Search, title: "2. Quality gate", desc: "The system checks focus, exposure, framing, and egg detection" },
-              { icon: BarChart3, title: "3. Record", desc: "Store a normalized scan, geometry, and capture metadata" },
+              { icon: Search, title: "2. Quality gate", desc: "The system checks focus, exposure, framing, and a candidate contour" },
+              { icon: BarChart3, title: "3. Record", desc: "Store a normalized research candidate and capture metadata" },
               { icon: Clock, title: "4. Validate", desc: "Link later laboratory measurements for model training" }
             ].map((step, i) => (
               <div key={i} className="flex flex-col items-center text-center relative group">

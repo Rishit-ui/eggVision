@@ -25,3 +25,20 @@ def test_multiple_isolated_eggs_block_pipeline_progression():
     assert result.can_proceed_to_inference is False
     assert "MULTIPLE_EGGS_DETECTED" in result.quality.warnings
     assert result.quality.retake_recommended is True
+
+
+def test_single_candidate_contour_abstains_without_a_validated_detector():
+    image = np.full((400, 400, 3), (10, 10, 15), dtype=np.uint8)
+    cv2.ellipse(image, (200, 200), (70, 120), 0, 0, 360, (40, 140, 230), -1)
+
+    result = VisionPipeline().process(image)
+    evidence = result.to_dict()["analysis"]
+
+    assert result.detection.found is True
+    assert result.detection.confidence is None
+    assert result.detection.status == "UNCERTAIN"
+    assert result.can_proceed_to_inference is False
+    assert evidence["status"] == "UNCERTAIN"
+    assert evidence["model"]["validated_egg_detector"] is False
+    assert "candidate_geometry" in result.to_dict()
+    assert "geometry" not in result.to_dict()

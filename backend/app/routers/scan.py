@@ -43,10 +43,16 @@ async def create_scan(
         "temperature_c": scan_create.temperature,
         "humidity_percent": scan_create.humidity,
     }
-    if cv_res.get("geometry"):
-        camera_metadata["egg_geometry"] = cv_res["geometry"]
+    # Contour-derived metrics are research observations only.  They are never
+    # persisted as verified egg measurements without an egg-detection model.
+    if cv_res.get("candidate_geometry"):
+        camera_metadata["candidate_contour_geometry"] = cv_res["candidate_geometry"]
     if cv_res.get("metrics"):
         camera_metadata["cv_metrics"] = cv_res["metrics"]
+    camera_metadata["analysis_evidence"] = cv_res.get("analysis", {
+        "status": "INFERENCE_ERROR",
+        "limitations": ["The capture analysis did not return evidence."],
+    })
 
     scan = await scan_service.create_scan(
         db=db,
@@ -63,6 +69,7 @@ async def create_scan(
     response_data = ScanResponse.model_validate(scan).model_dump()
     response_data["retake_recommended"] = cv_res.get("retake_recommended", False)
     response_data["recommendation"] = cv_res.get("recommendation")
-    response_data["egg_geometry"] = cv_res.get("geometry")
+    response_data["analysis"] = cv_res.get("analysis")
+    response_data["candidate_contour_geometry"] = cv_res.get("candidate_geometry")
 
     return ScanResponse(**response_data)
