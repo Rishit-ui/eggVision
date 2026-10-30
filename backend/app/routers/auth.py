@@ -41,7 +41,7 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         value=access_token,
         httponly=True,
         secure=settings.APP_ENV.lower() == "production",
-        samesite="lax",
+        samesite="none" if settings.APP_ENV.lower() == "production" else "lax",
         max_age=settings.JWT_EXPIRY_MINUTES * 60,
     )
     return TokenResponse(access_token=access_token)
@@ -54,7 +54,7 @@ async def logout(response: Response):
         key="eggvision_access_token",
         httponly=True,
         secure=settings.APP_ENV.lower() == "production",
-        samesite="lax",
+        samesite="none" if settings.APP_ENV.lower() == "production" else "lax",
     )
 
 

@@ -76,15 +76,18 @@ export function apiAssetUrl(
 
 function statusMessage(status: number): string {
   return {
-    401: 'Please sign in to continue.',
-    403: 'You do not have permission to perform this action.',
+    400: 'The request is invalid. Please check your image format and metadata.',
+    401: 'Your session has expired or authentication is required. Please sign in to continue.',
+    403: 'Permission denied. Your account does not have access to this resource.',
     404: 'The requested EggVision resource was not found.',
-    413: 'The selected image is too large.',
-    422: 'The submitted data is invalid. Please review it and try again.',
+    408: 'The EggVision API request timed out. The server may be waking up or processing took too long.',
+    413: 'The selected image is too large. Maximum allowed size is 10 MB.',
+    422: 'The submitted data is invalid. Please review metadata and try again.',
     429: 'Too many requests. Please wait and try again.',
+    500: 'The EggVision backend encountered an unexpected error. Please try again later.',
     502: 'EggVision could not complete image processing or storage. Please try again.',
-    503: 'EggVision storage or scan persistence is temporarily unavailable. Please try again.',
-    504: 'EggVision processing timed out. Please try again with a smaller image.',
+    503: 'EggVision storage or scan persistence is temporarily unavailable. The server may be starting up.',
+    504: 'EggVision processing timed out. The backend may be waking up or under load. Please retry with a smaller image.',
   }[status] || (status >= 500
     ? 'The EggVision API encountered an error. Please try again later.'
     : `Request failed with status ${status}`);
@@ -120,11 +123,11 @@ async function fetchWithHandler(
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new ApiError(408, 'The EggVision API request timed out. Please try again.');
+      throw new ApiError(408, 'The EggVision API request timed out. The server may be waking up from sleep.');
     }
     throw new ApiError(
       0,
-      'Unable to reach the EggVision API. Check your connection, backend availability, and browser access policy.',
+      'Unable to reach the EggVision API. Check your internet connection, verify that the backend is awake, or check browser access policy.',
     );
   } finally {
     clearTimeout(timeout);
@@ -139,6 +142,11 @@ async function fetchWithHandler(
         errorData.message || errorData.detail || errorMessage;
     } catch {
       // The response may not contain JSON.
+    }
+
+    // Immediately purge expired/invalid tokens from browser storage on 401
+    if (response.status === 401 && typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('eggvision_access_token');
     }
 
     throw new ApiError(response.status, errorMessage);
