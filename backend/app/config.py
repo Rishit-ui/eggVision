@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     UPLOAD_MAX_SIZE_MB: int = 10
     UPLOAD_MAX_PIXELS: int = 25_000_000
     HEALTHCHECK_TIMEOUT_SECONDS: float = 3.0
+    S3_CONNECT_TIMEOUT_SECONDS: float = 5.0
+    S3_READ_TIMEOUT_SECONDS: float = 15.0
     
     model_config = SettingsConfigDict(env_file=".env")
 

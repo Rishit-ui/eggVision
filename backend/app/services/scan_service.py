@@ -1,11 +1,15 @@
+import logging
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
+from sqlalchemy.exc import SQLAlchemyError
 from app.models.batch import Batch
 from app.models.scan import Scan
 from app.models.prediction import Prediction
 from app.models.sensor_reading import SensorReading
 from app.schemas.scan import ScanCreate
+
+logger = logging.getLogger(__name__)
 
 class ScanService:
     async def create_scan(
@@ -30,26 +34,30 @@ class ScanService:
             device_id=metadata.device_id,
             camera_metadata=camera_metadata or metadata.camera_metadata
         )
-        db.add(scan)
-        await db.commit()
-        if metadata.batch_id:
-            await db.execute(
-                update(Batch)
-                .where(Batch.id == metadata.batch_id)
-                .values(scanned_eggs=Batch.scanned_eggs + 1, status="in_progress")
-            )
-            await db.commit()
-        if metadata.temperature is not None or metadata.humidity is not None:
-            db.add(
-                SensorReading(
-                    scan_id=scan.id,
-                    device_id=metadata.device_id,
-                    temperature=metadata.temperature,
-                    humidity=metadata.humidity,
+        try:
+            db.add(scan)
+            await db.flush()
+            if metadata.batch_id:
+                await db.execute(
+                    update(Batch)
+                    .where(Batch.id == metadata.batch_id)
+                    .values(scanned_eggs=Batch.scanned_eggs + 1, status="in_progress")
                 )
-            )
+            if metadata.temperature is not None or metadata.humidity is not None:
+                db.add(
+                    SensorReading(
+                        scan_id=scan.id,
+                        device_id=metadata.device_id,
+                        temperature=metadata.temperature,
+                        humidity=metadata.humidity,
+                    )
+                )
             await db.commit()
-        await db.refresh(scan)
+            await db.refresh(scan)
+        except SQLAlchemyError:
+            await db.rollback()
+            logger.exception("scan_persistence_failed category=database")
+            raise
         return scan
         
     async def get_scan(self, db: AsyncSession, scan_id: uuid.UUID) -> Scan | None:

@@ -4,13 +4,18 @@ Decodes incoming raw image uploads, executes VisionPipeline,
 and generates processed/normalized image artifacts for storage.
 """
 
+import asyncio
+import logging
 import uuid
-from typing import Optional, Dict, Any, Tuple
+from time import perf_counter
+from typing import Any
 import cv2
 import numpy as np
 
 from ml.vision.pipeline import VisionPipeline, PipelineResult
 from app.services.storage_service import storage_service
+
+logger = logging.getLogger(__name__)
 
 
 class CVService:
@@ -19,7 +24,7 @@ class CVService:
     def __init__(self):
         self.pipeline = VisionPipeline()
 
-    async def process_scan_image(self, image_bytes: bytes, original_filename: str) -> Dict[str, Any]:
+    async def process_scan_image(self, image_bytes: bytes, original_filename: str, correlation_id: str) -> dict[str, Any]:
         """Decode image bytes, run CV quality and normalization, and upload processed image.
         
         Returns:
@@ -33,9 +38,12 @@ class CVService:
             - geometry: Optional[dict]
             - can_proceed_to_inference: bool
         """
-        # Decode byte buffer into OpenCV BGR numpy array
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        started = perf_counter()
+        # Decode byte buffer into OpenCV BGR numpy array. Only dimensions are
+        # logged; image bytes and the client filename are never logged.
+        image_bgr = await asyncio.to_thread(
+            cv2.imdecode, np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR
+        )
 
         if image_bgr is None:
             return {
@@ -56,23 +64,41 @@ class CVService:
                 },
                 "can_proceed_to_inference": False
             }
+        logger.info(
+            "scan_stage=image_decoded request_id=%s elapsed_ms=%.2f width=%s height=%s",
+            correlation_id, (perf_counter() - started) * 1000, image_bgr.shape[1], image_bgr.shape[0],
+        )
 
-        # Run computer vision pipeline
-        result: PipelineResult = self.pipeline.process(image_bgr)
+        logger.info("scan_stage=cv_processing_started request_id=%s", correlation_id)
+        cv_started = perf_counter()
+        try:
+            # VisionPipeline is synchronous and CPU-bound. Keep it off the
+            # FastAPI event loop so other requests can continue while it runs.
+            result: PipelineResult = await asyncio.to_thread(self.pipeline.process, image_bgr)
+        except Exception:
+            logger.exception("scan_failed request_id=%s category=cv_processing", correlation_id)
+            raise
+        logger.info(
+            "scan_stage=cv_processing_completed request_id=%s elapsed_ms=%.2f",
+            correlation_id, (perf_counter() - cv_started) * 1000,
+        )
         pipeline_dict = result.to_dict()
 
         processed_url = None
         if result.normalization and result.normalization.success:
             # Encode canonical normalized image to JPEG
             norm_img = result.normalization.normalized_image
-            success, encoded_buf = cv2.imencode(".jpg", norm_img, [cv2.IMWRITE_JPEG_QUALITY, 95])
+            success, encoded_buf = await asyncio.to_thread(
+                cv2.imencode, ".jpg", norm_img, [cv2.IMWRITE_JPEG_QUALITY, 95]
+            )
             if success:
                 norm_filename = f"normalized_{uuid.uuid4()}.jpg"
-                processed_url = await storage_service.upload_image(
-                    encoded_buf.tobytes(),
-                    norm_filename,
-                    "image/jpeg"
-                )
+                try:
+                    processed_url = await storage_service.upload_image(encoded_buf.tobytes(), norm_filename, "image/jpeg")
+                except Exception:
+                    logger.exception("scan_failed request_id=%s category=normalized_image_storage", correlation_id)
+                    raise
+                logger.info("scan_stage=normalized_image_storage_completed request_id=%s", correlation_id)
 
         pipeline_dict["processed_image_url"] = processed_url
         return pipeline_dict

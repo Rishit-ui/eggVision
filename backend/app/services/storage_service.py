@@ -30,7 +30,12 @@ class StorageService:
                 aws_access_key_id=settings.S3_ACCESS_KEY,
                 aws_secret_access_key=settings.S3_SECRET_KEY,
                 region_name="us-east-1",
-                config=Config(signature_version="s3v4"),
+                config=Config(
+                    signature_version="s3v4",
+                    connect_timeout=settings.S3_CONNECT_TIMEOUT_SECONDS,
+                    read_timeout=settings.S3_READ_TIMEOUT_SECONDS,
+                    retries={"max_attempts": 2, "mode": "standard"},
+                ),
             )
 
     @property
@@ -74,13 +79,17 @@ class StorageService:
         key = self._safe_key(filename)
         if self._s3_available:
             assert self._client is not None and settings.S3_BUCKET is not None
-            await asyncio.to_thread(
-                self._client.put_object,
-                Bucket=settings.S3_BUCKET,
-                Key=key,
-                Body=file_data,
-                ContentType=content_type,
-            )
+            try:
+                await asyncio.to_thread(
+                    self._client.put_object,
+                    Bucket=settings.S3_BUCKET,
+                    Key=key,
+                    Body=file_data,
+                    ContentType=content_type,
+                )
+            except Exception:
+                logger.exception("storage_upload_failed category=s3")
+                raise
             return f"/api/v1/artifacts/{key}"
 
         path = self.upload_dir / key

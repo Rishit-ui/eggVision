@@ -82,6 +82,9 @@ function statusMessage(status: number): string {
     413: 'The selected image is too large.',
     422: 'The submitted data is invalid. Please review it and try again.',
     429: 'Too many requests. Please wait and try again.',
+    502: 'EggVision could not complete image processing or storage. Please try again.',
+    503: 'EggVision storage or scan persistence is temporarily unavailable. Please try again.',
+    504: 'EggVision processing timed out. Please try again with a smaller image.',
   }[status] || (status >= 500
     ? 'The EggVision API encountered an error. Please try again later.'
     : `Request failed with status ${status}`);
