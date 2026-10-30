@@ -10,7 +10,8 @@ import type {
 } from './types';
 
 export const LOCAL_API_BASE_URL = 'http://localhost:8000/api/v1';
-export const PRODUCTION_API_BASE_URL = 'https://eggvision-1.onrender.com/api/v1';
+// Updated to the Vercel backend deployment (no Render dependency in production)
+export const PRODUCTION_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eggvision-1.onrender.com/api/v1';
 
 function normalizeApiBaseUrl(value: string): string {
   const trimmed = value.trim().replace(/\/+$/, '');
@@ -243,8 +244,15 @@ export const api = {
     image: File,
     metadata?: object,
   ): Promise<ScanResponse> {
-    const formData = new FormData();
+    // Images over 4 MB use the presigned direct-upload path to bypass
+    // Vercel's 4.5 MB request-body limit for serverless functions.
+    const DIRECT_THRESHOLD_BYTES = 4 * 1024 * 1024; // 4 MB
 
+    if (image.size > DIRECT_THRESHOLD_BYTES) {
+      return this._directUploadScan(image, metadata);
+    }
+
+    const formData = new FormData();
     formData.append('image', image);
     formData.append('metadata', JSON.stringify(metadata || {}));
 
@@ -253,6 +261,43 @@ export const api = {
     return fetchWithHandler('/scan', {
       method: 'POST',
       body: formData,
+    });
+  },
+
+  async _directUploadScan(
+    image: File,
+    metadata?: object,
+  ): Promise<ScanResponse> {
+    // Step 1: Request a presigned PUT URL from the backend
+    const urlRes = await fetchWithHandler('/scan/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: image.name,
+        content_type: image.type || 'image/jpeg',
+        file_size: image.size,
+      }),
+    });
+
+    // Step 2: PUT the file directly to Supabase Storage (bypasses Vercel body limit)
+    const putResponse = await fetch(urlRes.upload_url, {
+      method: 'PUT',
+      headers: { 'Content-Type': image.type || 'image/jpeg' },
+      body: image,
+    });
+
+    if (!putResponse.ok) {
+      throw new ApiError(putResponse.status, 'Direct image upload to storage failed. Please try again.');
+    }
+
+    // Step 3: Confirm scan with the object key (backend fetches from S3 & runs CV)
+    return fetchWithHandler('/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        object_key: urlRes.object_key,
+        metadata: metadata || {},
+      }),
     });
   },
 

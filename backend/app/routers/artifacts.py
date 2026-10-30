@@ -9,7 +9,7 @@ from app.services.storage_service import storage_service
 router = APIRouter(tags=["Artifacts"])
 
 
-@router.get("/artifacts/{filename}", include_in_schema=False)
+@router.get("/artifacts/{filename:path}", include_in_schema=False)
 async def get_artifact(filename: str):
     try:
         content, content_type = await storage_service.get_image(filename)

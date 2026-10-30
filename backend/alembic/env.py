@@ -33,10 +33,16 @@ def do_run_migrations(connection) -> None:
         context.run_migrations()
 
 async def run_async_migrations() -> None:
+    connect_args = {}
+    db_url = config.get_main_option("sqlalchemy.url") or ""
+    if ":6543" in db_url or "pooler" in db_url.lower():
+        connect_args["statement_cache_size"] = 0
+
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
 
     async with connectable.connect() as connection:

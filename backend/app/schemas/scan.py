@@ -15,6 +15,24 @@ class ScanCreate(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+
+class UploadUrlRequest(BaseModel):
+    filename: str
+    content_type: str = "image/jpeg"
+    file_size: int | None = None
+
+
+class UploadUrlResponse(BaseModel):
+    upload_url: str
+    object_key: str
+    public_url: str | None = None
+    expires_in: int = 300
+
+
+class DirectScanCreate(BaseModel):
+    object_key: str
+    metadata: ScanCreate = ScanCreate()
+
 class PredictionResponse(BaseModel):
     id: uuid.UUID
     scan_id: uuid.UUID
