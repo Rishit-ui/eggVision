@@ -112,7 +112,8 @@ async function fetchWithHandler(
 
   let response: Response;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeoutMs = endpoint.includes('/scan') ? 60_000 : 30_000;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     response = await fetch(url, {

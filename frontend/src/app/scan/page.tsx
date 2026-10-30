@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThermometerSun, Droplets, Info, AlertTriangle, CheckCircle2, RefreshCw } from "lucide-react";
@@ -28,6 +28,7 @@ export default function ScanPage() {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanElapsed, setScanElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   // Metadata state
@@ -35,6 +36,21 @@ export default function ScanPage() {
   const [storageCond, setStorageCond] = useState("unknown");
   const [temperature, setTemperature] = useState("");
   const [humidity, setHumidity] = useState("");
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (isScanning) {
+      setScanElapsed(0);
+      timer = setInterval(() => {
+        setScanElapsed((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setScanElapsed(0);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isScanning]);
 
   const [qualityReport, setQualityReport] = useState<{
     image_quality: string;
@@ -235,15 +251,35 @@ export default function ScanPage() {
           {error && (
             <div className="p-3 text-sm text-destructive-foreground bg-destructive/90 rounded-md shadow-sm space-y-2">
               <p>{error}</p>
-              {!api.isAuthenticated() && <Button asChild size="sm" variant="secondary"><Link href="/login">Sign in</Link></Button>}
+              <div className="flex gap-2 pt-1">
+                {!api.isAuthenticated() && (
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href="/login">Sign in</Link>
+                  </Button>
+                )}
+                {selectedImage && (
+                  <Button size="sm" variant="outline" className="bg-background text-foreground" onClick={handleScan}>
+                    Retry Scan
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
-          <ScanButton 
-            onClick={handleScan} 
-            disabled={!selectedImage} 
-            loading={isScanning} 
-          />
+          <div className="space-y-2">
+            <ScanButton 
+              onClick={handleScan} 
+              disabled={!selectedImage} 
+              loading={isScanning} 
+            />
+            {isScanning && scanElapsed >= 4 && (
+              <p className="text-xs text-muted-foreground text-center animate-pulse">
+                {scanElapsed < 15
+                  ? "Uploading capture to server…"
+                  : "Waking up backend service from sleep (free tier cold start)… please wait."}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
