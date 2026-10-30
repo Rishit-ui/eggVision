@@ -32,6 +32,8 @@ class PipelineResult:
         """Convert pipeline results to JSON-serializable dictionary."""
         out = {
             "image_quality": self.quality.image_quality,
+            # This field remains for backwards-compatible persistence only.
+            # It is always null: no calibrated capture-readiness score exists.
             "quality_score": self.quality.quality_score,
             "warnings": self.quality.warnings,
             "retake_recommended": self.quality.retake_recommended,
@@ -40,16 +42,18 @@ class PipelineResult:
             "metrics": self.quality.metrics,
             "analysis": {
                 "status": self.detection.status,
+                "capture_mode": self.detection.capture_mode,
                 "model": {
                     "name": self.detection.algorithm,
-                    "version": "1",
-                    "task": "controlled_chamber_candidate_contour_screen",
+                    "version": "2",
+                    "task": "non_ml_candidate_contour_screen",
                     "validated_egg_detector": False,
                 },
                 "detections": [],
                 "limitations": [
                     "No trained, validated egg detector is installed.",
                     "A contour compatible with the chamber silhouette is not proof that an egg is present.",
+                    "Capture-quality measurements are engineering screening metrics, not AI confidence or egg-quality predictions.",
                     "No defect, freshness, spoilage, contamination, or food-safety assessment was performed.",
                 ],
                 "message": self.detection.message,
@@ -86,7 +90,7 @@ class VisionPipeline:
     def process(self, image_bgr: np.ndarray) -> PipelineResult:
         """Run the end-to-end vision pipeline."""
         if image_bgr is None or image_bgr.size == 0:
-            quality = self.assessor.assess(image_bgr, has_egg=False)
+            quality = self.assessor.assess(image_bgr, screening_status="INVALID_IMAGE")
             detection = DetectionResult(found=False, status="INVALID_IMAGE", message="Empty image.")
             return PipelineResult(quality=quality, detection=detection, can_proceed_to_inference=False)
 
@@ -97,14 +101,16 @@ class VisionPipeline:
         quality = self.assessor.assess(
             image_bgr=image_bgr,
             bbox=detection.bbox,
-            has_egg=detection.found
+            candidate_mask=detection.candidate_mask,
+            screening_status=detection.status,
         )
 
         # Add multiple eggs warning if detected
-        if detection.egg_count > 1:
-            quality.warnings.append(QualityWarning.MULTIPLE_EGGS)
+        if detection.status == "MULTIPLE_CANDIDATES":
+            quality.warnings.append(QualityWarning.MULTIPLE_CANDIDATES)
             quality.retake_recommended = True
-            quality.recommendation = "Place only one egg in the candling chamber at a time."
+            quality.image_quality = "POOR"
+            quality.recommendation = "Multiple isolated candidates were screened. Capture one subject at a time; this screen cannot establish egg identity."
             return PipelineResult(
                 quality=quality,
                 detection=detection,
@@ -112,8 +118,8 @@ class VisionPipeline:
                 error=quality.recommendation,
             )
 
-        # If image quality is POOR or no candidate was found: do not normalize or infer.
-        if quality.image_quality == "POOR" or not detection.found:
+        # If the capture is unsuitable or no candidate was screened: do not normalize or infer.
+        if quality.image_quality in {"POOR", "INCONCLUSIVE"} or not detection.found:
             return PipelineResult(
                 quality=quality,
                 detection=detection,

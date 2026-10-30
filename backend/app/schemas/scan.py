@@ -45,6 +45,7 @@ class ScanResponse(BaseModel):
     original_image_url: str | None = None
     processed_image_url: str | None = None
     image_quality: str | None = None
+    # Deprecated persistence field; no longer a quality/confidence percentage.
     image_quality_score: float | None = None
     image_quality_warnings: list[str] = []
     retake_recommended: bool = False

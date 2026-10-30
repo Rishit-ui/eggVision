@@ -108,9 +108,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
           <Badge variant={isQualityGood ? "default" : "destructive"}>
             Capture Quality: {scan?.image_quality || "UNKNOWN"}
           </Badge>
-          <Badge variant="outline" className="text-xs">
-            Score: {Math.round((scan?.image_quality_score || 0) * 100)}%
-          </Badge>
+          <Badge variant="outline" className="text-xs">Screening metrics only</Badge>
         </div>
       </div>
 
@@ -126,7 +124,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
           <Card className="overflow-hidden border-border/80 shadow-sm">
             <CardHeader className="p-3 bg-muted/40 border-b border-border flex flex-row items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {viewMode === "normalized" ? "Normalized 512x512 Frame" : "Original Chamber Image"}
+                {viewMode === "normalized" ? "Normalized candidate frame" : "Original capture"}
               </span>
               <div className="flex rounded-md bg-muted p-0.5 text-xs">
                 <button
@@ -172,8 +170,8 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                 <span className="font-semibold">{scan?.image_quality || "N/A"}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-border/40">
-                <span className="text-muted-foreground">Numerical Score</span>
-                <span className="font-semibold">{Math.round((scan?.image_quality_score || 0) * 100)} / 100</span>
+                <span className="text-muted-foreground">Screening method</span>
+                <span className="font-semibold">Non-ML capture metrics</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-muted-foreground">Warnings Detected</span>
@@ -196,7 +194,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                 <Scale className="w-4 h-4 text-primary" /> Egg Presence Evidence
               </CardTitle>
               <CardDescription className="text-xs">
-                Status from the actual capture-analysis pipeline; no trained egg detector is currently installed.
+                Capture mode: {analysis?.capture_mode?.replaceAll("_", " ") || "unknown"}. No trained egg detector is currently installed.
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -23,7 +23,7 @@ def test_multiple_isolated_eggs_block_pipeline_progression():
 
     assert result.detection.egg_count > 1
     assert result.can_proceed_to_inference is False
-    assert "MULTIPLE_EGGS_DETECTED" in result.quality.warnings
+    assert "MULTIPLE_CANDIDATES" in result.quality.warnings
     assert result.quality.retake_recommended is True
 
 

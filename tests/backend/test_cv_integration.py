@@ -73,11 +73,13 @@ async def test_scan_with_cv_pipeline():
             assert "processed_image_url" in body
             assert body["processed_image_url"] is not None
             assert body["image_quality"] in ["GOOD", "ACCEPTABLE"]
-            assert body["image_quality_score"] > 0.60
+            # Capture metrics are not a model confidence or egg-quality score.
+            assert body["image_quality_score"] is None
             assert isinstance(body["image_quality_warnings"], list)
             assert body["retake_recommended"] is False
             assert body["analysis"]["status"] == "UNCERTAIN"
             assert body["analysis"]["model"]["validated_egg_detector"] is False
+            assert body["analysis"]["capture_mode"] == "controlled_candling"
             assert body["egg_geometry"] is None
             assert body["candidate_contour_geometry"] is not None
     finally:

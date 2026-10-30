@@ -18,6 +18,8 @@ EggVision currently records controlled capture quality and research evidence. It
 
 EggVision AI is a production-oriented research platform for controlled egg-candling capture, image-quality gating, and future validated quality estimation. It currently performs image-quality and egg-geometry processing; it deliberately returns `MODEL_NOT_READY` rather than producing a freshness, age, Haugh Unit, crack, or safety claim until a trained model has passed the documented release gate.
 
+The capture screen is non-ML and records only candidate-contour and optical evidence; see [capture screening](docs/capture-screening.md) for its supported contexts, thresholds, and limitations.
+
 ## Architecture Overview
 ```
 Camera → File Validation → Capture Quality → Candidate-Contour Screen →

@@ -25,7 +25,7 @@ class CVService:
         Returns:
             Dictionary containing:
             - image_quality: "GOOD" | "ACCEPTABLE" | "POOR"
-            - quality_score: float
+            - quality_score: deprecated and always None; not a confidence score
             - warnings: list[str]
             - retake_recommended: bool
             - recommendation: Optional[str]
@@ -40,7 +40,7 @@ class CVService:
         if image_bgr is None:
             return {
                 "image_quality": "POOR",
-                "quality_score": 0.0,
+                "quality_score": None,
                 "warnings": ["INVALID_IMAGE_DATA"],
                 "retake_recommended": True,
                 "recommendation": "The uploaded file could not be parsed as a valid image.",

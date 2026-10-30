@@ -8,7 +8,7 @@
 
 ## Reliability issue corrected
 
-The former contour rule exposed a shape-derived score as `confidence` and used language implying an egg had been located. A bright or egg-shaped non-egg object could therefore be mistaken for a confirmed egg. The contour stage is now explicitly a controlled-chamber **candidate-contour screen**:
+The former contour rule exposed a shape-derived score as `confidence` and used language implying an egg had been located. A bright or egg-shaped non-egg object could therefore be mistaken for a confirmed egg. The contour stage is now explicitly a non-ML **candidate-contour screen**:
 
 - corrupt/empty input: `INVALID_IMAGE`;
 - no suitable chamber contour: `NO_EGG_DETECTED`;

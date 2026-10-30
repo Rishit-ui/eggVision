@@ -13,6 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 
+const warningGuidance: Record<string, string> = {
+  UNSUPPORTED_BACKGROUND: "The bright uniform background prevents reliable boundary screening. Use a contrasting matte background or the controlled chamber.",
+  NO_CANDIDATE_CONTOUR: "No isolated candidate boundary was screened. Reframe one subject against a simpler background.",
+  MULTIPLE_CANDIDATES: "Multiple isolated candidates were screened. Capture one subject at a time.",
+  BLUR_DETECTED: "Focus or stabilize the camera before capture.",
+  EXCESSIVE_CANDIDATE_GLARE: "Diffuse or reposition the light to reduce glare.",
+  STRONG_CANDIDATE_SHADOWS: "Use more even illumination to reduce shadows.",
+  CANDIDATE_PARTIALLY_VISIBLE_BORDER_CLIPPED: "Keep the full candidate inside the frame with a visible margin.",
+  LOW_RESOLUTION: "Capture at a higher resolution with the subject larger in frame.",
+};
+
 export default function ScanPage() {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -27,7 +38,6 @@ export default function ScanPage() {
 
   const [qualityReport, setQualityReport] = useState<{
     image_quality: string;
-    quality_score: number;
     warnings: string[];
     retake_recommended: boolean;
     recommendation?: string | null;
@@ -71,10 +81,9 @@ export default function ScanPage() {
       if (scanResponse.retake_recommended || scanResponse.image_quality === 'POOR') {
         setQualityReport({
           image_quality: scanResponse.image_quality || 'POOR',
-          quality_score: scanResponse.image_quality_score || 0,
           warnings: scanResponse.image_quality_warnings || [],
           retake_recommended: true,
-          recommendation: scanResponse.recommendation || 'Image quality below threshold. Please retake the photo under controlled candling illumination.',
+          recommendation: scanResponse.recommendation || 'Capture screening could not produce a usable candidate region. Adjust the background, framing, focus, or lighting and try again.',
           processed_image_url: scanResponse.processed_image_url,
         });
         setIsScanning(false);
@@ -123,9 +132,7 @@ export default function ScanPage() {
                       {qualityReport.retake_recommended ? "Image Quality Substandard — Retake Recommended" : "Image Quality Warning"}
                     </CardTitle>
                   </div>
-                  <Badge variant={qualityReport.retake_recommended ? "destructive" : "secondary"}>
-                    Score: {Math.round(qualityReport.quality_score * 100)}%
-                  </Badge>
+                  <Badge variant={qualityReport.retake_recommended ? "destructive" : "secondary"}>Capture screening</Badge>
                 </div>
                 <CardDescription className="text-sm">
                   {qualityReport.recommendation || "Controlled candling quality conditions must be satisfied before the capture can be retained for research."}
@@ -137,8 +144,8 @@ export default function ScanPage() {
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detected Quality Issues:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {qualityReport.warnings.map((w, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                          {w.replace(/_/g, " ")}
+                        <span key={idx} title={warningGuidance[w]} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                          {warningGuidance[w] || w.replace(/_/g, " ")}
                         </span>
                       ))}
                     </div>
@@ -158,7 +165,7 @@ export default function ScanPage() {
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start text-blue-800 text-sm">
             <Info className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5 text-blue-500" />
             <p>
-              <strong>For best results:</strong> Use controlled lighting (candling preferred), center the egg in the frame, and ensure the background is dark and uniform.
+              <strong>For best results:</strong> Capture one centered subject with its full outline visible. Candling works with a dark chamber; general photographs need a matte, contrasting background. This screen only assesses capture conditions and does not identify eggs or assess freshness, defects, or food safety.
             </p>
           </div>
         </div>

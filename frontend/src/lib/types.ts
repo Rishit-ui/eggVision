@@ -10,10 +10,11 @@ export interface EggGeometry {
   orientation_deg: number;
 }
 
-export type AnalysisStatus = 'EGG_DETECTED' | 'NO_EGG_DETECTED' | 'UNCERTAIN' | 'INVALID_IMAGE' | 'INFERENCE_ERROR';
+export type AnalysisStatus = 'EGG_DETECTED' | 'NO_EGG_DETECTED' | 'NO_CANDIDATE_CONTOUR' | 'UNSUPPORTED_BACKGROUND' | 'MULTIPLE_CANDIDATES' | 'UNCERTAIN' | 'INVALID_IMAGE' | 'INFERENCE_ERROR';
 
 export interface AnalysisEvidence {
   status: AnalysisStatus | string;
+  capture_mode?: 'controlled_candling' | 'general_photograph' | string;
   model?: {
     name?: string;
     version?: string;
@@ -54,6 +55,7 @@ export interface ScanResponse {
   original_image_url?: string | null;
   processed_image_url?: string | null;
   image_quality?: ImageQuality | string | null;
+  /** Deprecated: never an AI confidence or egg-quality percentage. */
   image_quality_score?: number | null;
   image_quality_warnings?: string[];
   retake_recommended?: boolean;
