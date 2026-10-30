@@ -86,6 +86,8 @@ class StorageService:
         path = self.upload_dir / key
         async with aiofiles.open(path, "wb") as file:
             await file.write(file_data)
+        if settings.APP_ENV.lower() == "production":
+            return f"/api/v1/artifacts/{key}"
         return f"/uploads/{key}"
 
     async def get_image(self, filename: str) -> tuple[bytes, str]:
@@ -122,6 +124,9 @@ class StorageService:
             if self._s3_available:
                 return "ok"
             return "degraded" if os.access(self.upload_dir, os.W_OK) else "error"
-        return "ok" if os.access(self.upload_dir, os.W_OK) else "error"
+        if not os.access(self.upload_dir, os.W_OK):
+            return "error"
+        # Local disk is useful in development but is not durable on Render.
+        return "degraded" if settings.APP_ENV.lower() == "production" else "ok"
 
 storage_service = StorageService()

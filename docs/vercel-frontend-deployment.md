@@ -7,8 +7,8 @@ EggVision is a monorepo. Deploy the Next.js application as **one Vercel project*
 1. In the repository import screen, select **Import single project** beside `frontend`.
 2. Confirm **Root Directory** is `frontend`.
 3. Use the automatically detected **Next.js** framework, `npm install`, and `npm run build`.
-4. In **Project Settings → Environment Variables**, add `NEXT_PUBLIC_API_URL` with the complete public API base URL, for example `https://your-render-service.onrender.com/api/v1`. Apply it to Production and Preview if previews should call that backend.
-5. Deploy, then open `/scan`. If the API URL is missing, the frontend will now show a configuration error instead of silently calling a visitor's `localhost`.
+4. Deploy. Production builds use `https://eggvision-1.onrender.com/api/v1` by default; no Vercel environment variable is required. `NEXT_PUBLIC_API_URL` is only an optional override for a separately hosted preview API and must be a complete URL ending in `/api/v1`.
+5. Open `/scan` after signing in. A production browser never falls back to its own `localhost`.
 
 ## Backend CORS
 

@@ -5,7 +5,11 @@ from app.config import settings
 engine = create_async_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
-    echo=settings.DEBUG
+    echo=settings.DEBUG,
+    connect_args={
+        "timeout": settings.HEALTHCHECK_TIMEOUT_SECONDS,
+        "command_timeout": settings.HEALTHCHECK_TIMEOUT_SECONDS,
+    },
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -17,3 +21,8 @@ AsyncSessionLocal = async_sessionmaker(
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
+
+
+async def close_database() -> None:
+    """Release pooled connections during application shutdown."""
+    await engine.dispose()

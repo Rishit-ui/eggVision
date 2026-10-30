@@ -1,16 +1,25 @@
+import logging
+import sys
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.database import close_database
 
 from app.middleware.auth import get_current_user
 from app.routers import artifacts, auth, health, scan, predict, result, history, batch, dashboard, analytics, model_info, research
 from app.services.storage_service import storage_service
 
+logger = logging.getLogger(__name__)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Starting EggVision API (python=%s, environment=%s)", sys.version.split()[0], settings.APP_ENV)
     await storage_service.ensure_ready()
-    yield
+    try:
+        yield
+    finally:
+        await close_database()
 
 app = FastAPI(
     title="EggVision AI API",
@@ -26,6 +35,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
@@ -45,4 +55,7 @@ from fastapi.staticfiles import StaticFiles
 
 upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads")
 os.makedirs(upload_dir, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+# Local artifact URLs are convenient for development.  Production fallback
+# artifacts are served through the authenticated artifacts router instead.
+if settings.APP_ENV.lower() != "production":
+    app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")

@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from time import perf_counter
 
 import redis.asyncio as redis
@@ -11,6 +13,7 @@ from app.services.prediction_service import inference_engine
 from app.services.storage_service import storage_service
 
 router = APIRouter(tags=["Health"])
+logger = logging.getLogger(__name__)
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(db: AsyncSession = Depends(get_db)):
@@ -18,21 +21,28 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     db_latency = None
     try:
         started = perf_counter()
-        await db.execute(text("SELECT 1"))
+        await asyncio.wait_for(
+            db.execute(text("SELECT 1")), timeout=settings.HEALTHCHECK_TIMEOUT_SECONDS
+        )
         db_latency = round((perf_counter() - started) * 1000, 2)
-    except Exception:
+    except Exception as error:
+        logger.warning("Database health check failed: %s", type(error).__name__)
         db_status = "error"
 
     redis_status = "ok"
     redis_latency = None
+    client = None
     try:
         client = redis.from_url(settings.REDIS_URL)
         started = perf_counter()
-        await client.ping()
+        await asyncio.wait_for(client.ping(), timeout=settings.HEALTHCHECK_TIMEOUT_SECONDS)
         redis_latency = round((perf_counter() - started) * 1000, 2)
-        await client.aclose()
-    except Exception:
+    except Exception as error:
+        logger.warning("Redis health check failed: %s", type(error).__name__)
         redis_status = "error"
+    finally:
+        if client is not None:
+            await client.aclose()
 
     storage_status = await storage_service.health_status()
     model_status = "ready" if inference_engine.is_ready() else "not_ready"

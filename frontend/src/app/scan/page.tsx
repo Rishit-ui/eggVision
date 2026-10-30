@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThermometerSun, Droplets, Info, AlertTriangle, CheckCircle2, RefreshCw } from "lucide-react";
 import { ImageUploader } from "@/components/scan/image-uploader";
@@ -47,6 +48,10 @@ export default function ScanPage() {
 
   const handleScan = async () => {
     if (!selectedImage) return;
+    if (!api.isAuthenticated()) {
+      setError("Please sign in before submitting a protected scan.");
+      return;
+    }
 
     setIsScanning(true);
     setError(null);
@@ -221,8 +226,9 @@ export default function ScanPage() {
           </Card>
 
           {error && (
-            <div className="p-3 text-sm text-destructive-foreground bg-destructive/90 rounded-md shadow-sm">
-              {error}
+            <div className="p-3 text-sm text-destructive-foreground bg-destructive/90 rounded-md shadow-sm space-y-2">
+              <p>{error}</p>
+              {!api.isAuthenticated() && <Button asChild size="sm" variant="secondary"><Link href="/login">Sign in</Link></Button>}
             </div>
           )}
 

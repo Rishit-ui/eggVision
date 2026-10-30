@@ -47,6 +47,17 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
     return TokenResponse(access_token=access_token)
 
 
+@router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(response: Response):
+    """Clear the optional browser session cookie as well as client token storage."""
+    response.delete_cookie(
+        key="eggvision_access_token",
+        httponly=True,
+        secure=settings.APP_ENV.lower() == "production",
+        samesite="lax",
+    )
+
+
 @router.get("/auth/me", response_model=UserResponse)
 async def me(current_user: User | None = Depends(get_current_user)):
     if current_user is None:

@@ -2,8 +2,6 @@
 
 import cv2
 import numpy as np
-import pytest
-from ml.vision.detector import EggDetector
 from ml.vision.segmentation import EggSegmenter
 from ml.vision.normalizer import EggNormalizer
 from ml.vision.pipeline import VisionPipeline
@@ -57,7 +55,10 @@ def test_vision_pipeline_end_to_end():
     pipeline = VisionPipeline()
     res = pipeline.process(img)
 
-    assert res.can_proceed_to_inference is True
+    # A contour candidate is useful for normalization, but the current
+    # heuristic is not a validated egg detector and must not unlock inference.
+    assert res.can_proceed_to_inference is False
+    assert res.detection.status == "UNCERTAIN"
     assert res.quality.image_quality in ["GOOD", "ACCEPTABLE"]
     assert res.detection.found is True
     assert res.segmentation is not None
@@ -67,5 +68,6 @@ def test_vision_pipeline_end_to_end():
 
     out_dict = res.to_dict()
     assert "image_quality" in out_dict
-    assert "geometry" in out_dict
-    assert out_dict["geometry"]["area"] > 5000
+    assert "candidate_geometry" in out_dict
+    assert out_dict["candidate_geometry"]["area"] > 5000
+    assert out_dict["analysis"]["model"]["validated_egg_detector"] is False

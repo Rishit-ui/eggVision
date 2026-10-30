@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Egg, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -18,6 +19,14 @@ const navLinks = [
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const pathname = usePathname();
+  const [authenticated, setAuthenticated] = React.useState(false);
+
+  React.useEffect(() => setAuthenticated(api.isAuthenticated()), [pathname]);
+
+  const signOut = () => {
+    void api.logout();
+    setAuthenticated(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -44,9 +53,7 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Button asChild size="sm" className="ml-4">
-              <Link href="/login">Sign in</Link>
-            </Button>
+            {authenticated ? <Button size="sm" variant="outline" className="ml-4" onClick={signOut}>Sign out</Button> : <Button asChild size="sm" className="ml-4"><Link href="/login">Sign in</Link></Button>}
           </div>
 
           {/* Mobile Navigation Toggle */}

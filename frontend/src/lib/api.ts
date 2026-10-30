@@ -9,11 +9,35 @@ import type {
   TokenResponse,
 } from './types';
 
-// Use localhost during development and the deployed Render API in production.
-const API_BASE_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000/api/v1'
-    : 'https://eggvision-1.onrender.com/api/v1';
+export const LOCAL_API_BASE_URL = 'http://localhost:8000/api/v1';
+export const PRODUCTION_API_BASE_URL = 'https://eggvision-1.onrender.com/api/v1';
+
+function normalizeApiBaseUrl(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, '');
+  if (!trimmed) throw new Error('The EggVision API URL is empty.');
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error('The EggVision API URL must be an absolute http(s) URL.');
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('The EggVision API URL must use http or https.');
+  }
+  const path = parsed.pathname.replace(/\/+$/, '');
+  if (path && path !== '/api/v1') {
+    throw new Error('The EggVision API URL must end with /api/v1.');
+  }
+  parsed.pathname = '/api/v1';
+  return parsed.toString().replace(/\/$/, '');
+}
+
+/** The sole API-url resolver. A public override is optional, never required. */
+export function resolveApiBaseUrl(environment = process.env.NODE_ENV, configuredUrl = process.env.NEXT_PUBLIC_API_URL): string {
+  const fallback = environment === 'development' ? LOCAL_API_BASE_URL : PRODUCTION_API_BASE_URL;
+  return normalizeApiBaseUrl(configuredUrl || fallback);
+}
 
 export class ApiError extends Error {
   constructor(
@@ -26,11 +50,12 @@ export class ApiError extends Error {
 }
 
 function requireApiBaseUrl(): string {
-  if (!API_BASE_URL) {
-    throw new ApiError(503, 'The EggVision API URL is not configured.');
+  try {
+    return resolveApiBaseUrl();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'The EggVision API URL is not configured.';
+    throw new ApiError(503, message);
   }
-
-  return API_BASE_URL.replace(/\/+$/, '');
 }
 
 export function apiAssetUrl(
@@ -47,6 +72,19 @@ export function apiAssetUrl(
   const assetPath = path.startsWith('/') ? path : `/${path}`;
 
   return `${origin}${assetPath}`;
+}
+
+function statusMessage(status: number): string {
+  return {
+    401: 'Please sign in to continue.',
+    403: 'You do not have permission to perform this action.',
+    404: 'The requested EggVision resource was not found.',
+    413: 'The selected image is too large.',
+    422: 'The submitted data is invalid. Please review it and try again.',
+    429: 'Too many requests. Please wait and try again.',
+  }[status] || (status >= 500
+    ? 'The EggVision API encountered an error. Please try again later.'
+    : `Request failed with status ${status}`);
 }
 
 async function fetchWithHandler(
@@ -67,22 +105,30 @@ async function fetchWithHandler(
   const url = `${requireApiBaseUrl()}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
   let response: Response;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
 
   try {
     response = await fetch(url, {
       ...options,
       credentials: 'include',
       headers,
+      signal: options?.signal || controller.signal,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new ApiError(408, 'The EggVision API request timed out. Please try again.');
+    }
     throw new ApiError(
       0,
-      `Unable to connect to EggVision API at ${url}. Check that the backend is running and that CORS allows https://egg-vision.vercel.app.`,
+      'Unable to reach the EggVision API. Check your connection, backend availability, and browser access policy.',
     );
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {
-    let errorMessage = `Request failed with status ${response.status}`;
+    let errorMessage = statusMessage(response.status);
 
     try {
       const errorData = await response.json();
@@ -99,7 +145,11 @@ async function fetchWithHandler(
     return null;
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new ApiError(502, 'The EggVision API returned an invalid response.');
+  }
 }
 
 export const api = {
@@ -128,10 +178,37 @@ export const api = {
     return result;
   },
 
-  logout(): void {
+  async logout(): Promise<void> {
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('eggvision_access_token');
     }
+    try {
+      await fetchWithHandler('/auth/logout', { method: 'POST' });
+    } catch {
+      // Local storage has already been cleared. The next server response will
+      // still reject an expired or retained cookie if it could not be cleared.
+    }
+  },
+
+  isAuthenticated(): boolean {
+    return typeof window !== 'undefined' && Boolean(window.sessionStorage.getItem('eggvision_access_token'));
+  },
+
+  /** Fetch a protected artifact as a browser blob so bearer auth is preserved. */
+  async getAssetBlob(path: string): Promise<Blob> {
+    const url = apiAssetUrl(path);
+    if (!url) throw new ApiError(404, 'The image artifact is unavailable.');
+    const token = typeof window === 'undefined' ? null : window.sessionStorage.getItem('eggvision_access_token');
+    const headers = new Headers();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    let response: Response;
+    try {
+      response = await fetch(url, { credentials: 'include', headers });
+    } catch {
+      throw new ApiError(0, 'Unable to retrieve the image artifact.');
+    }
+    if (!response.ok) throw new ApiError(response.status, statusMessage(response.status));
+    return response.blob();
   },
 
   async uploadScan(

@@ -9,7 +9,6 @@
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     depends_on:
       backend:
         condition: service_healthy
@@ -46,7 +45,7 @@
       retries: 5
       start_period: 15s
     volumes:
-      - upload_data:/app/uploads
+      - upload_data:/app/backend/uploads
     networks:
       - eggvision-network
 

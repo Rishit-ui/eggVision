@@ -15,6 +15,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"normalized" | "original">("normalized");
+  const [artifactUrls, setArtifactUrls] = useState<{ original: string | null; processed: string | null }>({ original: null, processed: null });
 
   useEffect(() => {
     async function loadScan() {
@@ -31,6 +32,35 @@ export default function ResultPage({ params }: { params: { id: string } }) {
     }
     loadScan();
   }, [params.id]);
+
+  useEffect(() => {
+    if (!scan) return;
+    const createdUrls: string[] = [];
+    let active = true;
+
+    const resolveArtifact = async (path: string | null | undefined) => {
+      if (!path) return null;
+      if (path.startsWith("/api/v1/artifacts/")) {
+        const blobUrl = URL.createObjectURL(await api.getAssetBlob(path));
+        createdUrls.push(blobUrl);
+        return blobUrl;
+      }
+      return apiAssetUrl(path);
+    };
+
+    void Promise.all([resolveArtifact(scan.original_image_url), resolveArtifact(scan.processed_image_url)])
+      .then(([original, processed]) => {
+        if (active) setArtifactUrls({ original, processed });
+      })
+      .catch((err: unknown) => {
+        if (active) setError(err instanceof Error ? err.message : "Unable to retrieve an image artifact.");
+      });
+
+    return () => {
+      active = false;
+      createdUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [scan]);
 
   if (loading) {
     return (
@@ -57,8 +87,8 @@ export default function ResultPage({ params }: { params: { id: string } }) {
   const analysis = scan?.analysis;
   const candidateGeo = scan?.candidate_contour_geometry;
   const eggEstablished = analysis?.status === "EGG_DETECTED";
-  const originalUrl = apiAssetUrl(scan?.original_image_url);
-  const processedUrl = apiAssetUrl(scan?.processed_image_url) || originalUrl;
+  const originalUrl = artifactUrls.original || apiAssetUrl(scan?.original_image_url);
+  const processedUrl = artifactUrls.processed || apiAssetUrl(scan?.processed_image_url) || originalUrl;
   const currentImageUrl = viewMode === "normalized" && processedUrl ? processedUrl : originalUrl;
 
   return (

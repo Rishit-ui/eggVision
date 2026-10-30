@@ -40,6 +40,8 @@ docker compose up --build
 
 For the public Next.js frontend, use [the Vercel deployment guide](docs/vercel-frontend-deployment.md). The FastAPI backend is deployed separately.
 
+The [deployment guide](docs/deployment.md) has the exact Render commands, migration procedure, storage limitation, required variable names, and smoke tests. Production frontend builds target `https://eggvision-1.onrender.com/api/v1` by default; no Vercel `NEXT_PUBLIC_` variable is required.
+
 ## Development Setup
 ### Backend
 ```bash

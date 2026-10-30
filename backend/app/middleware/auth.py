@@ -8,10 +8,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.database import get_db
+from app.database import AsyncSessionLocal
 from app.models.user import User
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -38,7 +37,6 @@ def create_access_token(user: User) -> str:
 async def get_current_user(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
-    db: AsyncSession = Depends(get_db),
 ) -> User | None:
     """Require an active user in production while allowing anonymous local development."""
     token = credentials.credentials if credentials else request.cookies.get("eggvision_access_token")
@@ -51,7 +49,8 @@ async def get_current_user(
         user_id = uuid.UUID(payload["sub"])
     except (JWTError, KeyError, ValueError) as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired access token") from error
-    user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    async with AsyncSessionLocal() as db:
+        user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User account is unavailable")
     return user

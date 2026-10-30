@@ -27,7 +27,7 @@ async def create_scan(
     
     is_valid, msg = image_service.validate_image(file_data)
     if not is_valid:
-        raise HTTPException(status_code=400, detail=msg)
+        raise HTTPException(status_code=413 if msg == "File too large" else 400, detail=msg)
         
     content_type, extension = image_service.canonical_upload_details(file_data)
     filename = f"{uuid.uuid4()}{extension}"
