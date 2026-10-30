@@ -1,134 +1,138 @@
-"""Candidate-contour screen for controlled candling images.
+"""Non-ML candidate-contour screening for capture-quality review.
 
-This module is *not* a trained egg detector.  It finds contours compatible with
-the chamber's expected silhouette to reject clearly unusable captures and to
-produce research candidates.  It must never be represented as proof that an
-image contains an egg or as a calibrated model confidence.
+This module deliberately does *not* identify eggs. It screens isolated,
+egg-like foreground candidates so optical measurements can use a likely subject
+rather than the entire frame. A candidate is never evidence of egg identity.
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple, List
+
 import cv2
 import numpy as np
 
 
+@dataclass(frozen=True)
+class ScreeningThresholds:
+    """Image-space capture gates, not learned egg-likelihood parameters."""
+
+    min_area_fraction: float = 0.02
+    max_area_fraction: float = 0.75
+    min_aspect_ratio: float = 1.05
+    max_aspect_ratio: float = 2.4
+    min_solidity: float = 0.80
+    dark_background_luminance: int = 75
+    light_background_luminance: int = 190
+    background_difference: int = 18
+    canny_low: int = 35
+    canny_high: int = 110
+    morphology_kernel_px: int = 9
+    duplicate_iou: float = 0.55
+    multiple_candidate_fraction: float = 0.35
+
+
 @dataclass
 class DetectionResult:
-    """Output from the controlled-chamber candidate-contour screen."""
+    """Output of a non-validated candidate-contour screen."""
+
     found: bool
-    bbox: Optional[Tuple[int, int, int, int]] = None  # (x, y, w, h)
-    # Kept for backwards-compatible callers; always None because no model is loaded.
-    confidence: Optional[float] = None
-    egg_count: int = 0
-    contour: Optional[np.ndarray] = None
-    message: Optional[str] = None
+    bbox: tuple[int, int, int, int] | None = None
+    confidence: float | None = None  # Always None: this is not a model score.
+    egg_count: int = 0  # Backwards-compatible name for candidate count.
+    contour: np.ndarray | None = None
+    candidate_mask: np.ndarray | None = None
+    message: str | None = None
     status: str = "UNCERTAIN"
-    algorithm: str = "opencv_candling_contour_gate_v1"
+    capture_mode: str = "general_photograph"
+    algorithm: str = "opencv_candidate_contour_screen_v2"
 
 
 class EggDetector:
-    """Non-ML candidate-contour screen for a single controlled chamber frame."""
+    """Screen isolated candidates in dark-candling and general-photo captures."""
 
-    def __init__(
-        self,
-        min_area_fraction: float = 0.05,
-        max_area_fraction: float = 0.90,
-        min_aspect_ratio: float = 0.9,
-        max_aspect_ratio: float = 2.2,
-    ):
-        self.min_area_fraction = min_area_fraction
-        self.max_area_fraction = max_area_fraction
-        self.min_aspect_ratio = min_aspect_ratio
-        self.max_aspect_ratio = max_aspect_ratio
+    def __init__(self, thresholds: ScreeningThresholds | None = None):
+        self.thresholds = thresholds or ScreeningThresholds()
+
+    def _capture_mode(self, gray: np.ndarray) -> str:
+        border = np.concatenate((gray[0], gray[-1], gray[:, 0], gray[:, -1]))
+        return "controlled_candling" if float(np.median(border)) <= self.thresholds.dark_background_luminance else "general_photograph"
+
+    @staticmethod
+    def _bbox_iou(first: tuple[int, int, int, int], second: tuple[int, int, int, int]) -> float:
+        ax, ay, aw, ah = first
+        bx, by, bw, bh = second
+        left, top = max(ax, bx), max(ay, by)
+        right, bottom = min(ax + aw, bx + bw), min(ay + ah, by + bh)
+        intersection = max(0, right - left) * max(0, bottom - top)
+        union = aw * ah + bw * bh - intersection
+        return intersection / union if union else 0.0
+
+    def _candidate_masks(self, image_bgr: np.ndarray, gray: np.ndarray, mode: str) -> list[np.ndarray]:
+        """Build complementary foreground proposals without assuming background colour."""
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        kernel_size = self.thresholds.morphology_kernel_px | 1
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+        masks: list[np.ndarray] = []
+
+        if mode == "controlled_candling":
+            _, otsu = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            masks.append(otsu)
+
+        lab = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB).astype(np.int16)
+        border = np.concatenate((lab[0], lab[-1], lab[:, 0], lab[:, -1]), axis=0)
+        background = np.median(border, axis=0)
+        distance = np.linalg.norm(lab - background, axis=2)
+        masks.append((distance >= self.thresholds.background_difference).astype(np.uint8) * 255)
+
+        # Fallback for white-on-white scenes where only shell edges are visible.
+        edges = cv2.Canny(blurred, self.thresholds.canny_low, self.thresholds.canny_high)
+        masks.append(cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2))
+        return [cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1) for mask in masks]
+
+    def _valid_candidates(self, masks: list[np.ndarray], image_shape: tuple[int, int]) -> list[dict]:
+        h, w = image_shape
+        total_area = float(h * w)
+        candidates: list[dict] = []
+        for mask in masks:
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                area = float(cv2.contourArea(contour))
+                fraction = area / total_area
+                if not self.thresholds.min_area_fraction <= fraction <= self.thresholds.max_area_fraction:
+                    continue
+                x, y, cw, ch = cv2.boundingRect(contour)
+                aspect = max(cw, ch) / max(1, min(cw, ch))
+                hull_area = float(cv2.contourArea(cv2.convexHull(contour)))
+                solidity = area / max(1.0, hull_area)
+                if not self.thresholds.min_aspect_ratio <= aspect <= self.thresholds.max_aspect_ratio or solidity < self.thresholds.min_solidity:
+                    continue
+                candidate = {"contour": contour, "area": area, "bbox": (x, y, cw, ch)}
+                if all(self._bbox_iou(candidate["bbox"], previous["bbox"]) < self.thresholds.duplicate_iou for previous in candidates):
+                    candidates.append(candidate)
+        return sorted(candidates, key=lambda candidate: candidate["area"], reverse=True)
 
     def detect(self, image_bgr: np.ndarray) -> DetectionResult:
-        """Detect the egg candidate in the input candling image."""
         if image_bgr is None or image_bgr.size == 0:
-            return DetectionResult(
-                found=False,
-                status="INVALID_IMAGE",
-                message="Empty image provided.",
+            return DetectionResult(False, status="INVALID_IMAGE", message="The image could not be decoded.")
+        if image_bgr.ndim != 3 or image_bgr.shape[2] != 3:
+            return DetectionResult(False, status="INVALID_IMAGE", message="Expected a three-channel colour image.")
+
+        gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+        mode = self._capture_mode(gray)
+        candidates = self._valid_candidates(self._candidate_masks(image_bgr, gray, mode), gray.shape)
+        if not candidates:
+            border = np.concatenate((gray[0], gray[-1], gray[:, 0], gray[:, -1]))
+            unsupported = float(np.std(border)) < 8.0 and float(np.median(border)) >= self.thresholds.light_background_luminance
+            status = "UNSUPPORTED_BACKGROUND" if unsupported else "NO_CANDIDATE_CONTOUR"
+            message = (
+                "The bright, uniform background does not provide a reliable subject boundary. Use a contrasting matte background or controlled chamber."
+                if unsupported else "No isolated candidate contour could be screened. This does not determine whether an egg is present."
             )
+            return DetectionResult(False, status=status, capture_mode=mode, message=message)
 
-        h, w = image_bgr.shape[:2]
-        total_area = float(h * w)
-
-        # Convert to LAB color space for luminance-robust separation
-        lab = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB)
-        l_channel, _, _ = cv2.split(lab)
-
-        # Blur slightly to smooth shell texture
-        blurred = cv2.GaussianBlur(l_channel, (7, 7), 0)
-
-        # Otsu thresholding to segment glowing egg from dark background
-        _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-        # Morphological closing to seal internal yolk shadows & open small noise
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-        opened = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel, iterations=1)
-
-        # Find external contours
-        contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        valid_candidates = []
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            area_frac = area / total_area
-
-            if self.min_area_fraction <= area_frac <= self.max_area_fraction:
-                x, y, cw, ch = cv2.boundingRect(cnt)
-                aspect = max(cw, ch) / max(1, min(cw, ch))
-                
-                # Candled egg profile check
-                hull = cv2.convexHull(cnt)
-                hull_area = cv2.contourArea(hull)
-                solidity = float(area / max(1.0, hull_area))
-
-                if self.min_aspect_ratio <= aspect <= self.max_aspect_ratio and solidity > 0.82:
-                    valid_candidates.append({
-                        "contour": cnt,
-                        "area": area,
-                        "bbox": (x, y, cw, ch),
-                        "solidity": solidity,
-                        "aspect": aspect
-                    })
-
-        if not valid_candidates:
-            # A full-frame bright image is not sufficient evidence of a single egg.
-            # Accepting it made trays, hands, and arbitrary photographs appear as eggs.
-            # The controlled chamber contract requires an isolated, egg-shaped contour.
-            return DetectionResult(
-                found=False,
-                egg_count=0,
-                status="NO_EGG_DETECTED",
-                message="No candidate contour was found by the controlled-chamber screen. Use one object in a dark candling chamber."
-            )
-
-        # Sort candidates by area descending
-        valid_candidates.sort(key=lambda c: c["area"], reverse=True)
-        egg_count = len(valid_candidates)
-
-        if egg_count > 1:
-            # Check if second candidate is substantially sized (multiple eggs in chamber)
-            second_area = valid_candidates[1]["area"]
-            first_area = valid_candidates[0]["area"]
-            if second_area > 0.35 * first_area:
-                return DetectionResult(
-                    found=True,
-                    bbox=valid_candidates[0]["bbox"],
-                    egg_count=egg_count,
-                    contour=valid_candidates[0]["contour"],
-                    status="UNCERTAIN",
-                    message="Multiple candidate contours found. This screen cannot establish egg identity."
-                )
-
-        best = valid_candidates[0]
-        return DetectionResult(
-            found=True,
-            bbox=best["bbox"],
-            egg_count=1,
-            contour=best["contour"],
-            status="UNCERTAIN",
-            message="One contour is compatible with the chamber silhouette, but no validated egg-detection model is installed."
-        )
+        best = candidates[0]
+        mask = np.zeros(gray.shape, dtype=np.uint8)
+        cv2.drawContours(mask, [best["contour"]], -1, 255, thickness=cv2.FILLED)
+        multiple = len(candidates) > 1 and candidates[1]["area"] >= best["area"] * self.thresholds.multiple_candidate_fraction
+        if multiple:
+            return DetectionResult(True, best["bbox"], egg_count=len(candidates), contour=best["contour"], candidate_mask=mask, status="MULTIPLE_CANDIDATES", capture_mode=mode, message="Multiple isolated candidates were screened; capture one subject at a time. No egg identity was established.")
+        return DetectionResult(True, best["bbox"], egg_count=1, contour=best["contour"], candidate_mask=mask, status="UNCERTAIN", capture_mode=mode, message="One isolated candidate contour was screened. This is not a trained egg-detection result.")
