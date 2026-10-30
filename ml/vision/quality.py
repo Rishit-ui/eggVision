@@ -99,8 +99,11 @@ class ImageQualityAssessor:
         x, y, bw, bh = bbox or cv2.boundingRect(cv2.findNonZero(candidate_mask))
         roi = gray[y:y + bh, x:x + bw]
         roi_mask = candidate_mask[y:y + bh, x:x + bw] > 0
-        laplacian_variance = float(cv2.Laplacian(roi, cv2.CV_64F).var())
-        gradient = cv2.magnitude(cv2.Sobel(roi, cv2.CV_64F, 1, 0), cv2.Sobel(roi, cv2.CV_64F, 0, 1))
+        laplacian_variance = float(cv2.Laplacian(roi, cv2.CV_32F).var())
+        sobel_x = cv2.Sobel(roi, cv2.CV_32F, 1, 0)
+        sobel_y = cv2.Sobel(roi, cv2.CV_32F, 0, 1)
+        gradient = cv2.magnitude(sobel_x, sobel_y)
+        del sobel_x, sobel_y
         glare_ratio = float(np.mean((roi >= self.thresholds.clipping_level) & (gradient > 50) & roi_mask))
         metrics.update({
             "exposure_region": "candidate_roi",

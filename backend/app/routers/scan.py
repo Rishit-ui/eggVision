@@ -81,6 +81,8 @@ async def create_scan(
     except Exception:
         logger.exception("scan_failed request_id=%s category=cv_processing", request_id)
         raise HTTPException(status_code=502, detail="Image processing failed. Please try again.")
+    finally:
+        del file_data
 
     camera_metadata = scan_create.camera_metadata or {}
     camera_metadata["capture_context"] = {

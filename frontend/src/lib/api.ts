@@ -93,14 +93,39 @@ function statusMessage(status: number): string {
     : `Request failed with status ${status}`);
 }
 
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    window.sessionStorage.getItem('eggvision_access_token') ||
+    window.localStorage.getItem('eggvision_access_token')
+  );
+}
+
+export function setStoredToken(token: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem('eggvision_access_token', token);
+    window.localStorage.setItem('eggvision_access_token', token);
+  } catch {
+    // Ignore private browsing or storage quota errors
+  }
+}
+
+export function clearStoredToken(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.removeItem('eggvision_access_token');
+    window.localStorage.removeItem('eggvision_access_token');
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 async function fetchWithHandler(
   endpoint: string,
   options?: RequestInit,
 ): Promise<any> {
-  const token =
-    typeof window === 'undefined'
-      ? null
-      : window.sessionStorage.getItem('eggvision_access_token');
+  const token = getStoredToken();
 
   const headers = new Headers(options?.headers);
 
@@ -146,8 +171,8 @@ async function fetchWithHandler(
     }
 
     // Immediately purge expired/invalid tokens from browser storage on 401
-    if (response.status === 401 && typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('eggvision_access_token');
+    if (response.status === 401) {
+      clearStoredToken();
     }
 
     throw new ApiError(response.status, errorMessage);
@@ -177,40 +202,31 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
 
-    if (
-      typeof window !== 'undefined' &&
-      result?.access_token
-    ) {
-      window.sessionStorage.setItem(
-        'eggvision_access_token',
-        result.access_token,
-      );
+    if (result?.access_token) {
+      setStoredToken(result.access_token);
     }
 
     return result;
   },
 
   async logout(): Promise<void> {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('eggvision_access_token');
-    }
+    clearStoredToken();
     try {
       await fetchWithHandler('/auth/logout', { method: 'POST' });
     } catch {
-      // Local storage has already been cleared. The next server response will
-      // still reject an expired or retained cookie if it could not be cleared.
+      // Storage has already been cleared.
     }
   },
 
   isAuthenticated(): boolean {
-    return typeof window !== 'undefined' && Boolean(window.sessionStorage.getItem('eggvision_access_token'));
+    return Boolean(getStoredToken());
   },
 
   /** Fetch a protected artifact as a browser blob so bearer auth is preserved. */
   async getAssetBlob(path: string): Promise<Blob> {
     const url = apiAssetUrl(path);
     if (!url) throw new ApiError(404, 'The image artifact is unavailable.');
-    const token = typeof window === 'undefined' ? null : window.sessionStorage.getItem('eggvision_access_token');
+    const token = getStoredToken();
     const headers = new Headers();
     if (token) headers.set('Authorization', `Bearer ${token}`);
     let response: Response;

@@ -77,11 +77,28 @@ class EggDetector:
             _, otsu = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             masks.append(otsu)
 
-        lab = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB).astype(np.int16)
-        border = np.concatenate((lab[0], lab[-1], lab[:, 0], lab[:, -1]), axis=0)
-        background = np.median(border, axis=0)
-        distance = np.linalg.norm(lab - background, axis=2)
-        masks.append((distance >= self.thresholds.background_difference).astype(np.uint8) * 255)
+        lab_u8 = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB)
+        border_u8 = np.concatenate((lab_u8[0], lab_u8[-1], lab_u8[:, 0], lab_u8[:, -1]), axis=0)
+        bg_f32 = np.median(border_u8, axis=0).astype(np.float32)
+
+        thresh_sq = float(self.thresholds.background_difference ** 2)
+        # Memory-efficient channel-by-channel sum of squared differences avoids
+        # allocating 800+ MB float64/int16 distance buffers on large images.
+        diff_l = lab_u8[:, :, 0].astype(np.float32) - bg_f32[0]
+        dist_sq = diff_l * diff_l
+        del diff_l
+
+        diff_a = lab_u8[:, :, 1].astype(np.float32) - bg_f32[1]
+        dist_sq += diff_a * diff_a
+        del diff_a
+
+        diff_b = lab_u8[:, :, 2].astype(np.float32) - bg_f32[2]
+        dist_sq += diff_b * diff_b
+        del diff_b
+        del lab_u8
+
+        masks.append((dist_sq >= thresh_sq).astype(np.uint8) * 255)
+        del dist_sq
 
         # Fallback for white-on-white scenes where only shell edges are visible.
         edges = cv2.Canny(blurred, self.thresholds.canny_low, self.thresholds.canny_high)
