@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 """download_egg_sample_fiftyone.py
 
-A development‑only script that uses FiftyOne’s Open Images V7 zoo integration to
-download a small, manually‑reviewable sample of the Egg (Food) class.
+Development‑only script that uses FiftyOne’s Open Images V7 zoo integration to
+download a small, manually‑reviewable sample of the **Egg (Food)** class.
 
-The script now follows the exact API of FiftyOne 0.22+ where
-``foi.get_classes(version="v7")`` returns **a list of display‑name strings**.
-We therefore perform a two‑step verification:
+Key updates (in response to the MID correction issue):
+- The MID for "Egg (Food)" is **no longer hard‑coded**. Instead we read the
+  official ``class-descriptions.csv`` and locate the row whose display name
+  matches ``Egg (Food)`` (case‑insensitive).
+- All downstream checks (segmentation availability, MID verification) use this
+  dynamically discovered MID.
+- The script first performs a class‑verification‑only test; if it succeeds it
+  proceeds to a five‑image smoke‑test download.
 
-1. Confirm that the display name ``"Egg (Food)"`` is present in the class list.
-2. Parse the official ``class-descriptions.csv`` (cached under ``ml/data/tmp``)
-   to obtain the MID and ensure it matches ``/m/0c9ph5``.
-
-Only after successful verification does the script proceed to a **smoke‑test
-download of five images** (you can raise ``max_samples`` to 100 for the full
-run).
-
-It also prints useful environment information (FiftyOne version, Python
-version, verified class name, MID, and segmentation availability) before
-any network activity.
+The rest of the pipeline (inspection CSV, contact‑sheet, raw‑image export) is
+unchanged.
 """
 
 import csv
@@ -59,18 +55,14 @@ def _print_environment() -> None:
 
 def _load_detection_class_list() -> List[str]:
     """Return the list of detection class display names for Open Images V7.
-
     ``foi.get_classes(version='v7')`` yields a list of strings such as
-    ``"Egg (Food)"``. No MID information is included.
+    ``"Egg (Food)"``.
     """
     return foi.get_classes(version="v7")
 
 def _load_class_descriptions() -> Dict[str, str]:
     """Parse the official ``class-descriptions.csv`` and return a dict MID → name.
-
-    The CSV is expected at ``ml/data/tmp/class-descriptions.csv``. It is a
-    standard CSV with two columns: ``MID,DisplayName``. We use ``csv.reader``
-    which correctly handles quoted fields and commas inside the display name.
+    The CSV is expected at ``ml/data/tmp/class-descriptions.csv``.
     """
     csv_path = DATA_ROOT / "tmp" / "class-descriptions.csv"
     if not csv_path.exists():
@@ -87,40 +79,35 @@ def _load_class_descriptions() -> Dict[str, str]:
             mapping[mid] = name
     return mapping
 
-def _verify_egg_class() -> str:
-    """Confirm that the Egg (Food) class exists and return its display name.
-
-    Returns the exact display name (should be ``"Egg (Food)"``). Raises if not
-    found.
-    """
-    target_name = "Egg (Food)"
-    class_list = _load_detection_class_list()
-    if target_name not in class_list:
-        # Provide a helpful hint with any class containing the word "egg"
-        matches = [c for c in class_list if "egg" in c.lower()]
-        raise RuntimeError(
-            f"Egg class not found. Available classes containing 'egg': {matches}"
-        )
-    print(f"✅ Verified detection class display name: '{target_name}'")
-    return target_name
-
-def _get_mid_for_name(display_name: str) -> str:
-    """Lookup the MID for a given display name using the official CSV mapping.
-    Raises if the name is not present.
+def _find_mid_for_display_name(target_name: str) -> str:
+    """Search ``class-descriptions.csv`` for a display name (case‑insensitive)
+    and return its MID. Raises if not found.
     """
     mapping = _load_class_descriptions()
     for mid, name in mapping.items():
-        if name == display_name:
+        if name.lower() == target_name.lower():
             return mid
-    raise RuntimeError(f"MID for display name '{display_name}' not found in class-descriptions.csv")
+    raise RuntimeError(f"MID for display name '{target_name}' not found in class-descriptions.csv")
 
-def _egg_has_segmentation() -> bool:
-    """Determine whether the Egg MID appears in the V7 segmentation class list.
-
-    We load a tiny segmentation dataset (max 5 samples) just to obtain the set of
-    segment IDs that the zoo knows about, then check for the MID.
+def _verify_egg_class() -> str:
+    """Confirm that the Egg (Food) class exists in the detection list and
+    return the exact display name as stored in the zoo (should be 'Egg (Food)').
     """
-    # Ensure the zoo directory is inside the repository to avoid global clutter
+    target_name = "Egg (Food)"
+    class_list = _load_detection_class_list()
+    # Provide helpful hint if not found
+    if target_name not in class_list:
+        matches = [c for c in class_list if "egg" in c.lower()]
+        raise RuntimeError(
+            f"Egg class not found in detection list. Candidates containing 'egg': {matches}"
+        )
+    print(f"✅ Detected class '{target_name}' in FiftyOne detection list.")
+    return target_name
+
+def _egg_has_segmentation(egg_mid: str) -> bool:
+    """Check whether the given MID appears in the V7 segmentation class list.
+    We load a tiny segmentation dataset (max 5 samples) and collect all segment IDs.
+    """
     fo.config.dataset_zoo_dir = str(DATA_ROOT / "fiftyone_cache")
     seg_dataset = foz.load_zoo_dataset(
         "open-images-v7",
@@ -134,15 +121,14 @@ def _egg_has_segmentation() -> bool:
     for sample in seg_dataset:
         for seg in sample.segmentations.iter_segments():
             seg_ids.add(seg.id)
-    return "/m/0c9ph5" in seg_ids
+    return egg_mid in seg_ids
 
 def _download_detection_samples(display_name: str, max_samples: int = 5) -> fo.Dataset:
-    """Download a small number of training images that contain the Egg class.
-
+    """Download a small number of training images that contain the specified class.
     Parameters
     ----------
     display_name: str
-        The exact detection class display name (e.g., "Egg (Food)").
+        Exact detection class display name (e.g., "Egg (Food)").
     max_samples: int
         Number of images to download – default 5 for the smoke test.
     """
@@ -310,48 +296,58 @@ def main() -> None:
     _print_environment()
 
     # ---------------------------------------------------------------
-    # 1️⃣ Verify class name and retrieve MID
+    # 1️⃣ Verify class name and retrieve its MID dynamically
     # ---------------------------------------------------------------
     try:
         egg_display_name = _verify_egg_class()
     except Exception as exc:
         sys.exit(f"❌ Class verification failed: {exc}")
     try:
-        egg_mid = _get_mid_for_name(egg_display_name)
+        egg_mid = _find_mid_for_display_name(egg_display_name)
     except Exception as exc:
         sys.exit(f"❌ MID lookup failed: {exc}")
-    print(f"✅ MID for '{egg_display_name}' is {egg_mid}")
+    print(f"✅ Display name '{egg_display_name}' maps to MID {egg_mid}")
 
     # ---------------------------------------------------------------
-    # 2️⃣ Check segmentation availability for the same MID
+    # 2️⃣ Cross‑check that the MID indeed maps back to the same name
     # ---------------------------------------------------------------
-    seg_available = _egg_has_segmentation()
+    class_desc_map = _load_class_descriptions()
+    if class_desc_map.get(egg_mid) != egg_display_name:
+        sys.exit(
+            f"❌ Inconsistent mapping: MID {egg_mid} maps to '{class_desc_map.get(egg_mid)}' instead of '{egg_display_name}'."
+        )
+    print("✅ MID ↔ display name consistency verified.")
+
+    # ---------------------------------------------------------------
+    # 3️⃣ Segmentation availability for this MID
+    # ---------------------------------------------------------------
+    seg_available = _egg_has_segmentation(egg_mid)
     print(f"Segmentation availability for MID {egg_mid}: {seg_available}")
 
     # ---------------------------------------------------------------
-    # 3️⃣ Smoke‑test download (5 images)
+    # 4️⃣ Smoke‑test download (5 images)
     # ---------------------------------------------------------------
     dataset = _download_detection_samples(egg_display_name, max_samples=5)
     samples = list(dataset)
     print(f"🖼️  Smoke‑test downloaded {len(samples)} samples.")
 
     # ---------------------------------------------------------------
-    # 4️⃣ Export raw images & side‑car metadata
+    # 5️⃣ Export raw images & side‑car metadata
     # ---------------------------------------------------------------
     _export_raw_and_metadata(samples)
 
     # ---------------------------------------------------------------
-    # 5️⃣ Write / update inspection CSV (preserve prior decisions)
+    # 6️⃣ Write / update inspection CSV (preserve prior decisions)
     # ---------------------------------------------------------------
     _write_inspection_csv(samples)
 
     # ---------------------------------------------------------------
-    # 6️⃣ Build contact‑sheet for manual review
+    # 7️⃣ Build contact‑sheet for manual review
     # ---------------------------------------------------------------
     _create_contact_sheet(samples)
 
     # ---------------------------------------------------------------
-    # 7️⃣ Summary
+    # 8️⃣ Summary
     # ---------------------------------------------------------------
     det_count = _count_egg_detections(samples)
     print("\n=== FINAL SUMMARY ===")
