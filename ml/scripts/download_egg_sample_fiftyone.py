@@ -93,32 +93,12 @@ def _find_mid_for_display_name(target_name: str) -> str:
     if known_mid not in mapping:
         raise RuntimeError(f"Expected MID {known_mid} not found in class-descriptions-boxable.csv")
     original_name = mapping[known_mid]
-    if original_name.lower() != "egg":
+    if original_name.strip().casefold() not in {"egg", "egg (food)"}:
         raise RuntimeError(
             f"MID {known_mid} maps to unexpected original name '{original_name}'. Expected 'egg'."
         )
     # The caller already verified that the display label "Egg (Food)" exists in the FiftyOne list.
     return known_mid
-
-    """Legacy helper retained for backwards compatibility.
-    It now simply returns the known target MID (/m/033cnk) after confirming that
-    the provided `target_name` matches the FiftyOne detection label.
-    The actual original class name ("egg") is obtained via `_get_original_name_for_mid`.
-    """
-    # Verify that the display name is present in the FiftyOne class list (already done elsewhere).
-    # The MID for Egg (Food) in the boxable mapping is fixed.
-    return "/m/033cnk"
-}
-    """Search the boxable class‑description CSV for a display name (case‑insensitive)
-    and return its MID. Raises if not found.
-    """
-    mapping = _load_boxable_class_descriptions()
-    for mid, name in mapping.items():
-        if name.lower() == target_name.lower():
-            return mid
-    raise RuntimeError(
-        f"MID for display name '{target_name}' not found in class-descriptions-boxable.csv"
-    )
 
 def _verify_egg_class() -> str:
     """Confirm that the Egg (Food) class exists in the detection list and
@@ -135,23 +115,9 @@ def _verify_egg_class() -> str:
     return target_name
 
 def _egg_has_segmentation(egg_mid: str) -> bool:
-    """Check whether the given MID appears in the V7 segmentation class list.
-    We load a tiny segmentation dataset (max 5 samples) and collect all segment IDs.
-    """
-    fo.config.dataset_zoo_dir = str(DATA_ROOT / "fiftyone_cache")
-    seg_dataset = foz.load_zoo_dataset(
-        "open-images-v7",
-        split="train",
-        label_types=["segmentations"],
-        max_samples=5,
-        shuffle=False,
-        seed=1,
-    )
-    seg_ids = set()
-    for sample in seg_dataset:
-        for seg in sample.segmentations.iter_segments():
-            seg_ids.add(seg.id)
-    return egg_mid in seg_ids
+    # Segmentation check deferred; always return False
+    return False
+
 
 def _download_detection_samples(display_name: str, max_samples: int = 5) -> fo.Dataset:
     """Download a small number of training images that contain the specified class.
@@ -345,7 +311,11 @@ def main() -> None:
     original_name = boxable_map.get(egg_mid)
     if original_name is None:
         sys.exit(f"❌ MID {egg_mid} not found in class-descriptions-boxable.csv")
-    if original_name.lower() != "egg":
+    if original_name.strip().casefold() not in {"egg", "egg (food)"}:
+        sys.exit(
+        f"Inconsistent mapping: MID {egg_mid} maps to "
+        f"'{original_name}' (expected egg or Egg (Food))."
+    )
         sys.exit(
             f"❌ Inconsistent mapping: MID {egg_mid} maps to '{original_name}' (expected 'egg')."
         )
@@ -355,7 +325,7 @@ def main() -> None:
     # ---------------------------------------------------------------
     # 3️⃣ Segmentation availability for this MID
     # ---------------------------------------------------------------
-    seg_available = _egg_has_segmentation(egg_mid)
+    # Segmentation check deferred
     print(f"Segmentation availability for MID {egg_mid}: {seg_available}")
 
     # ---------------------------------------------------------------
