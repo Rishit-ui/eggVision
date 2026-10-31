@@ -56,87 +56,95 @@ class EggSegmenter:
     ) -> np.ndarray:
         """
         Refine the candidate mask by removing cast shadows or attached table glare
-        that deviate in color from the core egg shell.
+        that deviate in color or geometry from the core egg shell.
         """
         h, w = image_bgr.shape[:2]
-        if len(cnt) < 5:
+        coords = np.where(initial_mask > 0)
+        n_pixels = len(coords[0])
+        if n_pixels < 1500:
             return initial_mask
 
-        # Fit ellipse to candidate contour
-        try:
-            ellipse = cv2.fitEllipse(cnt)
-            (ecx, ecy), (d1, d2), angle = ellipse
-        except cv2.error:
-            return initial_mask
+        # Step 1: Color clustering (LAB 2-cluster separation)
+        # Identifies and separates severe bimodal color contamination (e.g. white glare
+        # or dark shadow fused with brown or cream egg shell).
+        lab = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB)
+        features = lab[coords].astype(np.float32)
 
-        # Sample shell color in the central 40% of the fitted ellipse
-        core_mask = np.zeros((h, w), dtype=np.uint8)
-        cv2.ellipse(
-            core_mask,
-            (int(round(ecx)), int(round(ecy))),
-            (max(1, int(round(d1 * 0.20))), max(1, int(round(d2 * 0.20)))),
-            angle,
-            0,
-            360,
-            255,
-            -1,
-        )
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        _, labels, centers = cv2.kmeans(features, 2, None, criteria, 5, cv2.KMEANS_PP_CENTERS)
+        cluster_dist = float(np.linalg.norm(centers[0] - centers[1]))
 
-        core_pixels = image_bgr[core_mask > 0]
-        if core_pixels.size == 0:
-            return initial_mask
+        working_mask = initial_mask.copy()
+        if cluster_dist >= 40.0:
+            # Significant color bifurcation inside candidate: separate clusters
+            c0_mask = np.zeros((h, w), dtype=np.uint8)
+            c0_mask[coords] = (labels.flatten() == 0).astype(np.uint8) * 255
+            c1_mask = np.zeros((h, w), dtype=np.uint8)
+            c1_mask[coords] = (labels.flatten() == 1).astype(np.uint8) * 255
 
-        lab = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
-        core_lab = cv2.cvtColor(core_pixels.reshape(-1, 1, 3), cv2.COLOR_BGR2LAB).astype(np.float32)
-        shell_med_lab = np.median(core_lab.reshape(-1, 3), axis=0)
+            def _score_component(m: np.ndarray) -> tuple[float, Optional[np.ndarray]]:
+                cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if not cnts:
+                    return 0.0, None
+                best = max(cnts, key=cv2.contourArea)
+                area = cv2.contourArea(best)
+                if area < 1500:
+                    return 0.0, None
+                hull = cv2.convexHull(best)
+                sol = area / max(1.0, cv2.contourArea(hull))
+                bx, by, bw, bh = cv2.boundingRect(best)
+                asp = max(bw, bh) / max(1, min(bw, bh))
+                shape_fit = (1.2 if sol >= 0.88 else 0.4) * (1.2 if 1.1 <= asp <= 2.2 else 0.4)
+                cx, cy = bx + bw / 2.0, by + bh / 2.0
+                centrality = 1.0 - min(1.0, np.hypot(cx - w / 2.0, cy - h / 2.0) / (0.7 * np.hypot(w, h)))
+                return area * shape_fit * (1.0 + centrality), best
 
-        # Difference in LAB color from core shell
-        color_diff = np.linalg.norm(lab - shell_med_lab, axis=2)
+            score0, best0 = _score_component(c0_mask)
+            score1, best1 = _score_component(c1_mask)
 
-        # Allow generous variance for natural shell shading (up to 75 LAB units)
-        # but prune extreme outliers (> 90 units, e.g. bright white glare on dark background
-        # or dark shadows on light background)
-        color_valid = (color_diff < 90.0)
+            chosen_cnt = best0 if score0 >= score1 else best1
+            if chosen_cnt is not None:
+                isolated = np.zeros((h, w), dtype=np.uint8)
+                cv2.drawContours(isolated, [chosen_cnt], -1, 255, -1)
+                kernel_c = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+                isolated = cv2.morphologyEx(isolated, cv2.MORPH_CLOSE, kernel_c)
+                working_mask = isolated
+                # Re-extract contour from isolated component
+                cnts_iso, _ = cv2.findContours(working_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if cnts_iso:
+                    cnt = max(cnts_iso, key=cv2.contourArea)
 
-        # Geometric envelope: points must lie within 1.15x of fitted ellipse
-        envelope_mask = np.zeros((h, w), dtype=np.uint8)
-        cv2.ellipse(
-            envelope_mask,
-            (int(round(ecx)), int(round(ecy))),
-            (max(1, int(round(d1 * 0.58))), max(1, int(round(d2 * 0.58)))),
-            angle,
-            0,
-            360,
-            255,
-            -1,
-        )
+        # Step 2: Elliptical Envelope & Convex Residual Pruning
+        if len(cnt) >= 5:
+            try:
+                ellipse = cv2.fitEllipse(cnt)
+                (ecx, ecy), (d1, d2), angle = ellipse
+                envelope_mask = np.zeros((h, w), dtype=np.uint8)
+                cv2.ellipse(
+                    envelope_mask,
+                    (int(round(ecx)), int(round(ecy))),
+                    (max(1, int(round(d1 * 0.56))), max(1, int(round(d2 * 0.56)))),
+                    angle,
+                    0,
+                    360,
+                    255,
+                    -1,
+                )
+                trimmed = cv2.bitwise_and(working_mask, envelope_mask)
+                cnts_trim, _ = cv2.findContours(trimmed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if cnts_trim:
+                    largest_trim = max(cnts_trim, key=cv2.contourArea)
+                    if cv2.contourArea(largest_trim) >= 0.55 * np.sum(working_mask > 0):
+                        final_clean = np.zeros((h, w), dtype=np.uint8)
+                        cv2.drawContours(final_clean, [largest_trim], -1, 255, -1)
+                        return final_clean
+            except cv2.error:
+                pass
 
-        # Refined mask: within initial contour AND inside envelope AND matching shell color
-        refined = (initial_mask > 0) & (envelope_mask > 0) & color_valid
-        refined_u8 = refined.astype(np.uint8) * 255
-
-        # Morphological clean up
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-        opened = cv2.morphologyEx(refined_u8, cv2.MORPH_OPEN, kernel)
-        closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
-
-        # Keep largest connected component
-        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(closed, connectivity=8)
-        if num_labels <= 1:
-            return initial_mask
-
-        largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-        largest_area = stats[largest_label, cv2.CC_STAT_AREA]
-
-        # Only accept refined mask if it retains at least 50% of candidate area
-        initial_area = np.sum(initial_mask > 0)
-        if largest_area >= 0.50 * initial_area:
-            return (labels == largest_label).astype(np.uint8) * 255
-
-        return initial_mask
+        return working_mask
 
     def segment(self, image_bgr: np.ndarray, contour_hint: Optional[np.ndarray] = None) -> SegmentationResult:
-        """Segment intact egg and compute geometric characteristics."""
+        """Segment intact egg and compute geometric characteristics with validation."""
         if image_bgr is None or image_bgr.size == 0:
             empty_mask = np.zeros((1, 1), dtype=np.uint8)
             return SegmentationResult(
@@ -213,7 +221,6 @@ class EggSegmenter:
                 orientation_deg = float(angle if d2 >= d1 else (angle + 90) % 180)
                 ellipse_center = (round(float(ecx), 2), round(float(ecy), 2))
                 ellipse_axes = (round(float(major_axis), 2), round(float(minor_axis), 2))
-                # Eccentricity: sqrt(1 - (b/a)^2)
                 eccentricity = float(np.sqrt(max(0.0, 1.0 - (minor_axis / max(1.0, major_axis)) ** 2)))
             except cv2.error:
                 major_axis = float(max(bw, bh))
@@ -230,8 +237,18 @@ class EggSegmenter:
             ellipse_center = (cx, cy)
             ellipse_axes = (major_axis, minor_axis)
 
-        # Status validation: Egg silhouettes have high solidity (> 0.82) and natural aspect ratio (1.05 - 2.4)
-        is_valid = (solidity >= self.min_solidity) and (1.05 <= aspect_ratio <= self.max_aspect_ratio) and (area > 3000)
+        # Mask Quality Validation:
+        # 1. Solidity must be >= 0.82 (smooth convex egg outline)
+        # 2. Aspect ratio must be within organic limits [1.05, 2.4]
+        # 3. Sufficient pixel area (> 3,000 px)
+        # 4. Extent (area / bbox area) between 0.60 and 0.88 (ellipse extent is pi/4 = 0.785)
+        extent = area / max(1.0, float(bw * bh))
+        is_valid = (
+            (solidity >= self.min_solidity)
+            and (1.05 <= aspect_ratio <= self.max_aspect_ratio)
+            and (area >= 3000.0)
+            and (0.55 <= extent <= 0.90)
+        )
         status = "VALID_CANDIDATE" if is_valid else "SEGMENTATION_UNCERTAIN"
 
         geometry = EggGeometry(

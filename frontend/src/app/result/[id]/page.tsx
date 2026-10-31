@@ -214,27 +214,31 @@ export default function ResultPage({ params }: { params: { id: string } }) {
               )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
-                  <span className="block text-xs text-muted-foreground mb-1">Egg Area</span>
+                  <span className="block text-xs text-muted-foreground mb-1">
+                    {eggEstablished ? "Egg Area" : "Candidate Area"}
+                  </span>
                   <span className="text-base font-bold text-foreground">
-                    {eggEstablished && scan?.egg_geometry?.area ? `${Math.round(scan.egg_geometry.area).toLocaleString()} px²` : "Not established"}
+                    {candidateGeo?.area ? `${Math.round(candidateGeo.area).toLocaleString()} px²` : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
-                  <span className="block text-xs text-muted-foreground mb-1">Aspect Ratio</span>
+                  <span className="block text-xs text-muted-foreground mb-1">
+                    {eggEstablished ? "Aspect Ratio" : "Candidate Aspect Ratio"}
+                  </span>
                   <span className="text-base font-bold text-foreground">
-                    {eggEstablished && scan?.egg_geometry?.aspect_ratio ? scan.egg_geometry.aspect_ratio.toFixed(2) : "Not established"}
+                    {candidateGeo?.aspect_ratio ? candidateGeo.aspect_ratio.toFixed(2) : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Orientation</span>
                   <span className="text-base font-bold text-foreground">
-                    {eggEstablished && scan?.egg_geometry?.orientation_deg !== undefined ? `${scan.egg_geometry.orientation_deg}°` : "Not established"}
+                    {candidateGeo?.orientation_deg !== undefined ? `${candidateGeo.orientation_deg}°` : "Not established"}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/40 border border-border/50 text-center">
                   <span className="block text-xs text-muted-foreground mb-1">Centroid</span>
                   <span className="text-base font-bold text-foreground">
-                    {eggEstablished && scan?.egg_geometry?.centroid ? `(${Math.round(scan.egg_geometry.centroid[0])}, ${Math.round(scan.egg_geometry.centroid[1])})` : "Not established"}
+                    {candidateGeo?.centroid ? `(${Math.round(candidateGeo.centroid[0])}, ${Math.round(candidateGeo.centroid[1])})` : "Not established"}
                   </span>
                 </div>
               </div>

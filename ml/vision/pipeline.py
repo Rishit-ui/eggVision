@@ -52,7 +52,11 @@ class PipelineResult:
                 "detections": [],
                 "limitations": [
                     "No trained, validated egg detector is installed.",
-                    "A contour compatible with the chamber silhouette is not proof that an egg is present.",
+                    (
+                        "A contour compatible with the candling chamber silhouette is not proof that an egg is present."
+                        if self.detection.capture_mode == "controlled_candling"
+                        else "A candidate contour is an optical shape observation and does not prove that an egg is present."
+                    ),
                     "Capture-quality measurements are engineering screening metrics, not AI confidence or egg-quality predictions.",
                     "No defect, freshness, spoilage, contamination, or food-safety assessment was performed.",
                 ],

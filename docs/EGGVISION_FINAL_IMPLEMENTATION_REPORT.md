@@ -101,22 +101,28 @@ backend\.venv\Scripts\pytest.exe tests -v
 ```
 
 ### Results Summary
-- **Total Tests Collected:** 55
-- **Passed:** 55 (100%)
+- **Total Tests Collected:** 64
+- **Passed:** 64 (100%)
 - **Failed:** 0
 - **Skipped:** 0
-- **Execution Duration:** 10.11 seconds
+- **Execution Duration:** 10.37 seconds
 
 ### Key Test Categories Verified:
-1. `tests/cv/test_capture_screening.py`: White, dark, and neutral backgrounds; bright candidate on dark background; multiple candidates; blur and low-res reporting (7 tests passed).
-2. `tests/cv/test_detection_safety.py`: Abstains from egg identity without validated detector; multiple eggs block progression (3 tests passed).
-3. `tests/cv/test_quality.py`: ROI-only exposure; blur and border clipping using candidate geometry (4 tests passed).
-4. `tests/cv/test_segmentation_normalization.py`: Segmentation mask, geometric attributes, normalization canvas, end-to-end pipeline (3 tests passed).
-5. `tests/backend/test_cv_integration.py`: End-to-end FastAPI `/api/v1/scan` with OpenCV pipeline (1 test passed).
-6. `tests/backend/test_scan_execution.py`: Structured stage logs, correlation IDs, async database rollback, atomic commits, non-blocking worker threads (21 tests passed).
-7. `tests/backend/test_deployment_configuration.py`: CORS policy, migration schema, Redis health client cleanup (5 tests passed).
-8. `tests/backend/test_password_hashing.py`: Passlib & bcrypt 4.0.1 pinning compatibility (2 tests passed).
-9. `tests/backend/test_memory_optimization.py`: Bounded decoding, LAB distance memory budget, numerical equivalence (6 tests passed).
+1. `tests/cv/test_segmentation_regression.py`:
+   - `test_segmentation_prunes_attached_white_region`: PASSED (pruned 8,692 px of attached glare).
+   - `test_normalized_image_excludes_white_region`: PASSED (512x512 canvas clean without white leakage).
+   - `test_five_background_conditions` (dark chamber, blue surface, neutral grey, wooden surface, light matte): 5/5 PASSED.
+   - `test_sharpness_screening_independent_of_egg_detection`: PASSED.
+   - `test_ui_limitation_text_tailored_to_capture_mode`: PASSED (general photograph mode does not mention chamber silhouette).
+2. `tests/cv/test_capture_screening.py`: White, dark, and neutral backgrounds; bright candidate on dark background; multiple candidates; blur and low-res reporting (7 tests passed).
+3. `tests/cv/test_detection_safety.py`: Abstains from egg identity without validated detector; multiple eggs block progression (3 tests passed).
+4. `tests/cv/test_quality.py`: ROI-only exposure; blur and border clipping using candidate geometry (4 tests passed).
+5. `tests/cv/test_segmentation_normalization.py`: Segmentation mask, geometric attributes, normalization canvas, end-to-end pipeline (3 tests passed).
+6. `tests/backend/test_cv_integration.py`: End-to-end FastAPI `/api/v1/scan` with OpenCV pipeline (1 test passed).
+7. `tests/backend/test_scan_execution.py`: Structured stage logs, correlation IDs, async database rollback, atomic commits, non-blocking worker threads (21 tests passed).
+8. `tests/backend/test_deployment_configuration.py`: CORS policy, migration schema, Redis health client cleanup (5 tests passed).
+9. `tests/backend/test_password_hashing.py`: Passlib & bcrypt 4.0.1 pinning compatibility (2 tests passed).
+10. `tests/backend/test_memory_optimization.py`: Bounded decoding, LAB distance memory budget, numerical equivalence (6 tests passed).
 
 ### Frontend Verification
 ```powershell

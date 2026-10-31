@@ -88,7 +88,12 @@ class ImageQualityAssessor:
 
         h, w = image_bgr.shape[:2]
         gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-        metrics: dict[str, Any] = {"resolution": f"{w}x{h}", "capture_readiness_score": None}
+        frame_laplacian = float(cv2.Laplacian(gray, cv2.CV_32F).var())
+        metrics: dict[str, Any] = {
+            "resolution": f"{w}x{h}",
+            "capture_readiness_score": None,
+            "frame_laplacian_variance": round(frame_laplacian, 2),
+        }
         if candidate_mask is None or not np.any(candidate_mask):
             warning = (
                 QualityWarning.UNSUPPORTED_BACKGROUND
@@ -101,7 +106,10 @@ class ImageQualityAssessor:
                 else "No isolated candidate contour was available, so exposure was not assessed. Use one centered subject against a simpler background."
             )
             metrics.update({"exposure_region": "inconclusive_no_candidate_roi", "candidate_pixel_count": 0})
-            return QualityReport("INCONCLUSIVE", None, [warning, QualityWarning.EXPOSURE_INCONCLUSIVE], metrics, True, message)
+            warnings = [warning, QualityWarning.EXPOSURE_INCONCLUSIVE]
+            if frame_laplacian < 8.0:
+                warnings.append(QualityWarning.BLUR_DETECTED)
+            return QualityReport("INCONCLUSIVE", None, warnings, metrics, True, message)
 
         pixels = gray[candidate_mask > 0]
         candidate_pixels = int(pixels.size)
