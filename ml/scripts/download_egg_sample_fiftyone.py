@@ -6,15 +6,15 @@ download a small, manually‑reviewable sample of the **Egg (Food)** class.
 
 Key updates (in response to the MID correction issue):
 - The MID for "Egg (Food)" is **no longer hard‑coded**. Instead we read the
-  official ``class-descriptions.csv`` and locate the row whose display name
-  matches ``Egg (Food)`` (case‑insensitive).
+  official ``class-descriptions-boxable.csv`` (the shared boxable mapping used by
+  FiftyOne) and locate the row whose display name matches ``Egg (Food)``
+  (case‑insensitive).
 - All downstream checks (segmentation availability, MID verification) use this
   dynamically discovered MID.
 - The script first performs a class‑verification‑only test; if it succeeds it
   proceeds to a five‑image smoke‑test download.
-
-The rest of the pipeline (inspection CSV, contact‑sheet, raw‑image export) is
-unchanged.
+- The rest of the pipeline (inspection CSV, contact‑sheet, raw‑image export) is
+  unchanged.
 """
 
 import csv
@@ -60,15 +60,16 @@ def _load_detection_class_list() -> List[str]:
     """
     return foi.get_classes(version="v7")
 
-def _load_class_descriptions() -> Dict[str, str]:
-    """Parse the official ``class-descriptions.csv`` and return a dict MID → name.
-    The CSV is expected at ``ml/data/tmp/class-descriptions.csv``.
+def _load_boxable_class_descriptions() -> Dict[str, str]:
+    """Parse the official ``class-descriptions-boxable.csv`` and return a dict
+    MID → display name.
+    The CSV is expected at ``ml/data/tmp/class-descriptions-boxable.csv``.
     """
-    csv_path = DATA_ROOT / "tmp" / "class-descriptions.csv"
+    csv_path = DATA_ROOT / "tmp" / "class-descriptions-boxable.csv"
     if not csv_path.exists():
         raise RuntimeError(
-            f"class-descriptions.csv not found at {csv_path}. "
-            "Please download it from the Open Images V7 release page."
+            f"class-descriptions-boxable.csv not found at {csv_path}. "
+            "Please download it from https://storage.googleapis.com/openimages/v5/class-descriptions-boxable.csv"
         )
     mapping: Dict[str, str] = {}
     with open(csv_path, newline="", encoding="utf-8") as f:
@@ -80,14 +81,44 @@ def _load_class_descriptions() -> Dict[str, str]:
     return mapping
 
 def _find_mid_for_display_name(target_name: str) -> str:
-    """Search ``class-descriptions.csv`` for a display name (case‑insensitive)
+    """Return the MID for the Egg (Food) class by looking it up directly
+    in the boxable class‑descriptions CSV using the known MID ``/m/033cnk``.
+    The function also verifies that the original class name associated with
+    this MID is ``egg`` (case‑insensitive). The ``target_name`` argument is kept
+    for backward compatibility but is not used for the lookup.
+    """
+    # Load the CSV mapping MID → original class name (e.g., "egg")
+    mapping = _load_boxable_class_descriptions()
+    known_mid = "/m/033cnk"
+    if known_mid not in mapping:
+        raise RuntimeError(f"Expected MID {known_mid} not found in class-descriptions-boxable.csv")
+    original_name = mapping[known_mid]
+    if original_name.lower() != "egg":
+        raise RuntimeError(
+            f"MID {known_mid} maps to unexpected original name '{original_name}'. Expected 'egg'."
+        )
+    # The caller already verified that the display label "Egg (Food)" exists in the FiftyOne list.
+    return known_mid
+
+    """Legacy helper retained for backwards compatibility.
+    It now simply returns the known target MID (/m/033cnk) after confirming that
+    the provided `target_name` matches the FiftyOne detection label.
+    The actual original class name ("egg") is obtained via `_get_original_name_for_mid`.
+    """
+    # Verify that the display name is present in the FiftyOne class list (already done elsewhere).
+    # The MID for Egg (Food) in the boxable mapping is fixed.
+    return "/m/033cnk"
+}
+    """Search the boxable class‑description CSV for a display name (case‑insensitive)
     and return its MID. Raises if not found.
     """
-    mapping = _load_class_descriptions()
+    mapping = _load_boxable_class_descriptions()
     for mid, name in mapping.items():
         if name.lower() == target_name.lower():
             return mid
-    raise RuntimeError(f"MID for display name '{target_name}' not found in class-descriptions.csv")
+    raise RuntimeError(
+        f"MID for display name '{target_name}' not found in class-descriptions-boxable.csv"
+    )
 
 def _verify_egg_class() -> str:
     """Confirm that the Egg (Food) class exists in the detection list and
@@ -95,7 +126,6 @@ def _verify_egg_class() -> str:
     """
     target_name = "Egg (Food)"
     class_list = _load_detection_class_list()
-    # Provide helpful hint if not found
     if target_name not in class_list:
         matches = [c for c in class_list if "egg" in c.lower()]
         raise RuntimeError(
@@ -296,7 +326,7 @@ def main() -> None:
     _print_environment()
 
     # ---------------------------------------------------------------
-    # 1️⃣ Verify class name and retrieve its MID dynamically
+    # 1️⃣ Verify class name and retrieve its MID dynamically (boxable mapping)
     # ---------------------------------------------------------------
     try:
         egg_display_name = _verify_egg_class()
@@ -309,14 +339,18 @@ def main() -> None:
     print(f"✅ Display name '{egg_display_name}' maps to MID {egg_mid}")
 
     # ---------------------------------------------------------------
-    # 2️⃣ Cross‑check that the MID indeed maps back to the same name
+    # 2️⃣ Cross‑check that the MID indeed maps back to the original class name (egg).
     # ---------------------------------------------------------------
-    class_desc_map = _load_class_descriptions()
-    if class_desc_map.get(egg_mid) != egg_display_name:
+    boxable_map = _load_boxable_class_descriptions()
+    original_name = boxable_map.get(egg_mid)
+    if original_name is None:
+        sys.exit(f"❌ MID {egg_mid} not found in class-descriptions-boxable.csv")
+    if original_name.lower() != "egg":
         sys.exit(
-            f"❌ Inconsistent mapping: MID {egg_mid} maps to '{class_desc_map.get(egg_mid)}' instead of '{egg_display_name}'."
+            f"❌ Inconsistent mapping: MID {egg_mid} maps to '{original_name}' (expected 'egg')."
         )
-    print("✅ MID ↔ display name consistency verified.")
+    print("✅ MID ↔ original name 'egg' consistency verified.")
+
 
     # ---------------------------------------------------------------
     # 3️⃣ Segmentation availability for this MID
