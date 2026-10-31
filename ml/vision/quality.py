@@ -32,15 +32,17 @@ class QualityWarning:
 class QualityThresholds:
     """Configurable capture gates; not validated egg-quality thresholds."""
 
-    blur_laplacian_variance: float = 100.0
-    minimum_contrast_stddev: float = 18.0
+    # Calibrated for organic smooth surfaces (egg shell) with edge-gradient gating.
+    blur_laplacian_variance: float = 45.0
+    blur_edge_gradient_threshold: float = 22.0
+    minimum_contrast_stddev: float = 12.0
     underexposed_mean: float = 30.0
-    overexposed_mean: float = 235.0
+    overexposed_mean: float = 240.0
     clipping_level: int = 250
     clipping_ratio: float = 0.08
     glare_ratio: float = 0.05
-    shadow_ratio: float = 0.25
-    shadow_level: int = 45
+    shadow_ratio: float = 0.30
+    shadow_level: int = 40
     min_short_edge_px: int = 160
     min_candidate_area_px: int = 5_000
     border_margin_px: int = 8
@@ -75,13 +77,24 @@ class ImageQualityAssessor:
         """
         del legacy
         if image_bgr is None or image_bgr.size == 0:
-            return QualityReport("POOR", None, [QualityWarning.INVALID_IMAGE], {}, True, "The image could not be decoded. Select a valid JPEG, PNG, or WebP image.")
+            return QualityReport(
+                "POOR",
+                None,
+                [QualityWarning.INVALID_IMAGE],
+                {},
+                True,
+                "The image could not be decoded. Select a valid JPEG, PNG, or WebP image.",
+            )
 
         h, w = image_bgr.shape[:2]
         gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
         metrics: dict[str, Any] = {"resolution": f"{w}x{h}", "capture_readiness_score": None}
         if candidate_mask is None or not np.any(candidate_mask):
-            warning = QualityWarning.UNSUPPORTED_BACKGROUND if screening_status == "UNSUPPORTED_BACKGROUND" else QualityWarning.NO_CANDIDATE
+            warning = (
+                QualityWarning.UNSUPPORTED_BACKGROUND
+                if screening_status == "UNSUPPORTED_BACKGROUND"
+                else QualityWarning.NO_CANDIDATE
+            )
             message = (
                 "Use a contrasting matte background or controlled chamber so the subject boundary can be screened."
                 if warning == QualityWarning.UNSUPPORTED_BACKGROUND
@@ -96,15 +109,36 @@ class ImageQualityAssessor:
         candidate_std = float(np.std(pixels))
         clipped_ratio = float(np.mean(pixels >= self.thresholds.clipping_level))
         dark_ratio = float(np.mean(pixels <= self.thresholds.shadow_level))
+
+        # Compute ROI bounding coordinates
         x, y, bw, bh = bbox or cv2.boundingRect(cv2.findNonZero(candidate_mask))
         roi = gray[y:y + bh, x:x + bw]
         roi_mask = candidate_mask[y:y + bh, x:x + bw] > 0
+
+        # Primary sharpness: Laplacian variance of candidate region
         laplacian_variance = float(cv2.Laplacian(roi, cv2.CV_32F).var())
-        sobel_x = cv2.Sobel(roi, cv2.CV_32F, 1, 0)
-        sobel_y = cv2.Sobel(roi, cv2.CV_32F, 0, 1)
-        gradient = cv2.magnitude(sobel_x, sobel_y)
-        del sobel_x, sobel_y
-        glare_ratio = float(np.mean((roi >= self.thresholds.clipping_level) & (gradient > 50) & roi_mask))
+
+        # Boundary edge sharpness (Tenengrad along candidate contour perimeter)
+        kernel_edge = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        dilated = cv2.morphologyEx(candidate_mask, cv2.MORPH_DILATE, kernel_edge)
+        eroded = cv2.morphologyEx(candidate_mask, cv2.MORPH_ERODE, kernel_edge)
+        edge_band = (dilated > 0) & (eroded == 0)
+
+        sobel_x_full = cv2.Sobel(gray, cv2.CV_32F, 1, 0)
+        sobel_y_full = cv2.Sobel(gray, cv2.CV_32F, 0, 1)
+        gradient_full = cv2.magnitude(sobel_x_full, sobel_y_full)
+
+        edge_gradients = gradient_full[edge_band]
+        edge_sharpness = float(np.percentile(edge_gradients, 85)) if edge_gradients.size > 0 else 0.0
+        tenengrad = float(np.mean(edge_gradients ** 2)) if edge_gradients.size > 0 else 0.0
+
+        # Glare detection within candidate ROI
+        sobel_x_roi = cv2.Sobel(roi, cv2.CV_32F, 1, 0)
+        sobel_y_roi = cv2.Sobel(roi, cv2.CV_32F, 0, 1)
+        gradient_roi = cv2.magnitude(sobel_x_roi, sobel_y_roi)
+        glare_ratio = float(np.mean((roi >= self.thresholds.clipping_level) & (gradient_roi > 50) & roi_mask))
+        del sobel_x_full, sobel_y_full, sobel_x_roi, sobel_y_roi, gradient_roi
+
         metrics.update({
             "exposure_region": "candidate_roi",
             "candidate_pixel_count": candidate_pixels,
@@ -114,13 +148,25 @@ class ImageQualityAssessor:
             "candidate_dark_ratio": round(dark_ratio, 4),
             "candidate_glare_ratio": round(glare_ratio, 4),
             "laplacian_variance": round(laplacian_variance, 2),
+            "edge_sharpness": round(edge_sharpness, 2),
+            "tenengrad": round(tenengrad, 2),
         })
 
         warnings: list[str] = []
         if min(w, h) < self.thresholds.min_short_edge_px or candidate_pixels < self.thresholds.min_candidate_area_px:
             warnings.append(QualityWarning.LOW_RESOLUTION)
-        if laplacian_variance < self.thresholds.blur_laplacian_variance:
+
+        # Blur gating: Smooth eggs on plain backgrounds naturally have low interior texture.
+        # An image is truly blurred if either:
+        # 1. Both edge boundary sharpness AND Laplacian variance are below threshold, OR
+        # 2. Laplacian variance is severely degraded (< 8.0, e.g. severe defocus / motion blur).
+        is_blurred = (
+            (edge_sharpness < self.thresholds.blur_edge_gradient_threshold and laplacian_variance < self.thresholds.blur_laplacian_variance)
+            or (laplacian_variance < 8.0)
+        )
+        if is_blurred:
             warnings.append(QualityWarning.BLUR_DETECTED)
+
         if candidate_mean < self.thresholds.underexposed_mean:
             warnings.append(QualityWarning.UNDEREXPOSED)
         if candidate_mean > self.thresholds.overexposed_mean or clipped_ratio > self.thresholds.clipping_ratio:
@@ -131,12 +177,30 @@ class ImageQualityAssessor:
             warnings.append(QualityWarning.SPECULAR_REFLECTION)
         if dark_ratio > self.thresholds.shadow_ratio and candidate_mean >= self.thresholds.underexposed_mean:
             warnings.append(QualityWarning.STRONG_SHADOWS)
-        if x <= self.thresholds.border_margin_px or y <= self.thresholds.border_margin_px or x + bw >= w - self.thresholds.border_margin_px or y + bh >= h - self.thresholds.border_margin_px:
+        if (
+            x <= self.thresholds.border_margin_px
+            or y <= self.thresholds.border_margin_px
+            or x + bw >= w - self.thresholds.border_margin_px
+            or y + bh >= h - self.thresholds.border_margin_px
+        ):
             warnings.append(QualityWarning.BORDER_CLIPPED)
 
-        blocking = {QualityWarning.LOW_RESOLUTION, QualityWarning.BLUR_DETECTED, QualityWarning.UNDEREXPOSED, QualityWarning.OVEREXPOSED, QualityWarning.BORDER_CLIPPED}
+        blocking = {
+            QualityWarning.LOW_RESOLUTION,
+            QualityWarning.BLUR_DETECTED,
+            QualityWarning.UNDEREXPOSED,
+            QualityWarning.OVEREXPOSED,
+            QualityWarning.BORDER_CLIPPED,
+        }
         image_quality = "POOR" if blocking.intersection(warnings) else ("ACCEPTABLE" if warnings else "GOOD")
-        return QualityReport(image_quality, None, warnings, metrics, bool(blocking.intersection(warnings)), self._recommendation(warnings))
+        return QualityReport(
+            image_quality,
+            None,
+            warnings,
+            metrics,
+            bool(blocking.intersection(warnings)),
+            self._recommendation(warnings),
+        )
 
     @staticmethod
     def _recommendation(warnings: list[str]) -> str | None:
@@ -148,6 +212,7 @@ class ImageQualityAssessor:
             QualityWarning.SPECULAR_REFLECTION: "Move or diffuse the light to reduce glare on the candidate.",
             QualityWarning.STRONG_SHADOWS: "Use more even illumination to reduce strong shadows across the candidate.",
             QualityWarning.BORDER_CLIPPED: "Keep the full candidate inside the frame with a visible margin.",
-            QualityWarning.LOW_RESOLUTION: "Capture at a higher resolution with the subject occupying more of the frame.",
+            QualityWarning.LOW_RESOLUTION: "Capture the image closer or with higher camera resolution.",
         }
-        return " ".join(guidance[warning] for warning in warnings if warning in guidance) or None
+        active = [guidance[w] for w in warnings if w in guidance]
+        return " ".join(active) if active else None

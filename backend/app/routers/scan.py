@@ -5,7 +5,7 @@ from pathlib import Path
 from time import perf_counter
 
 from botocore.exceptions import BotoCoreError, ClientError
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -91,10 +91,9 @@ async def get_upload_url(
 async def create_scan(
     request: Request,
     response: Response,
-    image: UploadFile | None = File(None),
+    image: UploadFile = File(...),
     metadata: str | None = Form(None),
     db: AsyncSession = Depends(get_db),
-    direct_scan: DirectScanCreate | None = Body(None),
     current_user: User | None = Depends(get_current_user),
 ):
     request_id = scan_request_id(request)
@@ -105,83 +104,37 @@ async def create_scan(
     logger.info("scan_stage=request_received request_id=%s", request_id)
     logger.info("scan_stage=authentication_completed request_id=%s", request_id)
 
-    # 1. DIRECT STORAGE WORKFLOW (via object_key from presigned direct upload)
-    if direct_scan and direct_scan.object_key:
-        object_key = direct_scan.object_key.strip()
-        user_id = str(current_user.id) if current_user else "anonymous"
-        expected_prefix = f"uploads/{user_id}/"
+    try:
+        metadata_dict = json.loads(metadata) if metadata else {}
+        scan_create = ScanCreate(**metadata_dict)
+    except Exception:
+        logger.warning("scan_rejected request_id=%s category=invalid_metadata", request_id)
+        raise HTTPException(status_code=400, detail="Invalid metadata format")
 
-        # Validate object ownership: key must belong to authenticated user
-        if not object_key.startswith(expected_prefix) and getattr(current_user, "role", "") != "admin":
-            logger.warning(
-                "scan_rejected request_id=%s category=unauthorized_object_key key=%s",
-                request_id,
-                object_key,
-            )
-            raise HTTPException(status_code=403, detail="Access to this upload object is not authorized")
+    file_data = await image.read()
+    logger.info("scan_stage=image_received request_id=%s bytes=%s", request_id, len(file_data))
 
-        try:
-            file_data, content_type = await storage_service.get_image(object_key)
-        except (FileNotFoundError, ClientError, ValueError):
-            logger.exception("scan_failed request_id=%s category=direct_object_fetch", request_id)
-            raise HTTPException(status_code=404, detail="Uploaded image was not found or expired")
+    is_valid, msg = image_service.validate_image(file_data)
+    if not is_valid:
+        logger.warning("scan_rejected request_id=%s category=image_validation", request_id)
+        raise HTTPException(status_code=413 if msg == "File too large" else 400, detail=msg)
+    logger.info("scan_stage=image_validation_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
 
-        scan_create = direct_data_meta = direct_scan.metadata
-        filename = Path(object_key).name
-        original_image_url = f"/api/v1/artifacts/{object_key}"
-        logger.info("scan_stage=image_received request_id=%s bytes=%s", request_id, len(file_data))
-
-        is_valid, msg = image_service.validate_image(file_data)
-        if not is_valid:
-            logger.warning("scan_rejected request_id=%s category=image_validation", request_id)
-            raise HTTPException(status_code=413 if msg == "File too large" else 400, detail=msg)
-        logger.info(
-            "scan_stage=image_validation_completed request_id=%s elapsed_ms=%.2f",
-            request_id,
-            (perf_counter() - started) * 1000,
-        )
-        logger.info(
-            "scan_stage=original_image_storage_completed request_id=%s elapsed_ms=%.2f",
-            request_id,
-            (perf_counter() - started) * 1000,
-        )
-
-    # 2. MULTIPART FORM UPLOAD WORKFLOW
-    else:
-        if image is None or metadata is None:
-            raise HTTPException(status_code=400, detail="Missing image or metadata")
-
-        try:
-            metadata_dict = json.loads(metadata)
-            scan_create = ScanCreate(**metadata_dict)
-        except Exception:
-            logger.warning("scan_rejected request_id=%s category=invalid_metadata", request_id)
-            raise HTTPException(status_code=400, detail="Invalid metadata format")
-
-        file_data = await image.read()
-        logger.info("scan_stage=image_received request_id=%s bytes=%s", request_id, len(file_data))
-
-        is_valid, msg = image_service.validate_image(file_data)
-        if not is_valid:
-            logger.warning("scan_rejected request_id=%s category=image_validation", request_id)
-            raise HTTPException(status_code=413 if msg == "File too large" else 400, detail=msg)
-        logger.info("scan_stage=image_validation_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
-
-        try:
-            content_type, extension = image_service.canonical_upload_details(file_data)
-        except Exception:
-            logger.exception("scan_failed request_id=%s category=image_canonicalization", request_id)
-            raise HTTPException(status_code=400, detail="The uploaded image could not be processed.")
-        filename = f"{uuid.uuid4()}{extension}"
-        try:
-            original_image_url = await storage_service.upload_image(file_data, filename, content_type)
-        except (BotoCoreError, ClientError, OSError, TimeoutError):
-            logger.exception("scan_failed request_id=%s category=original_image_storage", request_id)
-            raise HTTPException(status_code=502, detail="Image storage is temporarily unavailable. Please try again.")
-        except Exception:
-            logger.exception("scan_failed request_id=%s category=original_image_storage", request_id)
-            raise HTTPException(status_code=502, detail="Image storage failed. Please try again.")
-        logger.info("scan_stage=original_image_storage_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
+    try:
+        content_type, extension = image_service.canonical_upload_details(file_data)
+    except Exception:
+        logger.exception("scan_failed request_id=%s category=image_canonicalization", request_id)
+        raise HTTPException(status_code=400, detail="The uploaded image could not be processed.")
+    filename = f"{uuid.uuid4()}{extension}"
+    try:
+        original_image_url = await storage_service.upload_image(file_data, filename, content_type)
+    except (BotoCoreError, ClientError, OSError, TimeoutError):
+        logger.exception("scan_failed request_id=%s category=original_image_storage", request_id)
+        raise HTTPException(status_code=502, detail="Image storage is temporarily unavailable. Please try again.")
+    except Exception:
+        logger.exception("scan_failed request_id=%s category=original_image_storage", request_id)
+        raise HTTPException(status_code=502, detail="Image storage failed. Please try again.")
+    logger.info("scan_stage=original_image_storage_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
 
     try:
         # CPU-intensive pipeline execution happens in a worker thread.
@@ -202,8 +155,6 @@ async def create_scan(
         "temperature_c": scan_create.temperature,
         "humidity_percent": scan_create.humidity,
     }
-    # Contour-derived metrics are research observations only. They are never
-    # persisted as verified egg measurements without an egg-detection model.
     if cv_res.get("candidate_geometry"):
         camera_metadata["candidate_contour_geometry"] = cv_res["candidate_geometry"]
     if cv_res.get("metrics"):
@@ -230,7 +181,6 @@ async def create_scan(
         raise HTTPException(status_code=503, detail="Scan persistence is temporarily unavailable. Please try again.")
     logger.info("scan_stage=postgres_persistence_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
 
-    # Return complete response including dynamic gating fields
     try:
         response_data = ScanResponse.model_validate(scan).model_dump()
         response_data["retake_recommended"] = cv_res.get("retake_recommended", False)
@@ -242,4 +192,110 @@ async def create_scan(
         logger.exception("scan_failed request_id=%s category=response_serialization", request_id)
         raise HTTPException(status_code=500, detail="Scan was saved but its response could not be prepared.")
     logger.info("scan_stage=response_serialization_completed request_id=%s elapsed_ms=%.2f", request_id, (perf_counter() - started) * 1000)
+    return serialized
+
+
+@router.post("/scan/direct", response_model=ScanResponse, status_code=201)
+async def create_scan_direct(
+    direct_scan: DirectScanCreate,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    current_user: User | None = Depends(get_current_user),
+):
+    """
+    Direct S3 upload confirmation route:
+    Takes an already-uploaded object key, verifies user ownership,
+    fetches from S3, and executes the CV pipeline and database persistence.
+    """
+    request_id = scan_request_id(request)
+    response.headers["X-Request-ID"] = request_id
+    started = perf_counter()
+    logger.info("scan_stage=request_received request_id=%s mode=direct", request_id)
+    logger.info("scan_stage=authentication_completed request_id=%s mode=direct", request_id)
+
+    object_key = direct_scan.object_key.strip()
+    user_id = str(current_user.id) if current_user else "anonymous"
+    expected_prefix = f"uploads/{user_id}/"
+
+    if not object_key.startswith(expected_prefix) and getattr(current_user, "role", "") != "admin":
+        logger.warning(
+            "scan_rejected request_id=%s category=unauthorized_object_key key=%s",
+            request_id,
+            object_key,
+        )
+        raise HTTPException(status_code=403, detail="Access to this upload object is not authorized")
+
+    try:
+        file_data, content_type = await storage_service.get_image(object_key)
+    except (FileNotFoundError, ClientError, ValueError):
+        logger.exception("scan_failed request_id=%s category=direct_object_fetch", request_id)
+        raise HTTPException(status_code=404, detail="Uploaded image was not found or expired")
+
+    scan_create = direct_scan.metadata
+    filename = Path(object_key).name
+    original_image_url = f"/api/v1/artifacts/{object_key}"
+    logger.info("scan_stage=image_received request_id=%s bytes=%s mode=direct", request_id, len(file_data))
+
+    is_valid, msg = image_service.validate_image(file_data)
+    if not is_valid:
+        logger.warning("scan_rejected request_id=%s category=image_validation", request_id)
+        raise HTTPException(status_code=413 if msg == "File too large" else 400, detail=msg)
+    logger.info("scan_stage=image_validation_completed request_id=%s elapsed_ms=%.2f mode=direct", request_id, (perf_counter() - started) * 1000)
+
+    try:
+        cv_res = await cv_service.process_scan_image(file_data, filename, request_id)
+    except (BotoCoreError, ClientError, OSError, TimeoutError):
+        logger.exception("scan_failed request_id=%s category=normalized_image_storage", request_id)
+        raise HTTPException(status_code=502, detail="Processed image storage is temporarily unavailable. Please try again.")
+    except Exception:
+        logger.exception("scan_failed request_id=%s category=cv_processing", request_id)
+        raise HTTPException(status_code=502, detail="Image processing failed. Please try again.")
+    finally:
+        del file_data
+
+    camera_metadata = scan_create.camera_metadata or {}
+    camera_metadata["capture_context"] = {
+        "egg_type": scan_create.egg_type,
+        "storage_condition": scan_create.storage_condition,
+        "temperature_c": scan_create.temperature,
+        "humidity_percent": scan_create.humidity,
+    }
+    if cv_res.get("candidate_geometry"):
+        camera_metadata["candidate_contour_geometry"] = cv_res["candidate_geometry"]
+    if cv_res.get("metrics"):
+        camera_metadata["cv_metrics"] = cv_res["metrics"]
+    camera_metadata["analysis_evidence"] = cv_res.get("analysis", {
+        "status": "INFERENCE_ERROR",
+        "limitations": ["The capture analysis did not return evidence."],
+    })
+
+    logger.info("scan_stage=postgres_persistence_started request_id=%s mode=direct", request_id)
+    try:
+        scan = await scan_service.create_scan(
+            db=db,
+            image_url=original_image_url,
+            metadata=scan_create,
+            processed_image_url=cv_res.get("processed_image_url"),
+            image_quality=cv_res.get("image_quality"),
+            image_quality_score=cv_res.get("quality_score"),
+            image_quality_warnings=cv_res.get("warnings", []),
+            camera_metadata=camera_metadata,
+        )
+    except SQLAlchemyError:
+        logger.exception("scan_failed request_id=%s category=postgres_persistence", request_id)
+        raise HTTPException(status_code=503, detail="Scan persistence is temporarily unavailable. Please try again.")
+    logger.info("scan_stage=postgres_persistence_completed request_id=%s elapsed_ms=%.2f mode=direct", request_id, (perf_counter() - started) * 1000)
+
+    try:
+        response_data = ScanResponse.model_validate(scan).model_dump()
+        response_data["retake_recommended"] = cv_res.get("retake_recommended", False)
+        response_data["recommendation"] = cv_res.get("recommendation")
+        response_data["analysis"] = cv_res.get("analysis")
+        response_data["candidate_contour_geometry"] = cv_res.get("candidate_geometry")
+        serialized = ScanResponse(**response_data)
+    except Exception:
+        logger.exception("scan_failed request_id=%s category=response_serialization", request_id)
+        raise HTTPException(status_code=500, detail="Scan was saved but its response could not be prepared.")
+    logger.info("scan_stage=response_serialization_completed request_id=%s elapsed_ms=%.2f mode=direct", request_id, (perf_counter() - started) * 1000)
     return serialized

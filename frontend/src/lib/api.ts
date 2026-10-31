@@ -291,7 +291,7 @@ export const api = {
     }
 
     // Step 3: Confirm scan with the object key (backend fetches from S3 & runs CV)
-    return fetchWithHandler('/scan', {
+    return fetchWithHandler('/scan/direct', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

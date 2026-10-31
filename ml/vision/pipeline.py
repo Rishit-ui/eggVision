@@ -67,7 +67,11 @@ class PipelineResult:
                 "height": geo.height,
                 "aspect_ratio": geo.aspect_ratio,
                 "centroid": [geo.centroid_x, geo.centroid_y],
-                "orientation_deg": geo.orientation_deg
+                "orientation_deg": geo.orientation_deg,
+                "solidity": geo.solidity,
+                "perimeter": geo.perimeter,
+                "eccentricity": geo.eccentricity,
+                "segmentation_status": geo.segmentation_status,
             }
         return out
 
