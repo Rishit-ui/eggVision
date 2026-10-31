@@ -67,3 +67,17 @@ coverage/
 *.bak
 *.tmp
 *.tsbuildinfo
+
+# Python virtual environments
+.venv/
+.venv-*/
+.venv_fiftyone/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# FiftyOne local database and cache
+.fiftyone/
+ml/data/fiftyone_cache/
