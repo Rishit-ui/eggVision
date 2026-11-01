@@ -326,6 +326,7 @@ def main() -> None:
     # 3️⃣ Segmentation availability for this MID
     # ---------------------------------------------------------------
     # Segmentation check deferred
+    seg_available = False
     print(f"Segmentation availability for MID {egg_mid}: {seg_available}")
 
     # ---------------------------------------------------------------
