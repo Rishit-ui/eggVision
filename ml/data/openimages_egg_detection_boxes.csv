@@ -1,0 +1,12 @@
+image_id,box_index,label_mid,label_name,source,confidence,xmin,xmax,ymin,ymax,is_occluded,is_truncated,is_group_of,is_depiction,is_inside
+21ea20278422cc9e,0,/m/033cnk,Egg (Food),xclick,1,0.264062,0.809375,0.182812,0.7,0,0,0,0,0
+48349509d010e736,0,/m/033cnk,Egg (Food),xclick,1,0.05,0.9625,0.309375,0.970312,1,0,1,0,0
+802c075e97bc705a,0,/m/033cnk,Egg (Food),xclick,1,0.105,0.825,0.155,0.59,1,0,0,0,0
+802c075e97bc705a,1,/m/033cnk,Egg (Food),xclick,1,0.2,0.608333,0.6325,0.9125,1,0,0,0,0
+802c075e97bc705a,2,/m/033cnk,Egg (Food),xclick,1,0.433333,0.79,0.5325,0.72125,1,0,0,0,0
+9b83b02ed3f32428,0,/m/033cnk,Egg (Food),xclick,1,0.460784,0.818627,0.26634,0.666667,1,0,0,0,0
+9b83b02ed3f32428,1,/m/033cnk,Egg (Food),xclick,1,0.712418,0.998366,0.349673,0.815359,0,1,0,0,0
+ae5c501360174e89,0,/m/033cnk,Egg (Food),xclick,1,0.293125,0.525,0.618299,0.807763,1,0,1,0,0
+ae5c501360174e89,1,/m/033cnk,Egg (Food),xclick,1,0.525,0.735,0.585952,0.781885,1,0,1,0,0
+ae5c501360174e89,2,/m/033cnk,Egg (Food),xclick,1,0.751875,0.793125,0.574861,0.749538,1,0,1,0,0
+ae5c501360174e89,3,/m/033cnk,Egg (Food),xclick,1,0.850625,0.899375,0.926987,0.980591,1,0,1,0,0

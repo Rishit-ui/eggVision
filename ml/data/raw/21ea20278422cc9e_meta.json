@@ -1,0 +1,38 @@
+{
+  "image_id": "21ea20278422cc9e",
+  "dataset": "Open Images V7",
+  "subset": "train",
+  "label_mid": "/m/033cnk",
+  "label_name": "Egg (Food)",
+  "image_path": "ml/data/raw/21ea20278422cc9e.jpg",
+  "width": 1024,
+  "height": 1024,
+  "original_url": "https://c7.staticflickr.com/9/8844/18156435460_4eee3d89d5_o.jpg",
+  "original_landing_url": "https://www.flickr.com/photos/onthewhiteline/18156435460",
+  "license_url": "https://creativecommons.org/licenses/by/2.0/",
+  "author": "Corey Taratuta",
+  "author_profile_url": "https://www.flickr.com/people/onthewhiteline/",
+  "title": "When a neighbor brings you eggs from her hen, you must make something special with it... like chive and cheddar crumpet clouds. #Knockahopple #Ireland",
+  "original_size": "68795",
+  "original_md5_base64": "oAngQ51eKPbvQe5mnXrp9g==",
+  "computed_md5_base64": "2gSqpbkyLunP8i7R2R5TYQ==",
+  "original_md5_matches": false,
+  "rotation_degrees": "",
+  "detection_boxes_normalized": [
+    {
+      "label_mid": "/m/033cnk",
+      "label_name": "Egg (Food)",
+      "source": "xclick",
+      "confidence": "1",
+      "xmin": 0.264062,
+      "xmax": 0.809375,
+      "ymin": 0.182812,
+      "ymax": 0.7,
+      "is_occluded": "0",
+      "is_truncated": "0",
+      "is_group_of": "0",
+      "is_depiction": "0",
+      "is_inside": "0"
+    }
+  ]
+}
