@@ -12,6 +12,7 @@ passed to :func:`register_image` so that the real project data are never touched
 '''  
 
 import argparse
+import re
 import csv
 import hashlib
 import json
@@ -124,6 +125,15 @@ def register_image(
 ) -> dict:
     """Register *source* image into the custom collection.
 
+    This version adds stricter safety checks:
+    * validates ``specimen_id`` against path traversal and unsafe characters
+    * recomputes image dimensions *after* Pillow's ``verify()``
+    * detects duplicates by scanning both side‑car JSON files **and** raw image files
+    * refuses to overwrite an existing destination file
+    """
+
+    """Register *source* image into the custom collection.
+
     Parameters
     ----------
     source: Path
@@ -149,14 +159,24 @@ def register_image(
     manifests_root = root / "manifests"
 
     # -------------------------------------------------------------------
-    # 1. Validate source image format
+    # 1. Validate source image format and specimen ID safety
     # -------------------------------------------------------------------
+    # Supported extensions
     supported_exts = {".jpg", ".jpeg", ".png", ".webp"}
     if source.suffix.lower() not in supported_exts:
-        raise RegistrationError(f"Unsupported file extension: {source.suffix}. Supported: {', '.join(supported_exts)}")
+        raise RegistrationError(
+            f"Unsupported file extension: {source.suffix}. Supported: {', '.join(supported_exts)}"
+        )
+    # Specimen ID safety: allow only alphanumerics, dash, underscore; no path separators
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", specimen_id):
+        raise RegistrationError(
+            f"Invalid specimen_id '{specimen_id}'. Use only letters, numbers, '_' or '-'."
+        )
+    # Verify image integrity; Pillow's verify may leave the file unusable, so reopen
     try:
         with Image.open(source) as img:
-            img.verify()  # verify integrity without loading pixel data
+            img.verify()
+        with Image.open(source) as img:
             width, height = img.width, img.height
             fmt = img.format
     except (UnidentifiedImageError, OSError) as e:
@@ -169,7 +189,11 @@ def register_image(
     existing_hashes = load_existing_hashes(metadata_root)
     if sha256 in existing_hashes:
         raise DuplicateImageError(f"Duplicate image detected (SHA‑256={sha256}). Already registered in {existing_hashes[sha256]}")
-
+    # Scan raw image files in the collection for duplicates (handles missing/corrupt side‑car)
+    for existing_file in raw_root.rglob('*'):
+        if existing_file.is_file() and existing_file.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'}:
+            if compute_sha256(existing_file) == sha256:
+                raise DuplicateImageError(f"Duplicate image detected in raw collection: {existing_file}")
     # -------------------------------------------------------------------
     # 3. Prepare destination paths
     # -------------------------------------------------------------------
@@ -184,6 +208,11 @@ def register_image(
 
     # -------------------------------------------------------------------
     # 4. Copy the file (preserve original timestamps)
+    # Ensure we do not overwrite an existing file
+    if dest_path.exists():
+        raise RegistrationError(f"Destination file already exists: {dest_path}")
+    shutil.copy2(source, dest_path)
+
     # -------------------------------------------------------------------
     shutil.copy2(source, dest_path)
 
