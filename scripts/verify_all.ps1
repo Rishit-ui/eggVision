@@ -30,15 +30,18 @@ function Invoke-VerificationCheck {
     $logPath = Join-Path $artifactRoot ("{0}.log" -f $Name)
     $started = Get-Date
     Push-Location $WorkingDirectory
+    $prevEAP = $ErrorActionPreference
     try {
+        $ErrorActionPreference = 'Continue'
         & $Executable @Arguments *> $logPath
-        $exitCode = $LASTEXITCODE
+        $exitCode = if ($LASTEXITCODE -ne $null) { $LASTEXITCODE } else { 0 }
     }
     catch {
         $_ | Out-File -LiteralPath $logPath -Append -Encoding utf8
         $exitCode = 1
     }
     finally {
+        $ErrorActionPreference = $prevEAP
         Pop-Location
     }
     $duration = [Math]::Round(((Get-Date) - $started).TotalSeconds, 2)
@@ -98,6 +101,7 @@ else {
     }
     Invoke-VerificationCheck -Name 'frontend-lint' -Executable 'npm' -Arguments @('run', 'lint') -WorkingDirectory $frontendDirectory | Out-Null
     Invoke-VerificationCheck -Name 'frontend-type-check' -Executable 'npm' -Arguments @('run', 'type-check') -WorkingDirectory $frontendDirectory | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $frontendDirectory '.next\types\app'), (Join-Path $frontendDirectory '.next\static\chunks\app') -Force | Out-Null
     Invoke-VerificationCheck -Name 'frontend-build' -Executable 'npm' -Arguments @('run', 'build') -WorkingDirectory $frontendDirectory | Out-Null
     Add-NotApplicableCheck -Name 'frontend-unit-tests' -Reason 'No frontend test script is configured in frontend/package.json.'
 }

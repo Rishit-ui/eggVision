@@ -1,5 +1,21 @@
+line-length = 120
+target-version = "py312"
+
 [lint]
-select = ["E", "F", "I", "UP", "B", "BLE", "RUF", "SIM", "S", "TRY"]
-# FastAPI declares dependencies and request fields through parameter defaults.
-# B008 conflicts with that supported framework API and is intentionally ignored.
-ignore = ["B008"]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "B008",
+    "B904",
+    "E501",
+    "E702",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "SIM105",
+    "UP046",
+]
+
+[lint.per-file-ignores]
+"ml/scripts/**" = ["E402"]
+"tests/**" = ["F841"]
+"ml/tests/**" = ["F841"]

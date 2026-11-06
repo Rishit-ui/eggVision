@@ -65,11 +65,20 @@ class CVService:
 
     def __init__(self, max_concurrent_processing: int = 1) -> None:
         self.pipeline = VisionPipeline()
+        self._max_concurrent_processing = max_concurrent_processing
+        self._processing_semaphore: asyncio.Semaphore | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
-        # Limit simultaneous CV operations to protect low-resource deployment instances.
-        self._processing_semaphore = asyncio.Semaphore(
-            max_concurrent_processing
-        )
+    @property
+    def processing_semaphore(self) -> asyncio.Semaphore:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if self._loop is not loop or self._processing_semaphore is None:
+            self._loop = loop
+            self._processing_semaphore = asyncio.Semaphore(self._max_concurrent_processing)
+        return self._processing_semaphore
 
     async def process_scan_image(
         self,
@@ -84,7 +93,7 @@ class CVService:
         """
         total_started = perf_counter()
 
-        async with self._processing_semaphore:
+        async with self.processing_semaphore:
             # STEP 1: Decode image inside semaphore without blocking event loop
             decode_started = perf_counter()
 

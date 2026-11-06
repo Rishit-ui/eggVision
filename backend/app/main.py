@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 
@@ -22,6 +23,7 @@ from app.routers import (
 from app.services.storage_service import storage_service
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +66,6 @@ app.include_router(dashboard.router, prefix="/api/v1", dependencies=protected)
 app.include_router(analytics.router, prefix="/api/v1", dependencies=protected)
 app.include_router(model_info.router, prefix="/api/v1", dependencies=protected)
 app.include_router(research.router, prefix="/api/v1", dependencies=protected)
-import os
-
-from fastapi.staticfiles import StaticFiles
 
 upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads")
 # Local artifact URLs are convenient for development.  Production fallback
