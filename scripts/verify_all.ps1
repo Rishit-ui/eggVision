@@ -101,6 +101,11 @@ else {
     }
     Invoke-VerificationCheck -Name 'frontend-lint' -Executable 'npm' -Arguments @('run', 'lint') -WorkingDirectory $frontendDirectory | Out-Null
     Invoke-VerificationCheck -Name 'frontend-type-check' -Executable 'npm' -Arguments @('run', 'type-check') -WorkingDirectory $frontendDirectory | Out-Null
+    # Ensure .next directory is clean and writable
+    $nextDir = Join-Path $frontendDirectory '.next'
+    if (Test-Path -LiteralPath $nextDir) {
+        Remove-Item -Recurse -Force -LiteralPath $nextDir
+    }
     New-Item -ItemType Directory -Path (Join-Path $frontendDirectory '.next\types\app'), (Join-Path $frontendDirectory '.next\static\chunks\app') -Force | Out-Null
     Invoke-VerificationCheck -Name 'frontend-build' -Executable 'npm' -Arguments @('run', 'build') -WorkingDirectory $frontendDirectory | Out-Null
     Add-NotApplicableCheck -Name 'frontend-unit-tests' -Reason 'No frontend test script is configured in frontend/package.json.'
