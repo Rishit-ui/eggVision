@@ -1,0 +1,5 @@
+[lint]
+select = ["E", "F", "I", "UP", "B", "BLE", "RUF", "SIM", "S", "TRY"]
+# FastAPI declares dependencies and request fields through parameter defaults.
+# B008 conflicts with that supported framework API and is intentionally ignored.
+ignore = ["B008"]

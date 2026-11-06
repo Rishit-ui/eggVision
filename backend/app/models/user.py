@@ -1,7 +1,9 @@
 import uuid
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Boolean
+
 from app.models.base import Base, TimestampMixin
+from sqlalchemy import Boolean, String
+from sqlalchemy.orm import Mapped, mapped_column
+
 
 class User(Base, TimestampMixin):
     __tablename__ = "users"

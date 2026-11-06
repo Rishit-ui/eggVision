@@ -59,7 +59,7 @@ def split_dataset(
     return counts
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Split dataset into train/val/test splits")
     parser.add_argument("--input-dir", type=Path, default=Path("ml/data/processed"), help="Input directory")
     parser.add_argument("--output-dir", type=Path, default=Path("ml/data"), help="Output root directory")
@@ -71,9 +71,11 @@ def main():
         print("Dataset split complete:")
         for split, count in counts.items():
             print(f"  {split}: {count} samples")
-    except Exception as exc:
+    except (AssertionError, FileNotFoundError, OSError, ValueError) as exc:
         print(f"Dataset split error: {exc}")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

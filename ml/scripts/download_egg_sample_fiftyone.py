@@ -19,18 +19,16 @@ Key updates (in response to the MID correction issue):
 
 import csv
 import json
-import pathlib
-import sys
 import platform
+import sys
 from pathlib import Path
-from typing import List, Dict
 
 # ---------------------------------------------------------------------
 # FiftyOne imports (official API)
 # ---------------------------------------------------------------------
 import fiftyone as fo
-import fiftyone.zoo as foz
 import fiftyone.utils.openimages as foi
+import fiftyone.zoo as foz
 
 # ---------------------------------------------------------------------
 # Configuration constants (paths are relative to the repository root)
@@ -53,14 +51,14 @@ def _print_environment() -> None:
     print(f"Python version    : {platform.python_version()}")
     print(f"FiftyOne version  : {fo.__version__}")
 
-def _load_detection_class_list() -> List[str]:
+def _load_detection_class_list() -> list[str]:
     """Return the list of detection class display names for Open Images V7.
     ``foi.get_classes(version='v7')`` yields a list of strings such as
     ``"Egg (Food)"``.
     """
     return foi.get_classes(version="v7")
 
-def _load_boxable_class_descriptions() -> Dict[str, str]:
+def _load_boxable_class_descriptions() -> dict[str, str]:
     """Parse the official ``class-descriptions-boxable.csv`` and return a dict
     MID → display name.
     The CSV is expected at ``ml/data/tmp/class-descriptions-boxable.csv``.
@@ -71,7 +69,7 @@ def _load_boxable_class_descriptions() -> Dict[str, str]:
             f"class-descriptions-boxable.csv not found at {csv_path}. "
             "Please download it from https://storage.googleapis.com/openimages/v5/class-descriptions-boxable.csv"
         )
-    mapping: Dict[str, str] = {}
+    mapping: dict[str, str] = {}
     with open(csv_path, newline="", encoding="utf-8") as f:
         for row in csv.reader(f):
             if len(row) != 2:
@@ -142,7 +140,7 @@ def _download_detection_samples(display_name: str, max_samples: int = 5) -> fo.D
     )
     return dataset
 
-def _read_image_info_csv() -> Dict[str, Dict[str, str]]:
+def _read_image_info_csv() -> dict[str, dict[str, str]]:
     """Parse the Open Images image‑info CSVs (train + validation) and return a dict keyed by ImageID.
     The CSVs contain provenance fields required for licensing.
     """
@@ -150,7 +148,7 @@ def _read_image_info_csv() -> Dict[str, Dict[str, str]]:
         DATA_ROOT / "tmp" / "train-images-boxable-with-labels.csv",
         DATA_ROOT / "tmp" / "validation-images-with-labels.csv",
     ]
-    combined: Dict[str, Dict[str, str]] = {}
+    combined: dict[str, dict[str, str]] = {}
     for p in info_paths:
         if not p.exists():
             raise RuntimeError(f"Missing image‑info CSV at {p}")
@@ -169,10 +167,10 @@ def _read_image_info_csv() -> Dict[str, Dict[str, str]]:
                 }
     return combined
 
-def _write_inspection_csv(samples: List[fo.Sample]) -> None:
+def _write_inspection_csv(samples: list[fo.Sample]) -> None:
     """Create or update ``inspection_report.csv`` while preserving any prior decisions."""
     import csv
-    existing: Dict[str, Dict[str, str]] = {}
+    existing: dict[str, dict[str, str]] = {}
     if INSPECTION_CSV.exists():
         with open(INSPECTION_CSV, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
@@ -223,7 +221,7 @@ def _write_inspection_csv(samples: List[fo.Sample]) -> None:
         writer.writerows(rows)
     print(f"Inspection CSV written/updated ({len(rows)} rows) at {INSPECTION_CSV}")
 
-def _create_contact_sheet(samples: List[fo.Sample], thumb_width: int = 200) -> None:
+def _create_contact_sheet(samples: list[fo.Sample], thumb_width: int = 200) -> None:
     """Build a simple contact‑sheet using Pillow, labeling each thumbnail with its Open Images ID."""
     from PIL import Image, ImageDraw, ImageFont
     font = ImageFont.load_default()
@@ -232,7 +230,7 @@ def _create_contact_sheet(samples: List[fo.Sample], thumb_width: int = 200) -> N
         img_path = Path(sample.filepath)
         try:
             img = Image.open(img_path).convert("RGB")
-        except Exception as e:
+        except OSError as e:
             print(f"⚠️  Could not open {img_path}: {e}")
             continue
         img.thumbnail((thumb_width, thumb_width), Image.Resampling.LANCZOS)
@@ -259,7 +257,7 @@ def _create_contact_sheet(samples: List[fo.Sample], thumb_width: int = 200) -> N
     sheet.save(CONTACT_SHEET)
     print(f"Contact sheet saved to {CONTACT_SHEET}")
 
-def _export_raw_and_metadata(samples: List[fo.Sample]) -> None:
+def _export_raw_and_metadata(samples: list[fo.Sample]) -> None:
     """Copy JPEGs to ``ml/data/raw/`` and write side‑car JSON files containing provenance.
     The provenance is taken from the image‑info CSVs parsed by ``_read_image_info_csv``.
     """
@@ -275,7 +273,7 @@ def _export_raw_and_metadata(samples: List[fo.Sample]) -> None:
         json_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"Copied {len(samples)} raw images and metadata to {RAW_DIR}")
 
-def _count_egg_detections(samples: List[fo.Sample]) -> int:
+def _count_egg_detections(samples: list[fo.Sample]) -> int:
     total = 0
     for sample in samples:
         if not sample.detections:
@@ -296,11 +294,11 @@ def main() -> None:
     # ---------------------------------------------------------------
     try:
         egg_display_name = _verify_egg_class()
-    except Exception as exc:
+    except (FileNotFoundError, KeyError, ValueError) as exc:
         sys.exit(f"❌ Class verification failed: {exc}")
     try:
         egg_mid = _find_mid_for_display_name(egg_display_name)
-    except Exception as exc:
+    except (FileNotFoundError, KeyError, ValueError) as exc:
         sys.exit(f"❌ MID lookup failed: {exc}")
     print(f"✅ Display name '{egg_display_name}' maps to MID {egg_mid}")
 

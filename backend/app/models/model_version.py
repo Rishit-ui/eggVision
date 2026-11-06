@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Boolean, DateTime, Text, func
-from sqlalchemy.dialects.postgresql import JSONB
+
 from app.models.base import Base
+from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
+
 
 class ModelVersion(Base):
     __tablename__ = "model_versions"

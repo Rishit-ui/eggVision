@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 import numpy as np
 
@@ -12,22 +11,22 @@ import numpy as np
 class PredictionResult:
     """Result from the inference engine."""
     status: str  # 'completed', 'model_not_ready', 'error'
-    freshness_class: Optional[str] = None
-    freshness_score: Optional[float] = None
-    estimated_age_min: Optional[int] = None
-    estimated_age_max: Optional[int] = None
-    predicted_haugh_unit: Optional[float] = None
-    confidence: Optional[float] = None
-    air_cell_area: Optional[float] = None
-    air_cell_ratio: Optional[float] = None
-    yolk_visibility: Optional[str] = None
-    crack_probability: Optional[float] = None
-    blood_spot_probability: Optional[float] = None
+    freshness_class: str | None = None
+    freshness_score: float | None = None
+    estimated_age_min: int | None = None
+    estimated_age_max: int | None = None
+    predicted_haugh_unit: float | None = None
+    confidence: float | None = None
+    air_cell_area: float | None = None
+    air_cell_ratio: float | None = None
+    yolk_visibility: str | None = None
+    crack_probability: float | None = None
+    blood_spot_probability: float | None = None
     explanation: list[str] = field(default_factory=list)
-    heatmap: Optional[np.ndarray] = None
-    inference_time_ms: Optional[float] = None
-    model_version: Optional[str] = None
-    error_message: Optional[str] = None
+    heatmap: np.ndarray | None = None
+    inference_time_ms: float | None = None
+    model_version: str | None = None
+    error_message: str | None = None
 
 
 @dataclass
@@ -37,9 +36,9 @@ class ModelInfo:
     model_type: str
     is_ready: bool
     description: str
-    dataset_version: Optional[str] = None
-    metrics: Optional[dict] = None
-    trained_at: Optional[datetime] = None
+    dataset_version: str | None = None
+    metrics: dict | None = None
+    trained_at: datetime | None = None
 
 
 class InferenceEngine(ABC):

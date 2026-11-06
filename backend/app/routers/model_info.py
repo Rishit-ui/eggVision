@@ -1,6 +1,6 @@
-from fastapi import APIRouter
 from app.schemas.prediction import ModelInfoResponse
 from app.services.prediction_service import inference_engine
+from fastapi import APIRouter
 
 router = APIRouter(tags=["Model Info"])
 

@@ -11,10 +11,11 @@ with any Phase‑2 snapshot‑protection fixtures that may exist elsewhere
 in the test suite.
 """
 
+import importlib
 import sys
 from pathlib import Path
+
 import pytest
-import importlib
 
 # Ensure the repository root is on PYTHONPATH for imports
 REPO_ROOT = Path(__file__).resolve().parents[2]

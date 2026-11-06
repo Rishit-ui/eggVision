@@ -63,6 +63,9 @@ htmlcov/
 .coverage
 coverage/
 
+# Locally generated verification evidence (may include machine-specific paths)
+artifacts/
+
 # Misc
 *.bak
 *.tmp

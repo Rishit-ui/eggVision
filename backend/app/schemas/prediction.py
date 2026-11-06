@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
-from .scan import PredictionResponse
+
 
 class PredictRequest(BaseModel):
     scan_id: uuid.UUID

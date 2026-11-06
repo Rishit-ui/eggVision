@@ -1,10 +1,9 @@
 """Serve stored artifacts without exposing storage credentials or filesystem paths."""
 
+from app.services.storage_service import storage_service
+from botocore.exceptions import ClientError
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-from botocore.exceptions import ClientError
-
-from app.services.storage_service import storage_service
 
 router = APIRouter(tags=["Artifacts"])
 

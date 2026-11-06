@@ -1,13 +1,14 @@
 """Integration tests for CV pipeline via FastAPI endpoints."""
 
-import io
 import json
+from datetime import UTC
+
 import cv2
 import numpy as np
 import pytest
-from httpx import ASGITransport, AsyncClient
-from app.main import app
 from app.database import get_db
+from app.main import app
+from httpx import ASGITransport, AsyncClient
 
 
 def make_test_egg_image_bytes() -> bytes:
@@ -26,13 +27,13 @@ class MockAsyncSession:
 
     def add(self, obj):
         import uuid
-        from datetime import datetime, timezone
+        from datetime import datetime
         if not hasattr(obj, "id") or obj.id is None:
             obj.id = uuid.uuid4()
         if not hasattr(obj, "created_at") or obj.created_at is None:
-            obj.created_at = datetime.now(timezone.utc)
+            obj.created_at = datetime.now(UTC)
         if not hasattr(obj, "capture_date") or obj.capture_date is None:
-            obj.capture_date = datetime.now(timezone.utc)
+            obj.capture_date = datetime.now(UTC)
         self.added.append(obj)
 
     async def commit(self):

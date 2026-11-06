@@ -1,13 +1,14 @@
 import logging
 import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, update
-from sqlalchemy.exc import SQLAlchemyError
+
 from app.models.batch import Batch
-from app.models.scan import Scan
 from app.models.prediction import Prediction
+from app.models.scan import Scan
 from app.models.sensor_reading import SensorReading
 from app.schemas.scan import ScanCreate
+from sqlalchemy import func, select, update
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class ScanService:
         result = await db.execute(select(Scan).filter(Scan.id == scan_id))
         return result.scalar_one_or_none()
         
-    async def list_scans(self, db: AsyncSession, page: int = 1, per_page: int = 10, filters: dict = None) -> tuple[list[Scan], int]:
+    async def list_scans(self, db: AsyncSession, page: int = 1, per_page: int = 10) -> tuple[list[Scan], int]:
         total_result = await db.execute(select(func.count()).select_from(Scan))
         total = total_result.scalar_one()
 

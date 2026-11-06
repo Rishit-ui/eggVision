@@ -15,10 +15,9 @@ from typing import Any
 
 import cv2
 import numpy as np
-
-from ml.vision.pipeline import PipelineResult, VisionPipeline
 from app.services.storage_service import storage_service
 
+from ml.vision.pipeline import PipelineResult, VisionPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +47,8 @@ def _decode_and_bound_image(
 
     if max_edge > max_dimension:
         scale = max_dimension / float(max_edge)
-        new_w = max(1, int(round(orig_w * scale)))
-        new_h = max(1, int(round(orig_h * scale)))
+        new_w = max(1, round(orig_w * scale))
+        new_h = max(1, round(orig_h * scale))
         working_bgr = cv2.resize(
             image_bgr,
             (new_w, new_h),

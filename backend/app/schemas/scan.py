@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
-from typing import Optional, Any
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
+
 
 class ScanCreate(BaseModel):
     egg_id: uuid.UUID | None = None

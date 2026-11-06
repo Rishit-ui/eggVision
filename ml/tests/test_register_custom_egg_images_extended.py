@@ -3,24 +3,21 @@
 All image creation uses the pytest ``tmp_path`` fixture to avoid touching the repository root.
 """
 
-import os
 import csv
-import json
 import shutil
 from pathlib import Path
+
 import pytest
 from PIL import Image
 
+
 # Helper to create an image at a given path.
-def _create_image(path: Path, fmt: str = "JPEG", colour: str = None) -> Path:
+def _create_image(path: Path, fmt: str = "JPEG", colour: str | None = None) -> Path:
     # Generate a deterministic colour based on the file path if not provided, ensuring distinct images for different paths.
     if colour is None:
         # Simple hash to produce an RGB tuple.
         hash_val = sum(ord(c) for c in str(path)) % 256
         colour = (hash_val, (hash_val * 2) % 256, (hash_val * 3) % 256)
-    img = Image.new("RGB", (100, 100), color=colour)
-    img.save(path, fmt)
-    return path
     img = Image.new("RGB", (100, 100), color=colour)
     img.save(path, fmt)
     return path
@@ -120,12 +117,28 @@ def test_csv_headers_and_no_duplicate_specimen(custom_root, tmp_path):
 def test_destination_not_overwritten(custom_root, tmp_path):
     from ml.scripts import register_custom_egg_images as reg
     src = _create_image(tmp_path / "dup1.jpg")
-    meta = reg.register_image(source=src, specimen_id="EGG010", view="top", custom_root=custom_root)
+    reg.register_image(source=src, specimen_id="EGG010", view="top", custom_root=custom_root)
     src2 = _create_image(tmp_path / "dup2.jpg")
     shutil.copy2(src, src2)
     with pytest.raises(reg.DuplicateImageError):
         reg.register_image(source=src2, specimen_id="EGG010", view="side", custom_root=custom_root)
     src.unlink(); src2.unlink()
+
+
+def test_explicit_custom_root_owns_its_manifests(custom_root, tmp_path, monkeypatch):
+    """Passing custom_root must never append to module-level production paths."""
+    from ml.scripts import register_custom_egg_images as reg
+
+    monkeypatch.setattr(reg, "IMAGES_CSV", tmp_path / "must-not-be-used-images.csv")
+    monkeypatch.setattr(reg, "SPECIMENS_CSV", tmp_path / "must-not-be-used-specimens.csv")
+    src = _create_image(tmp_path / "root.jpg")
+
+    reg.register_image(source=src, specimen_id="EGGROOT", view="top", custom_root=custom_root)
+
+    assert (custom_root / "manifests" / "images.csv").exists()
+    assert (custom_root / "manifests" / "specimens.csv").exists()
+    assert not (tmp_path / "must-not-be-used-images.csv").exists()
+    assert not (tmp_path / "must-not-be-used-specimens.csv").exists()
 
 def test_duplicate_hash_detection_when_sidecar_missing(custom_root, tmp_path):
     from ml.scripts import register_custom_egg_images as reg

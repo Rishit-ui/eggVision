@@ -4,16 +4,17 @@ All image files are created in the pytest ``tmp_path`` temporary directory
 to ensure no real repository data is touched.
 """
 
-import os
-import shutil
 import csv
 import json
+import shutil
 from pathlib import Path
+
 import pytest
 from PIL import Image
 
+
 # Helper to create an image file at a given path.
-def _create_image(path: Path, fmt: str = "JPEG", colour: str = None) -> Path:
+def _create_image(path: Path, fmt: str = "JPEG", colour: str | None = None) -> Path:
     # Generate a deterministic colour based on the file path if not provided to ensure distinct images.
     if colour is None:
         hash_val = sum(ord(c) for c in str(path)) % 256
@@ -131,7 +132,6 @@ def test_destination_not_overwritten(custom_root, tmp_path):
         view="top",
         custom_root=custom_root,
     )
-    dest = custom_root / "raw" / "EGG010" / f"{meta['capture_id']}.jpg"
     src2 = _create_image(tmp_path / "dup2.jpg")
     shutil.copy2(src, src2)
     with pytest.raises(reg.DuplicateImageError):

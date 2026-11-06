@@ -5,9 +5,10 @@ and optical contrast normalization while preserving internal biological signals.
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+
 import cv2
 import numpy as np
+
 from .segmentation import EggGeometry
 
 
@@ -18,9 +19,9 @@ class NormalizationResult:
     normalized_mask: np.ndarray   # Canonical 512x512 binary mask
     clahe_image: np.ndarray        # CLAHE enhanced 512x512 image
     rotation_angle_applied: float
-    canonical_size: Tuple[int, int]
+    canonical_size: tuple[int, int]
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class EggNormalizer:

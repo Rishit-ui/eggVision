@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+
 @pytest.fixture
 def app():
     """Use the actual application; endpoint tests must never target a fake app."""

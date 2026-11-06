@@ -2,15 +2,19 @@
 
 import uuid
 
+from app.database import get_db
+from app.models.egg import Egg
+from app.models.ground_truth import GroundTruth
+from app.schemas.research import (
+    EggCreate,
+    EggResponse,
+    GroundTruthCreate,
+    GroundTruthResponse,
+)
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.database import get_db
-from app.models.egg import Egg
-from app.models.ground_truth import GroundTruth
-from app.schemas.research import EggCreate, EggResponse, GroundTruthCreate, GroundTruthResponse
 
 router = APIRouter(tags=["Research data"])
 

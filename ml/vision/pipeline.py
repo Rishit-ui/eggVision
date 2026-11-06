@@ -8,14 +8,14 @@ Orchestrates:
 """
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
-import numpy as np
-import cv2
+from typing import Any
 
-from .quality import ImageQualityAssessor, QualityReport, QualityWarning
-from .detector import EggDetector, DetectionResult
-from .segmentation import EggSegmenter, SegmentationResult, EggGeometry
+import numpy as np
+
+from .detector import DetectionResult, EggDetector
 from .normalizer import EggNormalizer, NormalizationResult
+from .quality import ImageQualityAssessor, QualityReport, QualityWarning
+from .segmentation import EggSegmenter, SegmentationResult
 
 
 @dataclass
@@ -23,12 +23,12 @@ class PipelineResult:
     """End-to-end outcome of computer vision processing on an egg image."""
     quality: QualityReport
     detection: DetectionResult
-    segmentation: Optional[SegmentationResult] = None
-    normalization: Optional[NormalizationResult] = None
+    segmentation: SegmentationResult | None = None
+    normalization: NormalizationResult | None = None
     can_proceed_to_inference: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert pipeline results to JSON-serializable dictionary."""
         out = {
             "image_quality": self.quality.image_quality,
@@ -85,10 +85,10 @@ class VisionPipeline:
 
     def __init__(
         self,
-        assessor: Optional[ImageQualityAssessor] = None,
-        detector: Optional[EggDetector] = None,
-        segmenter: Optional[EggSegmenter] = None,
-        normalizer: Optional[EggNormalizer] = None
+        assessor: ImageQualityAssessor | None = None,
+        detector: EggDetector | None = None,
+        segmenter: EggSegmenter | None = None,
+        normalizer: EggNormalizer | None = None
     ):
         self.assessor = assessor or ImageQualityAssessor()
         self.detector = detector or EggDetector()

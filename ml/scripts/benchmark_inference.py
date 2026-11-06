@@ -19,6 +19,7 @@ if str(repo_root) not in sys.path:
 
 import cv2
 import numpy as np
+
 from ml.vision.pipeline import VisionPipeline
 
 
@@ -44,7 +45,7 @@ def benchmark(resolutions: list[tuple[int, int]], iterations: int = 5) -> list[d
             _ = pipeline.process(test_img)
             times.append((time.perf_counter() - start) * 1000)
 
-        current, peak = tracemalloc.get_traced_memory()
+        _current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
 
         avg_latency = float(np.mean(times))

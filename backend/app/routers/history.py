@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.schemas.common import PaginatedResponse
 from app.schemas.scan import ScanResponse
 from app.services.scan_service import scan_service
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["History"])
 

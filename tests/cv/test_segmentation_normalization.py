@@ -2,9 +2,10 @@
 
 import cv2
 import numpy as np
-from ml.vision.segmentation import EggSegmenter
+
 from ml.vision.normalizer import EggNormalizer
 from ml.vision.pipeline import VisionPipeline
+from ml.vision.segmentation import EggSegmenter
 
 
 def create_synthetic_candled_egg(h=400, w=300) -> np.ndarray:

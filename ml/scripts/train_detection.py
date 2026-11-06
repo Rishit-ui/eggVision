@@ -7,7 +7,7 @@ Objective: Localize egg bounding box and distinguish egg presence from backgroun
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -46,7 +46,7 @@ def train_detection(
         "epochs": epochs,
         "batch_size": batch_size,
         "input_resolution": [img_size, img_size],
-        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "trained_at": datetime.now(UTC).isoformat(),
         "status": "TRAINED_UNVALIDATED",
         "metrics": {"mAP50": None, "mAP50_95": None, "precision": None, "recall": None},
     }

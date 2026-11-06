@@ -18,7 +18,6 @@ if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
 import cv2
-import numpy as np
 
 
 def compute_sha256(filepath: Path) -> str:
@@ -90,7 +89,7 @@ def validate_dataset(data_dir: Path, num_classes: int = 1) -> dict:
         # Check corresponding label
         label_path = labels_dir / f"{img_path.stem}.txt" if labels_dir.exists() else None
         if label_path and label_path.exists():
-            with open(label_path, "r", encoding="utf-8") as lf:
+            with open(label_path, encoding="utf-8") as lf:
                 for line_idx, line in enumerate(lf, 1):
                     line_clean = line.strip()
                     if not line_clean:

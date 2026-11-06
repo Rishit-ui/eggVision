@@ -1,17 +1,16 @@
 """Bearer-token authentication used by protected API routes."""
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
+from app.config import settings
+from app.database import AsyncSessionLocal
+from app.models.user import User
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy import select
-
-from app.config import settings
-from app.database import AsyncSessionLocal
-from app.models.user import User
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -26,7 +25,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def create_access_token(user: User) -> str:
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRY_MINUTES)
+    expires_at = datetime.now(UTC) + timedelta(minutes=settings.JWT_EXPIRY_MINUTES)
     return jwt.encode(
         {"sub": str(user.id), "role": user.role, "exp": expires_at},
         settings.JWT_SECRET,

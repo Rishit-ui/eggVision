@@ -4,11 +4,10 @@ from pathlib import Path
 import pytest
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.datastructures import Headers
-
 from app.config import Settings
 from app.routers import health
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.datastructures import Headers
 
 
 def production_settings(**overrides):

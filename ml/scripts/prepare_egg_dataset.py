@@ -25,13 +25,13 @@ Steps performed:
 Running the script is safe – it only reads existing files and writes the updated CSV and copies images.
 '''  
 
+import base64
 import csv
 import hashlib
-import base64
 import os
-from pathlib import Path
-from datetime import datetime
 import shutil
+from datetime import datetime
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -102,7 +102,6 @@ def main():
         # Re‑compute MD5 correctly (Base64) and set flag
         image_path = RAW_DIR / f"{row['image_id']}.jpg"
         if image_path.exists():
-            computed_b64 = compute_base64_md5(image_path)
             # The original Open Images MD5 is not stored in this CSV.
             # We assume the computed value is the reference, so we set True.
             row["md5_matches_original"] = "True"

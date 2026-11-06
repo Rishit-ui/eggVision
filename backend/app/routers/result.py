@@ -1,11 +1,11 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database import get_db
 from app.schemas.scan import ScanResponse
-from app.services.scan_service import scan_service
 from app.services.prediction_service import prediction_service
-from app.schemas.scan import PredictionResponse
+from app.services.scan_service import scan_service
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Result"])
 

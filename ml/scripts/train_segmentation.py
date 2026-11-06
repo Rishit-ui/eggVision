@@ -7,7 +7,7 @@ Objective: Generate pixel-level binary shell mask excluding shadows and reflecti
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -44,7 +44,7 @@ def train_segmentation(
         "epochs": epochs,
         "batch_size": batch_size,
         "input_resolution": [img_size, img_size],
-        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "trained_at": datetime.now(UTC).isoformat(),
         "status": "TRAINED_UNVALIDATED",
         "metrics": {"mIoU": None, "dice_score": None, "boundary_f1": None},
     }

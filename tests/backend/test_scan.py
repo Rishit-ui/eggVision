@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.asyncio
 async def test_scan_creates_record(client):
     response = await client.post("/api/v1/scan")

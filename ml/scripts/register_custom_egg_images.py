@@ -12,15 +12,15 @@ passed to :func:`register_image` so that the real project data are never touched
 '''  
 
 import argparse
-import re
 import csv
 import hashlib
 import json
 import os
+import re
 import shutil
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image, UnidentifiedImageError
 
@@ -73,9 +73,9 @@ def load_existing_hashes(metadata_dir: Path) -> dict[str, Path]:
             h = data.get("sha256")
             if isinstance(h, str):
                 hashes[h] = json_file
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             # Corrupt side‑car – ignore for duplicate detection
-            continue
+            pass
     return hashes
 
 def next_capture_id(specimen_dir: Path, specimen_id: str, suffix: str) -> str:
@@ -106,6 +106,17 @@ def ensure_manifest(csv_path: Path, header: list[str]):
             writer = csv.writer(f)
             writer.writerow(header)
 
+
+def atomic_copy(source: Path, destination: Path) -> None:
+    """Copy *source* to *destination* without exposing a partial final file."""
+    temporary = destination.with_name(f".{destination.name}.{uuid.uuid4().hex}.partial")
+    try:
+        shutil.copy2(source, temporary)
+        os.replace(temporary, destination)
+    except OSError as error:
+        temporary.unlink(missing_ok=True)
+        raise RegistrationError(f"Could not register image safely: {error}") from error
+
 # ---------------------------------------------------------------------------
 # Core registration logic (callable from tests)
 # ---------------------------------------------------------------------------
@@ -114,14 +125,14 @@ def register_image(
     source: Path,
     specimen_id: str,
     view: str,
-    lighting: Optional[str] = None,
-    background: Optional[str] = None,
-    photographer: Optional[str] = None,
-    captured_at: Optional[str] = None,
-    provenance: Optional[str] = None,
-    license: Optional[str] = None,
+    lighting: str | None = None,
+    background: str | None = None,
+    photographer: str | None = None,
+    captured_at: str | None = None,
+    provenance: str | None = None,
+    license: str | None = None,
     *,
-    custom_root: Optional[Path] = None,
+    custom_root: Path | None = None,
 ) -> dict:
     """Register *source* image into the custom collection.
 
@@ -132,31 +143,13 @@ def register_image(
     * refuses to overwrite an existing destination file
     """
 
-    """Register *source* image into the custom collection.
-
-    Parameters
-    ----------
-    source: Path
-        Path to the original image file supplied by the user.
-    specimen_id: str
-        Identifier for the physical egg (e.g. ``EGG001``). Must be unique across specimens.
-    view: str
-        One of ``top, side, oblique, closeup, other``.
-    lighting, background, photographer, captured_at, provenance, license:
-        Optional free‑form metadata strings.
-    custom_root: Path, optional
-        Root of the custom collection. If omitted the default repository location is used.
-
-    Returns
-    -------
-    dict
-        The generated metadata dictionary (also written to a JSON side‑car).
-    """
     # Resolve collection root
     root = Path(custom_root) if custom_root else DEFAULT_CUSTOM_ROOT
     raw_root = root / "raw"
     metadata_root = root / "metadata"
     manifests_root = root / "manifests"
+    images_csv = manifests_root / "images.csv"
+    specimens_csv = manifests_root / "specimens.csv"
 
     # -------------------------------------------------------------------
     # 1. Validate source image format and specimen ID safety
@@ -191,9 +184,8 @@ def register_image(
         raise DuplicateImageError(f"Duplicate image detected (SHA‑256={sha256}). Already registered in {existing_hashes[sha256]}")
     # Scan raw image files in the collection for duplicates (handles missing/corrupt side‑car)
     for existing_file in raw_root.rglob('*'):
-        if existing_file.is_file() and existing_file.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'}:
-            if compute_sha256(existing_file) == sha256:
-                raise DuplicateImageError(f"Duplicate image detected in raw collection: {existing_file}")
+        if existing_file.is_file() and existing_file.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'} and compute_sha256(existing_file) == sha256:
+            raise DuplicateImageError(f"Duplicate image detected in raw collection: {existing_file}")
     # -------------------------------------------------------------------
     # 3. Prepare destination paths
     # -------------------------------------------------------------------
@@ -211,10 +203,7 @@ def register_image(
     # Ensure we do not overwrite an existing file
     if dest_path.exists():
         raise RegistrationError(f"Destination file already exists: {dest_path}")
-    shutil.copy2(source, dest_path)
-
-    # -------------------------------------------------------------------
-    shutil.copy2(source, dest_path)
+    atomic_copy(source, dest_path)
 
     # -------------------------------------------------------------------
     # 5. Create metadata side‑car
@@ -263,9 +252,9 @@ def register_image(
         "license",
         "review_status",
     ]
-    ensure_manifest(IMAGES_CSV, images_header)
+    ensure_manifest(images_csv, images_header)
 
-    with IMAGES_CSV.open("a", newline="", encoding="utf-8") as f:
+    with images_csv.open("a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             capture_id,
@@ -288,17 +277,17 @@ def register_image(
 
     # Specimens manifest – add a row if this specimen is new
     specimens_header = ["specimen_id", "registered_at", "notes"]
-    ensure_manifest(SPECIMENS_CSV, specimens_header)
+    ensure_manifest(specimens_csv, specimens_header)
     # Check if specimen already present
     specimen_present = False
-    with SPECIMENS_CSV.open("r", newline="", encoding="utf-8") as f:
+    with specimens_csv.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             if row.get("specimen_id") == specimen_id:
                 specimen_present = True
                 break
     if not specimen_present:
-        with SPECIMENS_CSV.open("a", newline="", encoding="utf-8") as f:
+        with specimens_csv.open("a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([specimen_id, now_iso, ""])
 
@@ -309,7 +298,7 @@ def register_image(
 # CLI entry point
 # ---------------------------------------------------------------------------
 
-def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Register a custom egg photograph into the collection.")
     parser.add_argument("--source", required=True, type=Path, help="Path to the source image file.")
     parser.add_argument("--specimen", required=True, help="Specimen ID (e.g. EGG001).")

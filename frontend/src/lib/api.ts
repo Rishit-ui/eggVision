@@ -82,7 +82,7 @@ function statusMessage(status: number): string {
     403: 'Permission denied. Your account does not have access to this resource.',
     404: 'The requested EggVision resource was not found.',
     408: 'The EggVision API request timed out. The server may be waking up or processing took too long.',
-    413: 'The selected image is too large. Maximum allowed size is 10 MB.',
+    413: 'The selected image is larger than the server allows. Use a smaller image and try again.',
     422: 'The submitted data is invalid. Please review metadata and try again.',
     429: 'Too many requests. Please wait and try again.',
     500: 'The EggVision backend encountered an unexpected error. Please try again later.',
@@ -96,17 +96,13 @@ function statusMessage(status: number): string {
 
 export function getStoredToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return (
-    window.sessionStorage.getItem('eggvision_access_token') ||
-    window.localStorage.getItem('eggvision_access_token')
-  );
+  return window.sessionStorage.getItem('eggvision_access_token');
 }
 
 export function setStoredToken(token: string): void {
   if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.setItem('eggvision_access_token', token);
-    window.localStorage.setItem('eggvision_access_token', token);
   } catch {
     // Ignore private browsing or storage quota errors
   }
@@ -116,7 +112,6 @@ export function clearStoredToken(): void {
   if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.removeItem('eggvision_access_token');
-    window.localStorage.removeItem('eggvision_access_token');
   } catch {
     // Ignore storage errors
   }

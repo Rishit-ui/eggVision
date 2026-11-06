@@ -6,7 +6,7 @@ area, axes, centroid, aspect ratio, solidity, perimeter, and major-axis orientat
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple, Dict, Any
+
 import cv2
 import numpy as np
 
@@ -21,8 +21,8 @@ class EggGeometry:
     centroid_x: float
     centroid_y: float
     orientation_deg: float  # Angle of major axis relative to vertical (0 = vertical)
-    fitted_ellipse_center: Optional[Tuple[float, float]] = None
-    fitted_ellipse_axes: Optional[Tuple[float, float]] = None
+    fitted_ellipse_center: tuple[float, float] | None = None
+    fitted_ellipse_axes: tuple[float, float] | None = None
     solidity: float = 1.0
     perimeter: float = 0.0
     eccentricity: float = 0.0
@@ -37,8 +37,8 @@ class SegmentationResult:
     geometry: EggGeometry
     success: bool
     status: str = "VALID_CANDIDATE"  # VALID_CANDIDATE, SEGMENTATION_UNCERTAIN, NO_SUBJECT
-    confidence_score: Optional[float] = None
-    error: Optional[str] = None
+    confidence_score: float | None = None
+    error: str | None = None
 
 
 class EggSegmenter:
@@ -82,7 +82,7 @@ class EggSegmenter:
             c1_mask = np.zeros((h, w), dtype=np.uint8)
             c1_mask[coords] = (labels.flatten() == 1).astype(np.uint8) * 255
 
-            def _score_component(m: np.ndarray) -> tuple[float, Optional[np.ndarray]]:
+            def _score_component(m: np.ndarray) -> tuple[float, np.ndarray | None]:
                 cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 if not cnts:
                     return 0.0, None
@@ -122,8 +122,8 @@ class EggSegmenter:
                 envelope_mask = np.zeros((h, w), dtype=np.uint8)
                 cv2.ellipse(
                     envelope_mask,
-                    (int(round(ecx)), int(round(ecy))),
-                    (max(1, int(round(d1 * 0.56))), max(1, int(round(d2 * 0.56)))),
+                    (round(ecx), round(ecy)),
+                    (max(1, round(d1 * 0.56)), max(1, round(d2 * 0.56))),
                     angle,
                     0,
                     360,
@@ -143,7 +143,7 @@ class EggSegmenter:
 
         return working_mask
 
-    def segment(self, image_bgr: np.ndarray, contour_hint: Optional[np.ndarray] = None) -> SegmentationResult:
+    def segment(self, image_bgr: np.ndarray, contour_hint: np.ndarray | None = None) -> SegmentationResult:
         """Segment intact egg and compute geometric characteristics with validation."""
         if image_bgr is None or image_bgr.size == 0:
             empty_mask = np.zeros((1, 1), dtype=np.uint8)
@@ -202,7 +202,7 @@ class EggSegmenter:
 
         area = float(cv2.contourArea(cnt))
         perimeter = float(cv2.arcLength(cnt, True))
-        x, y, bw, bh = cv2.boundingRect(cnt)
+        _x, _y, bw, bh = cv2.boundingRect(cnt)
 
         # Solidity: contour area / convex hull area
         hull = cv2.convexHull(cnt)

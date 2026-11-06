@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, ForeignKey, DateTime, Float, Text, func
+
 from app.models.base import Base
+from sqlalchemy import DateTime, Float, ForeignKey, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column
+
 
 class GroundTruth(Base):
     __tablename__ = "ground_truth"

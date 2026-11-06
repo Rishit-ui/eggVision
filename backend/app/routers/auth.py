@@ -2,15 +2,19 @@
 
 import hmac
 
+from app.config import settings
+from app.database import get_db
+from app.middleware.auth import (
+    create_access_token,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
+from app.models.user import User
+from app.schemas.auth import BootstrapRequest, LoginRequest, TokenResponse, UserResponse
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.config import settings
-from app.database import get_db
-from app.middleware.auth import create_access_token, get_current_user, hash_password, verify_password
-from app.models.user import User
-from app.schemas.auth import BootstrapRequest, LoginRequest, TokenResponse, UserResponse
 
 router = APIRouter(tags=["Authentication"])
 
@@ -41,7 +45,10 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         value=access_token,
         httponly=True,
         secure=settings.APP_ENV.lower() == "production",
-        samesite="none" if settings.APP_ENV.lower() == "production" else "lax",
+        # Browser clients send the bearer token held in session storage for
+        # cross-origin API requests. Keeping the cookie Lax avoids using the
+        # cookie as a cross-site state-changing credential.
+        samesite="lax",
         max_age=settings.JWT_EXPIRY_MINUTES * 60,
     )
     return TokenResponse(access_token=access_token)
@@ -54,7 +61,7 @@ async def logout(response: Response):
         key="eggvision_access_token",
         httponly=True,
         secure=settings.APP_ENV.lower() == "production",
-        samesite="none" if settings.APP_ENV.lower() == "production" else "lax",
+        samesite="lax",
     )
 
 

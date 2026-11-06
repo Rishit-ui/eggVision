@@ -8,7 +8,7 @@ Scientific Rule: Internal freshness / Haugh Unit cannot be predicted without lab
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -55,7 +55,7 @@ def train_classification(
         "epochs": epochs,
         "batch_size": batch_size,
         "learning_rate": lr,
-        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "trained_at": datetime.now(UTC).isoformat(),
         "status": "TRAINED_UNVALIDATED",
         "metrics": {"macro_f1": None, "per_class_precision": {}, "per_class_recall": {}},
     }

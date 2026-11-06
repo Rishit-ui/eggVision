@@ -4,11 +4,6 @@ import uuid
 from pathlib import Path
 from time import perf_counter
 
-from botocore.exceptions import BotoCoreError, ClientError
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.config import settings
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -24,6 +19,20 @@ from app.services.cv_service import cv_service
 from app.services.image_service import image_service
 from app.services.scan_service import scan_service
 from app.services.storage_service import storage_service
+from botocore.exceptions import BotoCoreError, ClientError
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
+from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Scan"])
 logger = logging.getLogger(__name__)
@@ -107,7 +116,7 @@ async def create_scan(
     try:
         metadata_dict = json.loads(metadata) if metadata else {}
         scan_create = ScanCreate(**metadata_dict)
-    except Exception:
+    except (TypeError, ValidationError, json.JSONDecodeError):
         logger.warning("scan_rejected request_id=%s category=invalid_metadata", request_id)
         raise HTTPException(status_code=400, detail="Invalid metadata format")
 
@@ -227,7 +236,7 @@ async def create_scan_direct(
         raise HTTPException(status_code=403, detail="Access to this upload object is not authorized")
 
     try:
-        file_data, content_type = await storage_service.get_image(object_key)
+        file_data, _content_type = await storage_service.get_image(object_key)
     except (FileNotFoundError, ClientError, ValueError):
         logger.exception("scan_failed request_id=%s category=direct_object_fetch", request_id)
         raise HTTPException(status_code=404, detail="Uploaded image was not found or expired")

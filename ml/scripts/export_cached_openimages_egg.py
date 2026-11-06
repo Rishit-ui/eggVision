@@ -264,7 +264,7 @@ def main() -> int:
             with Image.open(source_path) as img:
                 img = ImageOps.exif_transpose(img)
                 width, height = img.size
-        except Exception as exc:
+        except OSError as exc:
             print(f"WARNING: unreadable cached image {image_id}: {exc}")
             continue
 

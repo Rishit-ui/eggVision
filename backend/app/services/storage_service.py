@@ -17,10 +17,9 @@ from pathlib import Path
 
 import aiofiles
 import boto3
+from app.config import settings
 from botocore.config import Config
 from botocore.exceptions import ClientError
-
-from app.config import settings
 
 logger = logging.getLogger(__name__)
 

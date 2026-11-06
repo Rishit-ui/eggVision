@@ -6,6 +6,7 @@ to target canonical dimensions, and extracts bounding coordinates.
 
 import argparse
 from pathlib import Path
+
 import cv2
 import numpy as np
 
