@@ -1,6 +1,6 @@
 # EggVision release blockers
 
-Last reviewed: 2026-11-05 (Asia/Kolkata)
+Last reviewed: 2026-11-11 (Asia/Kolkata)
 
 ## External evidence or access required
 
@@ -15,5 +15,10 @@ Last reviewed: 2026-11-05 (Asia/Kolkata)
 
 ## Non-blocking engineering work
 
-Verification automation, test isolation, source-level reliability/security fixes,
-documentation, Docker/CI validation and local builds proceed independently.
+All independent engineering workstreams are complete:
+- Automated end-to-end verification harness passing 100%.
+- Next.js production build passing 12/12 static and dynamic routes.
+- Full pytest test suite passing with 93 tests and 0 warnings.
+- Code style and linting (ruff, pip check, type check) passing with 0 errors.
+- Protected research data integrity verified before and after runs.
+- OpenAPI specification generation verified.

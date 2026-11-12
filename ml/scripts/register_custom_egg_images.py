@@ -1,4 +1,4 @@
-'''register_custom_egg_images.py
+"""register_custom_egg_images.py
 
 Command‑line helper to safely register user‑provided photographs of individual, shell‑on chicken eggs
 into the ``ml/data/custom_collection`` area.
@@ -9,7 +9,7 @@ manifest files (``images.csv`` and ``specimens.csv``).
 
 All paths are derived from the repository root (``REPO_ROOT``).  For testing a custom root can be
 passed to :func:`register_image` so that the real project data are never touched.
-'''  
+"""
 
 import argparse
 import csv

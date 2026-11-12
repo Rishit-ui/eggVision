@@ -1,4 +1,4 @@
-'''prepare_egg_dataset.py
+"""prepare_egg_dataset.py
 Utility script to finalize the Phase 2 dataset audit and organise the existing five Open Images samples.
 
 Steps performed:
@@ -23,7 +23,7 @@ Steps performed:
    Empty categories are still created for future use.
 
 Running the script is safe – it only reads existing files and writes the updated CSV and copies images.
-'''  
+"""
 
 import base64
 import csv

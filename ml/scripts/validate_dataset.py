@@ -10,6 +10,7 @@ Checks for:
 
 import argparse
 import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -46,7 +47,12 @@ def validate_yolo_bbox(line: str, line_no: int, filepath: Path, num_classes: int
 
 
 def validate_dataset(data_dir: Path, num_classes: int = 1) -> dict:
-    images_dir = data_dir / "images"
+    if (data_dir / "images").exists():
+        images_dir = data_dir / "images"
+    elif (data_dir / "raw").exists():
+        images_dir = data_dir / "raw"
+    else:
+        images_dir = data_dir
     labels_dir = data_dir / "labels"
 
     stats = {
@@ -110,9 +116,14 @@ def main():
     parser = argparse.ArgumentParser(description="Validate dataset integrity for EggVision AI")
     parser.add_argument("--data-dir", type=Path, default=Path("ml/data"), help="Path to dataset root")
     parser.add_argument("--num-classes", type=int, default=1, help="Expected number of classes")
+    parser.add_argument("--output", type=Path, default=None, help="Path to write JSON validation report")
     args = parser.parse_args()
 
     results = validate_dataset(args.data_dir, args.num_classes)
+    if args.output:
+        args.output.write_text(json.dumps(results, indent=2), encoding="utf-8")
+        print(f"Validation report written to {args.output}")
+
     print("--- EggVision Dataset Validation Results ---")
     print(f"Valid images: {results['valid_images']}")
     print(f"Corrupt images: {results['corrupt_images']}")

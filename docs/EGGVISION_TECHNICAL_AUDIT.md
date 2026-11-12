@@ -1,8 +1,8 @@
 # EggVision AI — Comprehensive Technical Audit
 
-**Date:** October 31, 2026  
-**Auditor:** Principal Computer Vision, ML & Full-Stack System Architect  
-**Repository:** `https://github.com/Rishit-ui/eggVision`  
+**Date:** October 31, 2026
+**Auditor:** Principal Computer Vision, ML & Full-Stack System Architect
+**Repository:** `https://github.com/Rishit-ui/eggVision`
 **Target Environments:** Vercel Hobby (Frontend + Serverless Backend), Supabase Free (PostgreSQL + S3 Storage), Upstash Free (Redis)
 
 ---

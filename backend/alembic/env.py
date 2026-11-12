@@ -1,5 +1,15 @@
 import asyncio
+import os
+import sys
 from logging.config import fileConfig
+
+# Ensure the repository root and backend directory are on PYTHONPATH for imports
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+backend_path = os.path.join(repo_root, 'backend')
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+if backend_path not in sys.path:
+    sys.path.append(backend_path)
 
 from alembic import context
 from app.config import settings
