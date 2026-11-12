@@ -1,0 +1,8 @@
+{
+  "valid_images": 5,
+  "corrupt_images": 0,
+  "missing_labels": 0,
+  "duplicate_images": 0,
+  "class_counts": {},
+  "errors": []
+}

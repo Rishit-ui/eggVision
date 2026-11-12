@@ -1,8 +1,10 @@
 import uuid
 from datetime import date, datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, ForeignKey, Date, DateTime, func
+
 from app.models.base import Base
+from sqlalchemy import Date, DateTime, ForeignKey, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+
 
 class Egg(Base):
     __tablename__ = "eggs"

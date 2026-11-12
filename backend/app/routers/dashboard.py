@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.database import get_db
 from app.models.prediction import Prediction
 from app.models.scan import Scan
 from app.schemas.common import CountByLabel
 from app.schemas.dashboard import DashboardResponse
 from app.services.prediction_service import inference_engine
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Dashboard"])
 

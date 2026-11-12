@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 300,
+        "memory": 3009,
+        "runtime": "python3.12"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "env": {
+    "APP_ENV": "production",
+    "DEBUG": "false",
+    "AUTH_REQUIRED": "true",
+    "S3_REQUIRED": "true",
+    "DIRECT_UPLOAD_ENABLED": "true",
+    "UPLOAD_MAX_SIZE_MB": "20",
+    "UPLOAD_MAX_PIXELS": "25000000",
+    "DB_POOL_SIZE": "2",
+    "DB_MAX_OVERFLOW": "0",
+    "S3_CONNECT_TIMEOUT_SECONDS": "10",
+    "S3_READ_TIMEOUT_SECONDS": "30"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

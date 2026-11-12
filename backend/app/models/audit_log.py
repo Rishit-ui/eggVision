@@ -1,9 +1,11 @@
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, ForeignKey, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB
+
 from app.models.base import Base
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
+
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"

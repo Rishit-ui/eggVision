@@ -8,14 +8,14 @@ Orchestrates:
 """
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
-import numpy as np
-import cv2
+from typing import Any
 
-from .quality import ImageQualityAssessor, QualityReport, QualityWarning
-from .detector import EggDetector, DetectionResult
-from .segmentation import EggSegmenter, SegmentationResult, EggGeometry
+import numpy as np
+
+from .detector import DetectionResult, EggDetector
 from .normalizer import EggNormalizer, NormalizationResult
+from .quality import ImageQualityAssessor, QualityReport, QualityWarning
+from .segmentation import EggSegmenter, SegmentationResult
 
 
 @dataclass
@@ -23,12 +23,12 @@ class PipelineResult:
     """End-to-end outcome of computer vision processing on an egg image."""
     quality: QualityReport
     detection: DetectionResult
-    segmentation: Optional[SegmentationResult] = None
-    normalization: Optional[NormalizationResult] = None
+    segmentation: SegmentationResult | None = None
+    normalization: NormalizationResult | None = None
     can_proceed_to_inference: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert pipeline results to JSON-serializable dictionary."""
         out = {
             "image_quality": self.quality.image_quality,
@@ -52,7 +52,11 @@ class PipelineResult:
                 "detections": [],
                 "limitations": [
                     "No trained, validated egg detector is installed.",
-                    "A contour compatible with the chamber silhouette is not proof that an egg is present.",
+                    (
+                        "A contour compatible with the candling chamber silhouette is not proof that an egg is present."
+                        if self.detection.capture_mode == "controlled_candling"
+                        else "A candidate contour is an optical shape observation and does not prove that an egg is present."
+                    ),
                     "Capture-quality measurements are engineering screening metrics, not AI confidence or egg-quality predictions.",
                     "No defect, freshness, spoilage, contamination, or food-safety assessment was performed.",
                 ],
@@ -67,7 +71,11 @@ class PipelineResult:
                 "height": geo.height,
                 "aspect_ratio": geo.aspect_ratio,
                 "centroid": [geo.centroid_x, geo.centroid_y],
-                "orientation_deg": geo.orientation_deg
+                "orientation_deg": geo.orientation_deg,
+                "solidity": geo.solidity,
+                "perimeter": geo.perimeter,
+                "eccentricity": geo.eccentricity,
+                "segmentation_status": geo.segmentation_status,
             }
         return out
 
@@ -77,10 +85,10 @@ class VisionPipeline:
 
     def __init__(
         self,
-        assessor: Optional[ImageQualityAssessor] = None,
-        detector: Optional[EggDetector] = None,
-        segmenter: Optional[EggSegmenter] = None,
-        normalizer: Optional[EggNormalizer] = None
+        assessor: ImageQualityAssessor | None = None,
+        detector: EggDetector | None = None,
+        segmenter: EggSegmenter | None = None,
+        normalizer: EggNormalizer | None = None
     ):
         self.assessor = assessor or ImageQualityAssessor()
         self.detector = detector or EggDetector()

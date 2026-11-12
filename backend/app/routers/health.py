@@ -3,14 +3,16 @@ import logging
 from time import perf_counter
 
 import redis.asyncio as redis
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
+from app.config import settings
 from app.database import get_db
 from app.schemas.health import HealthResponse, ServiceStatus
-from app.config import settings
 from app.services.prediction_service import inference_engine
 from app.services.storage_service import storage_service
+from fastapi import APIRouter, Depends
+from redis.exceptions import RedisError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Health"])
 logger = logging.getLogger(__name__)
@@ -25,7 +27,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
             db.execute(text("SELECT 1")), timeout=settings.HEALTHCHECK_TIMEOUT_SECONDS
         )
         db_latency = round((perf_counter() - started) * 1000, 2)
-    except Exception as error:
+    except (OSError, SQLAlchemyError, TimeoutError) as error:
         logger.warning("Database health check failed: %s", type(error).__name__)
         db_status = "error"
 
@@ -37,7 +39,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         started = perf_counter()
         await asyncio.wait_for(client.ping(), timeout=settings.HEALTHCHECK_TIMEOUT_SECONDS)
         redis_latency = round((perf_counter() - started) * 1000, 2)
-    except Exception as error:
+    except (OSError, RedisError, TimeoutError) as error:
         logger.warning("Redis health check failed: %s", type(error).__name__)
         redis_status = "error"
     finally:

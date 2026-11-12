@@ -3,20 +3,18 @@ Tests for Memory Optimization, Bounded Image Scaling, and Semaphore Concurrency.
 Verifies that EggVision operates reliably under low-memory constraints (Render 512 MB).
 """
 
-import asyncio
 import gc
 import tracemalloc
-import numpy as np
-import cv2
-import pytest
 
-from ml.vision.detector import EggDetector, ScreeningThresholds
-from ml.vision.pipeline import VisionPipeline
+import cv2
+import numpy as np
+import pytest
 from app.services.cv_service import (
-    CVService,
-    _decode_and_bound_image,
     MAX_WORKING_DIM,
+    _decode_and_bound_image,
 )
+
+from ml.vision.detector import EggDetector
 
 
 def test_decode_and_bound_image_preserves_smaller_images():
@@ -66,7 +64,7 @@ def test_detector_lab_distance_memory_budget():
     gc.collect()
     tracemalloc.start()
     masks = detector._candidate_masks(img, gray, "general_photograph")
-    current, peak = tracemalloc.get_traced_memory()
+    _current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
 
     peak_mb = peak / (1024 * 1024)

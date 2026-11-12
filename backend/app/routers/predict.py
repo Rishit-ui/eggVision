@@ -1,10 +1,9 @@
-import uuid
+from app.database import get_db
+from app.schemas.prediction import PredictionResponse, PredictRequest
+from app.services.prediction_service import prediction_service
+from app.services.scan_service import scan_service
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import get_db
-from app.schemas.prediction import PredictRequest, PredictionResponse
-from app.services.scan_service import scan_service
-from app.services.prediction_service import prediction_service
 
 router = APIRouter(tags=["Predict"])
 

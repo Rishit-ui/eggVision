@@ -3,6 +3,7 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   poweredByHeader: false,
+  cleanDistDir: false,
   images: {
     remotePatterns: [
       {
@@ -14,4 +15,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

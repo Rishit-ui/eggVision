@@ -2,7 +2,6 @@
 
 import bcrypt
 import passlib
-
 from app.middleware.auth import hash_password, verify_password
 
 

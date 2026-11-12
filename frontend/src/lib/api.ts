@@ -10,7 +10,8 @@ import type {
 } from './types';
 
 export const LOCAL_API_BASE_URL = 'http://localhost:8000/api/v1';
-export const PRODUCTION_API_BASE_URL = 'https://eggvision-1.onrender.com/api/v1';
+// Updated to the Vercel backend deployment (no Render dependency in production)
+export const PRODUCTION_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eggvision-1.onrender.com/api/v1';
 
 function normalizeApiBaseUrl(value: string): string {
   const trimmed = value.trim().replace(/\/+$/, '');
@@ -40,11 +41,10 @@ export function resolveApiBaseUrl(environment = process.env.NODE_ENV, configured
 }
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
+  status: number;
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
     this.name = 'ApiError';
   }
 }
@@ -81,7 +81,7 @@ function statusMessage(status: number): string {
     403: 'Permission denied. Your account does not have access to this resource.',
     404: 'The requested EggVision resource was not found.',
     408: 'The EggVision API request timed out. The server may be waking up or processing took too long.',
-    413: 'The selected image is too large. Maximum allowed size is 10 MB.',
+    413: 'The selected image is larger than the server allows. Use a smaller image and try again.',
     422: 'The submitted data is invalid. Please review metadata and try again.',
     429: 'Too many requests. Please wait and try again.',
     500: 'The EggVision backend encountered an unexpected error. Please try again later.',
@@ -95,17 +95,13 @@ function statusMessage(status: number): string {
 
 export function getStoredToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return (
-    window.sessionStorage.getItem('eggvision_access_token') ||
-    window.localStorage.getItem('eggvision_access_token')
-  );
+  return window.sessionStorage.getItem('eggvision_access_token');
 }
 
 export function setStoredToken(token: string): void {
   if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.setItem('eggvision_access_token', token);
-    window.localStorage.setItem('eggvision_access_token', token);
   } catch {
     // Ignore private browsing or storage quota errors
   }
@@ -115,7 +111,6 @@ export function clearStoredToken(): void {
   if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.removeItem('eggvision_access_token');
-    window.localStorage.removeItem('eggvision_access_token');
   } catch {
     // Ignore storage errors
   }
@@ -243,8 +238,15 @@ export const api = {
     image: File,
     metadata?: object,
   ): Promise<ScanResponse> {
-    const formData = new FormData();
+    // Images over 4 MB use the presigned direct-upload path to bypass
+    // Vercel's 4.5 MB request-body limit for serverless functions.
+    const DIRECT_THRESHOLD_BYTES = 4 * 1024 * 1024; // 4 MB
 
+    if (image.size > DIRECT_THRESHOLD_BYTES) {
+      return this._directUploadScan(image, metadata);
+    }
+
+    const formData = new FormData();
     formData.append('image', image);
     formData.append('metadata', JSON.stringify(metadata || {}));
 
@@ -253,6 +255,43 @@ export const api = {
     return fetchWithHandler('/scan', {
       method: 'POST',
       body: formData,
+    });
+  },
+
+  async _directUploadScan(
+    image: File,
+    metadata?: object,
+  ): Promise<ScanResponse> {
+    // Step 1: Request a presigned PUT URL from the backend
+    const urlRes = await fetchWithHandler('/scan/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: image.name,
+        content_type: image.type || 'image/jpeg',
+        file_size: image.size,
+      }),
+    });
+
+    // Step 2: PUT the file directly to Supabase Storage (bypasses Vercel body limit)
+    const putResponse = await fetch(urlRes.upload_url, {
+      method: 'PUT',
+      headers: { 'Content-Type': image.type || 'image/jpeg' },
+      body: image,
+    });
+
+    if (!putResponse.ok) {
+      throw new ApiError(putResponse.status, 'Direct image upload to storage failed. Please try again.');
+    }
+
+    // Step 3: Confirm scan with the object key (backend fetches from S3 & runs CV)
+    return fetchWithHandler('/scan/direct', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        object_key: urlRes.object_key,
+        metadata: metadata || {},
+      }),
     });
   },
 

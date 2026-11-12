@@ -5,9 +5,10 @@ and optical contrast normalization while preserving internal biological signals.
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+
 import cv2
 import numpy as np
+
 from .segmentation import EggGeometry
 
 
@@ -18,9 +19,9 @@ class NormalizationResult:
     normalized_mask: np.ndarray   # Canonical 512x512 binary mask
     clahe_image: np.ndarray        # CLAHE enhanced 512x512 image
     rotation_angle_applied: float
-    canonical_size: Tuple[int, int]
+    canonical_size: tuple[int, int]
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class EggNormalizer:
@@ -114,10 +115,10 @@ class EggNormalizer:
 
         # 5. CLAHE (Contrast Limited Adaptive Histogram Equalization) on LAB L-channel
         lab = cv2.cvtColor(canvas_img, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
+        l_chan, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=self.clahe_clip_limit, tileGridSize=self.clahe_tile_grid)
         # Apply CLAHE only inside egg mask to preserve black background
-        l_clahe = clahe.apply(l)
+        l_clahe = clahe.apply(l_chan)
         l_final = np.where(canvas_mask > 0, l_clahe, 0)
         lab_clahe = cv2.merge((l_final, a, b))
         clahe_bgr = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)

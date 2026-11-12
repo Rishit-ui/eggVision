@@ -1,7 +1,9 @@
 import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+
 from app.models.prediction import Prediction
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from ml.inference.placeholder import PlaceholderEngine
 
 inference_engine = PlaceholderEngine()

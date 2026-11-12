@@ -1,5 +1,6 @@
-from datetime import datetime
-from typing import Generic, TypeVar, Any
+from datetime import UTC, datetime
+from typing import Generic, TypeVar
+
 from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
@@ -7,7 +8,7 @@ T = TypeVar("T")
 class StatusResponse(BaseModel):
     status: str
     message: str | None = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     
     model_config = ConfigDict(from_attributes=True)
 

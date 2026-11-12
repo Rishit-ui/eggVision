@@ -1,29 +1,8 @@
-"""Execution-path tests for scan service logic, error handling, and response behavior.
+"""Execution-path tests for scan service logic, error handling and responses.
 
-Sandbox constraint
-------------------
-This environment (Windows sandbox, Python 3.12, pytest-asyncio 1.4.1) does not
-support running asyncio event loops inside pytest worker processes — any attempt
-to run ``asyncio.run()`` or an ``async def`` test blocks indefinitely due to a
-ProactorEventLoop restriction in the sandboxed process.
-
-Strategy
---------
-* Sync-only tests (``def test_…``) exercise as much of the route and service
-  logic as possible without an event loop.
-* Tests that intrinsically require a running event loop (the route handler and
-  concurrency test) are marked ``skip`` with an explicit reason, and documented
-  below so they can be run in a normal development environment.
-* No test makes real network, S3, or database calls.
-
-Running the async tests outside the sandbox
--------------------------------------------
-In a normal development shell (not inside the sandbox):
-
-    $env:PYTHONPATH = "$PWD\\backend;$PWD"
-    backend\\.venv\\Scripts\\pytest.exe tests/backend/test_scan_execution.py -v
-
-All 14 tests should pass; in the sandbox only the 8 sync tests run.
+No test makes a real network, object-storage or database call. Async route and
+event-loop checks are first-class tests and must run in every supported
+environment rather than being conditionally skipped.
 """
 
 import asyncio
@@ -31,53 +10,21 @@ import io
 import json
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import cv2
 import numpy as np
 import pytest
-from fastapi import HTTPException, Response, UploadFile
-from sqlalchemy.exc import SQLAlchemyError
-from starlette.datastructures import Headers
-from starlette.requests import Request
-
 from app.routers import scan as scan_router
 from app.schemas.scan import ScanCreate
 from app.services.cv_service import CVService
 from app.services.scan_service import ScanService
-
-
-# ---------------------------------------------------------------------------
-# Environment probe
-# ---------------------------------------------------------------------------
-
-def _event_loop_works() -> bool:
-    """Return True if asyncio.run() completes within 2 s in this process."""
-    import concurrent.futures
-    import threading
-
-    result: list[bool] = []
-
-    def _run():
-        try:
-            asyncio.run(asyncio.sleep(0))
-            result.append(True)
-        except Exception:
-            result.append(False)
-
-    t = threading.Thread(target=_run, daemon=True)
-    t.start()
-    t.join(timeout=2.0)
-    return bool(result and result[0])
-
-
-_ASYNC_AVAILABLE = _event_loop_works()
-_ASYNC_SKIP_REASON = (
-    "asyncio event loop hangs in this Windows sandbox process; "
-    "run these tests in a normal development shell"
-)
+from fastapi import HTTPException, Response, UploadFile
+from sqlalchemy.exc import SQLAlchemyError
+from starlette.datastructures import Headers
+from starlette.requests import Request
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -119,7 +66,7 @@ def make_request(request_id: str = "scan-test-123") -> Request:
 
 
 def persisted_scan() -> SimpleNamespace:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return SimpleNamespace(
         id=uuid.uuid4(),
         egg_id=None,
@@ -186,10 +133,7 @@ def test_database_failure_rolls_back_without_partial_scan_record():
     """ScanService.create_scan must roll back and re-raise on flush failure."""
 
     class FakeSyncSession:
-        """Minimal session stub whose awaitable methods are driven by asyncio.run
-        ONLY when the event loop is available; otherwise skipped via a
-        sync-path reimplementation below.
-        """
+        """Minimal async-session stub that fails while flushing the scan."""
         def __init__(self):
             self.added: list = []
             self.rolled_back = False
@@ -211,31 +155,10 @@ def test_database_failure_rolls_back_without_partial_scan_record():
             pass
 
     db = FakeSyncSession()
-    if _ASYNC_AVAILABLE:
-        with pytest.raises(SQLAlchemyError):
-            asyncio.run(ScanService().create_scan(db, "/uploads/original.jpg", ScanCreate()))
-        assert db.rolled_back is True
-        assert len(db.added) == 1
-    else:
-        # Verify the structure manually — add is sync, so we can confirm it runs.
-        # The key invariant is: add() is called before flush(), and rollback()
-        # must be called on failure. We validate this by examining the source.
-        import inspect
-        src = inspect.getsource(ScanService.create_scan)
-        assert "db.add(scan)" in src
-        assert "await db.flush()" in src
-        assert "await db.rollback()" in src
-        assert "raise" in src
-        # And we confirm a Scan would be added via the sync add call:
-        service = ScanService()
-        from app.models.scan import Scan
-        # Verify model construction doesn't crash
-        scan = Scan(
-            original_image_url="/uploads/test.jpg",
-            image_quality_warnings=[],
-        )
-        db.add(scan)
-        assert len(db.added) == 1
+    with pytest.raises(SQLAlchemyError):
+        asyncio.run(ScanService().create_scan(db, "/uploads/original.jpg", ScanCreate()))
+    assert db.rolled_back is True
+    assert len(db.added) == 1
 
 
 def test_scan_service_source_uses_single_commit():
@@ -275,7 +198,8 @@ def test_scan_router_source_returns_correlation_id_header():
 
 def test_scan_router_source_never_logs_sensitive_data():
     """Router log calls must never include sensitive parameter names."""
-    import inspect, re
+    import inspect
+    import re
     src = inspect.getsource(scan_router.create_scan)
     # Extract only the arguments passed to logger.info / logger.warning /
     # logger.exception calls — not comments or docstrings.
@@ -298,6 +222,7 @@ def test_cv_service_uses_asyncio_to_thread_for_pipeline():
 def test_storage_service_uses_asyncio_to_thread_for_s3():
     """StorageService.upload_image must use asyncio.to_thread for boto3 calls."""
     import inspect
+
     from app.services.storage_service import StorageService
     src = inspect.getsource(StorageService.upload_image)
     assert "asyncio.to_thread" in src
@@ -305,17 +230,16 @@ def test_storage_service_uses_asyncio_to_thread_for_s3():
 
 def test_no_real_io_required():
     """Importing route/service modules must not open sockets or files."""
-    import app.routers.scan            # noqa: F401
-    import app.services.cv_service     # noqa: F401
-    import app.services.scan_service   # noqa: F401
+    import app.routers.scan
+    import app.services.cv_service
+    import app.services.scan_service
     import app.services.storage_service  # noqa: F401
 
 
 # ---------------------------------------------------------------------------
-# Async tests — conditionally skipped in the sandbox
+# Async tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_successful_scan_with_mocked_pipeline_and_response_serialization():
     """Happy-path route call: all dependencies mocked; no real I/O."""
     scan = persisted_scan()
@@ -347,7 +271,6 @@ async def test_successful_scan_with_mocked_pipeline_and_response_serialization()
     )
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_correlation_id_is_returned_in_response_header():
     scan = persisted_scan()
     resp = Response()
@@ -370,7 +293,6 @@ async def test_correlation_id_is_returned_in_response_header():
     assert resp.headers.get("X-Request-ID") == "header-id-abc"
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_slow_pipeline_runs_without_blocking_event_loop():
     """A 150 ms synchronous pipeline must not starve concurrent coroutines."""
     service = CVService()
@@ -401,7 +323,6 @@ async def test_slow_pipeline_runs_without_blocking_event_loop():
     )
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_cv_exception_is_logged_and_returned_as_safe_502():
     with (
         patch.object(scan_router.image_service, "validate_image", return_value=(True, "Valid image")),
@@ -418,7 +339,6 @@ async def test_cv_exception_is_logged_and_returned_as_safe_502():
     assert any("category=cv_processing" in call.args[0] for call in exception_log.call_args_list)
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_original_storage_failure_is_logged_and_returned_as_safe_502():
     with (
         patch.object(scan_router.image_service, "validate_image", return_value=(True, "Valid image")),
@@ -433,7 +353,6 @@ async def test_original_storage_failure_is_logged_and_returned_as_safe_502():
     assert any("category=original_image_storage" in call.args[0] for call in exception_log.call_args_list)
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_normalized_storage_failure_propagates_as_502():
     from botocore.exceptions import BotoCoreError
 
@@ -453,7 +372,6 @@ async def test_normalized_storage_failure_propagates_as_502():
     assert exc_info.value.status_code == 502
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_db_failure_in_router_returns_503_not_fake_scan():
     with (
         patch.object(scan_router.image_service, "validate_image", return_value=(True, "Valid image")),
@@ -476,7 +394,6 @@ async def test_db_failure_in_router_returns_503_not_fake_scan():
     assert any("category=postgres_persistence" in call.args[0] for call in exception_log.call_args_list)
 
 
-@pytest.mark.skipif(not _ASYNC_AVAILABLE, reason=_ASYNC_SKIP_REASON)
 async def test_timing_logs_emitted_for_all_mandatory_stages():
     scan = persisted_scan()
     mandatory_stages = {

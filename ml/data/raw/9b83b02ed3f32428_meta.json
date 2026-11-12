@@ -1,0 +1,53 @@
+{
+  "image_id": "9b83b02ed3f32428",
+  "dataset": "Open Images V7",
+  "subset": "train",
+  "label_mid": "/m/033cnk",
+  "label_name": "Egg (Food)",
+  "image_path": "ml/data/raw/9b83b02ed3f32428.jpg",
+  "width": 1024,
+  "height": 1024,
+  "original_url": "https://c1.staticflickr.com/9/8489/8208985874_ef4b6beb09_o.jpg",
+  "original_landing_url": "https://www.flickr.com/photos/gravel72/8208985874",
+  "license_url": "https://creativecommons.org/licenses/by/2.0/",
+  "author": "gravel72",
+  "author_profile_url": "https://www.flickr.com/people/gravel72/",
+  "title": "The perfect breakfast",
+  "original_size": "83508",
+  "original_md5_base64": "Wza3vi9535GziRkzGw2m0A==",
+  "computed_md5_base64": "bjXNSe8zLcSXR+h1sLsmIw==",
+  "original_md5_matches": false,
+  "rotation_degrees": "0.0",
+  "detection_boxes_normalized": [
+    {
+      "label_mid": "/m/033cnk",
+      "label_name": "Egg (Food)",
+      "source": "xclick",
+      "confidence": "1",
+      "xmin": 0.460784,
+      "xmax": 0.818627,
+      "ymin": 0.26634,
+      "ymax": 0.666667,
+      "is_occluded": "1",
+      "is_truncated": "0",
+      "is_group_of": "0",
+      "is_depiction": "0",
+      "is_inside": "0"
+    },
+    {
+      "label_mid": "/m/033cnk",
+      "label_name": "Egg (Food)",
+      "source": "xclick",
+      "confidence": "1",
+      "xmin": 0.712418,
+      "xmax": 0.998366,
+      "ymin": 0.349673,
+      "ymax": 0.815359,
+      "is_occluded": "0",
+      "is_truncated": "1",
+      "is_group_of": "0",
+      "is_depiction": "0",
+      "is_inside": "0"
+    }
+  ]
+}

@@ -32,7 +32,7 @@ export function ImageUploader({ onImageSelected, className }: ImageUploaderProps
       if (isValidImage(file)) {
         onImageSelected(file);
       } else {
-        alert("Please upload a valid image file (JPG, PNG, WebP) under 10MB.");
+        alert("Please upload a valid image file (JPG, PNG, WebP) under 20MB.");
       }
     }
   };
@@ -43,14 +43,14 @@ export function ImageUploader({ onImageSelected, className }: ImageUploaderProps
       if (isValidImage(file)) {
         onImageSelected(file);
       } else {
-        alert("Please upload a valid image file (JPG, PNG, WebP) under 10MB.");
+        alert("Please upload a valid image file (JPG, PNG, WebP) under 20MB.");
       }
     }
   };
   
   const isValidImage = (file: File) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 20 * 1024 * 1024; // 20MB
     return validTypes.includes(file.type) && file.size <= maxSize;
   };
   
@@ -88,7 +88,7 @@ export function ImageUploader({ onImageSelected, className }: ImageUploaderProps
             Drag & drop an egg image or click to browse
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Supports JPG, PNG, WebP • Max 10MB
+            Supports JPG, PNG, WebP • Max 20MB
           </p>
         </div>
         

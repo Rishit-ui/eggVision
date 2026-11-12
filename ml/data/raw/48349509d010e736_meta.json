@@ -1,0 +1,38 @@
+{
+  "image_id": "48349509d010e736",
+  "dataset": "Open Images V7",
+  "subset": "train",
+  "label_mid": "/m/033cnk",
+  "label_name": "Egg (Food)",
+  "image_path": "ml/data/raw/48349509d010e736.jpg",
+  "width": 1024,
+  "height": 1024,
+  "original_url": "https://farm7.staticflickr.com/3928/15379644922_b80c26c3da_o.jpg",
+  "original_landing_url": "https://www.flickr.com/photos/aashimtyagi/15379644922",
+  "license_url": "https://creativecommons.org/licenses/by/2.0/",
+  "author": "Aashim Tyagi",
+  "author_profile_url": "https://www.flickr.com/people/aashimtyagi/",
+  "title": "Galaxy",
+  "original_size": "125561",
+  "original_md5_base64": "Pybhsfw+Vm0p/meFXKOHOw==",
+  "computed_md5_base64": "Fy/vfxtMs6uAwvSxchP1+A==",
+  "original_md5_matches": false,
+  "rotation_degrees": "0.0",
+  "detection_boxes_normalized": [
+    {
+      "label_mid": "/m/033cnk",
+      "label_name": "Egg (Food)",
+      "source": "xclick",
+      "confidence": "1",
+      "xmin": 0.05,
+      "xmax": 0.9625,
+      "ymin": 0.309375,
+      "ymax": 0.970312,
+      "is_occluded": "1",
+      "is_truncated": "0",
+      "is_group_of": "1",
+      "is_depiction": "0",
+      "is_inside": "0"
+    }
+  ]
+}

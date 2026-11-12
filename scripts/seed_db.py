@@ -2,6 +2,7 @@
 
 import asyncio
 
+
 async def seed():
     print("Seeding database with sample farm, device, and model version...")
     # Placeholder for actual DB connection and ORM logic
