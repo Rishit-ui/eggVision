@@ -73,13 +73,20 @@ Docker CLI v29.8.2 is installed but the Docker Engine daemon is not running (`op
 
 ## Alembic Migration Note
 
-`backend/alembic.ini` now references `script_location = backend/alembic` (corrected from bare `alembic`) so that migrations can be run from the repository root. `backend/alembic/env.py` injects `backend/` onto `sys.path` at load time with `# noqa: E402` to avoid ruff false positives.
+`backend/alembic.ini` references `script_location = %(here)s/alembic` (using Alembic's `%(here)s` directive to resolve relative to `alembic.ini`'s folder, ensuring migrations can be run both from the repository root as `alembic -c backend/alembic.ini` and from inside `backend` as `alembic -c alembic.ini` without path resolution errors on deployment platforms such as Render). `backend/alembic/env.py` injects `backend/` onto `sys.path` at load time with `# noqa: E402` to avoid ruff false positives.
 
 To run migrations against a live Postgres instance:
 
+From repository root:
 ```powershell
 $env:DATABASE_URL = "postgresql+asyncpg://user:pass@host:5432/dbname"
 backend\.venv\Scripts\python.exe -m alembic -c backend\alembic.ini upgrade head
+```
+
+From inside `backend`:
+```powershell
+$env:DATABASE_URL = "postgresql+asyncpg://user:pass@host:5432/dbname"
+.\.venv\Scripts\python.exe -m alembic -c alembic.ini upgrade head
 ```
 
 ---
