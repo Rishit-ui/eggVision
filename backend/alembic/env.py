@@ -3,7 +3,10 @@ import os
 import sys
 from logging.config import fileConfig
 
-# Ensure the repository root and backend directory are on PYTHONPATH for imports
+# Ensure the repository root and backend directory are on PYTHONPATH.
+# This sys.path manipulation must precede the app imports below; the noqa
+# comments silence ruff E402 (module-level import not at top of file) which
+# would otherwise flag the deferred imports as style violations.
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 backend_path = os.path.join(repo_root, 'backend')
 if repo_root not in sys.path:
@@ -11,11 +14,11 @@ if repo_root not in sys.path:
 if backend_path not in sys.path:
     sys.path.append(backend_path)
 
-from alembic import context
-from app.config import settings
-from app.models.base import Base
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from alembic import context  # noqa: E402
+from app.config import settings  # noqa: E402
+from app.models.base import Base  # noqa: E402
+from sqlalchemy import pool  # noqa: E402
+from sqlalchemy.ext.asyncio import async_engine_from_config  # noqa: E402
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
