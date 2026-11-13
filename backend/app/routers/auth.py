@@ -8,11 +8,13 @@ from app.middleware.auth import (
     create_access_token,
     get_current_user,
     hash_password,
+    require_admin,
     verify_password,
 )
+from app.middleware.rate_limit import get_client_ip, login_rate_limiter
 from app.models.user import User
 from app.schemas.auth import BootstrapRequest, LoginRequest, TokenResponse, UserResponse
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,7 +37,14 @@ async def bootstrap_admin(payload: BootstrapRequest, db: AsyncSession = Depends(
 
 
 @router.post("/auth/login", response_model=TokenResponse)
-async def login(payload: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(
+    payload: LoginRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    client_ip = get_client_ip(request)
+    await login_rate_limiter.check(client_ip)
     user = (await db.execute(select(User).where(User.email == str(payload.email).lower()))).scalar_one_or_none()
     if user is None or not user.is_active or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
@@ -70,3 +79,13 @@ async def me(current_user: User | None = Depends(get_current_user)):
     if current_user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication is disabled for local development")
     return current_user
+
+
+@router.get("/admin/users", response_model=list[UserResponse])
+async def list_users(
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve user directory. Strictly requires administrator role."""
+    result = await db.execute(select(User).order_by(User.created_at.desc()))
+    return list(result.scalars().all())

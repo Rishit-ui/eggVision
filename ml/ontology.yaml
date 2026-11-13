@@ -1,0 +1,73 @@
+version: "1.0.0"
+title: "EggVision Visible Shell Defect & Surface Screening Ontology"
+task_type: "visible_shell_condition_screening"
+target: "individual_intact_shell_on_eggs"
+disclaimer: >
+  This visual-inspection ontology evaluates only exterior calcium-carbonate shell integrity
+  and visible surface presentation. It does not certify microbiological safety, freedom from
+  foodborne pathogens (Salmonella, E. coli), internal freshness, or regulatory commercial grade.
+
+multi_label_allowed: true
+primary_categories:
+  - id: 0
+    key: "no_visible_defect"
+    display_name: "No Visible External Defect"
+    description: >
+      Intact, structurally sound shell with normal surface texture and uniform appearance.
+      No visible fractures, structural micro-cracks, puncture breaks, abnormal chalkiness, or soiling.
+    eligibility_criteria:
+      - Continuous calcium-carbonate contour.
+      - Free from visible fractures under standard diffuse optical illumination.
+      - Total surface foreign matter area < 1% of visible shell surface.
+    exclusions:
+      - Does not imply internal albumen/yolk freshness or absence of microbial pathogens.
+
+  - id: 1
+    key: "crack_line"
+    display_name: "Visible Crack / Hairline Fracture"
+    description: >
+      Linear or branched fracture, hairline crack, or star-crack in the mineral shell
+      without gross structural displacement or ruptured membrane.
+    eligibility_criteria:
+      - Distinct line of fracture visible on shell surface.
+      - Intact or slightly depressed shell fragments without complete shell detachment.
+    severity_levels: ["hairline", "moderate", "star_crack"]
+
+  - id: 2
+    key: "shell_puncture_break"
+    display_name: "Chip / Puncture / Gross Break"
+    description: >
+      Mechanical puncture, crushed shell region, chip, or missing shell fragment exposing
+      the outer shell membrane or resulting in internal content leakage.
+    eligibility_criteria:
+      - Physical loss of shell continuity with exposed or torn membrane.
+      - Gross structural compromise.
+    severity_levels: ["chip", "puncture", "severe_break"]
+
+  - id: 3
+    key: "surface_soiling_stain"
+    display_name: "Dirt / Stain / Surface Soiling"
+    description: >
+      Extraneous matter adhering to the outer shell cuticle, including organic litter,
+      fecal contamination, blood smears, yolk leakage stains, or nest material.
+    eligibility_criteria:
+      - Foreign matter deposit covering >= 1% of visible projection area.
+    severity_levels: ["spot", "moderate_stain", "heavy_soiling"]
+
+  - id: 4
+    key: "surface_shape_anomaly"
+    display_name: "Abnormal Surface / Calcification Anomaly"
+    description: >
+      Morphological shell irregularities, including corrugated shell bands, calcium pimples,
+      rough sandpaper texture, localized thinning, asymmetric waist constriction, or severe misshapenness.
+    eligibility_criteria:
+      - Distinct developmental or calcification deformity observed during inspection.
+    severity_levels: ["minor_calcification", "misshapen", "corrugated"]
+
+  - id: 5
+    key: "uncertain_review_needed"
+    display_name: "Uncertain / Requires Human Review"
+    description: >
+      Ambiguous optical presentation where specular reflection/glare, motion blur, shadow,
+      boundary clipping, or optical artifacts prevent confident visual classification.
+    action: "Route to certified human inspector for manual review; do not output automated prediction."

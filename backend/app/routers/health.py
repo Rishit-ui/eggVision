@@ -8,7 +8,7 @@ from app.database import get_db
 from app.schemas.health import HealthResponse, ServiceStatus
 from app.services.prediction_service import inference_engine
 from app.services.storage_service import storage_service
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -16,6 +16,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Health"])
 logger = logging.getLogger(__name__)
+
+
+@router.get("/health/live", status_code=status.HTTP_200_OK)
+async def liveness():
+    """Liveness probe: verifies the API process is alive and responding."""
+    return {"status": "alive"}
+
+
+@router.get("/health/ready", status_code=status.HTTP_200_OK)
+async def readiness(db: AsyncSession = Depends(get_db)):
+    """Readiness probe: verifies essential persistence before routing traffic."""
+    try:
+        await asyncio.wait_for(
+            db.execute(text("SELECT 1")), timeout=settings.HEALTHCHECK_TIMEOUT_SECONDS
+        )
+    except (OSError, SQLAlchemyError, TimeoutError) as error:
+        logger.warning("Readiness probe database check failed: %s", type(error).__name__)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        )
+    return {
+        "status": "ready",
+        "model_status": "ready" if inference_engine.is_ready() else "not_ready",
+    }
+
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(db: AsyncSession = Depends(get_db)):

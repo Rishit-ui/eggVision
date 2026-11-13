@@ -56,11 +56,13 @@ class Settings(BaseSettings):
         if not origins:
             raise ValueError("CORS_ORIGINS must contain at least one origin")
         for origin in origins:
-            if origin == "*":
+            if origin == "*" or "*" in origin:
                 raise ValueError("CORS_ORIGINS must not use wildcard origins when credentials are enabled")
             parsed = urlparse(origin)
             if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.path not in {"", "/"}:
                 raise ValueError("CORS_ORIGINS entries must be http(s) origins without a path")
+            if "*" in parsed.netloc:
+                raise ValueError("CORS_ORIGINS must not contain wildcard domain patterns")
         return ",".join(origins)
 
     @model_validator(mode="after")
@@ -73,6 +75,12 @@ class Settings(BaseSettings):
                 raise ValueError("DEBUG must be false in production")
             if not self.cors_origins:
                 raise ValueError("CORS_ORIGINS must explicitly list trusted origins in production")
+            for origin in self.cors_origins:
+                parsed = urlparse(origin)
+                if parsed.scheme != "https":
+                    raise ValueError("CORS_ORIGINS entries must use https in production")
+                if "*" in parsed.netloc:
+                    raise ValueError("CORS_ORIGINS must not contain wildcard domain patterns in production")
             if not self.AUTH_REQUIRED:
                 raise ValueError("AUTH_REQUIRED must be true in production")
             if not self.BOOTSTRAP_TOKEN or len(self.BOOTSTRAP_TOKEN) < 32:

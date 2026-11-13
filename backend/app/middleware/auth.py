@@ -53,3 +53,17 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User account is unavailable")
     return user
+
+
+def require_role(required_role: str):
+    """Enforce server-side role check; requires active user with the specified role."""
+    async def _role_checker(current_user: User | None = Depends(get_current_user)) -> User:
+        if current_user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+        if current_user.role != required_role:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient administrative permissions")
+        return current_user
+    return _role_checker
+
+
+require_admin = require_role("admin")
