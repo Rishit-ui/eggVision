@@ -16,11 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 DEFECT_CLASSES = {
-    0: "intact_shell",
-    1: "hairline_crack",
-    2: "punctured_break",
-    3: "severe_breakage",
-    4: "abnormal_staining",
+    0: "no_visible_defect",
+    1: "crack_line",
+    2: "shell_puncture_break",
+    3: "surface_soiling_stain",
+    4: "surface_shape_anomaly",
+    5: "uncertain_review_needed",
 }
 
 
