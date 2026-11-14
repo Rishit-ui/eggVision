@@ -8,6 +8,7 @@ MODEL_DOWNLOADING, MODEL_INTEGRITY_FAILED, MODEL_ERROR).
 
 import asyncio
 import hashlib
+import hmac
 import json
 import logging
 import tempfile
@@ -51,8 +52,46 @@ class ModelLifecycleManager:
         self._lock = asyncio.Lock()
 
     def get_engine(self) -> InferenceEngine:
-        """Return the active inference engine (real or placeholder)."""
+        """Return a real engine only when the complete verified lifecycle is ready."""
+        if self._is_fully_ready():
+            return self.engine
+        if not isinstance(self.engine, PlaceholderEngine):
+            self.engine = PlaceholderEngine()
         return self.engine
+
+    def _is_fully_ready(self) -> bool:
+        return bool(
+            self.state == "MODEL_READY"
+            and self.artifact_available
+            and self.checksum_verified
+            and self.runtime_available
+            and self.engine.is_ready()
+        )
+
+    def _reset_state(self) -> None:
+        self.state = "MODEL_NOT_READY"
+        self.artifact_available = False
+        self.checksum_verified = False
+        self.runtime_available = False
+        self.runtime_name = None
+        self.resolved_model_path = None
+        self.error_message = None
+        self.engine = PlaceholderEngine()
+
+    def _reject_integrity(self, message: str) -> None:
+        self.state = "MODEL_INTEGRITY_FAILED"
+        self.checksum_verified = False
+        self.runtime_available = False
+        self.runtime_name = None
+        self.error_message = message
+        self.engine = PlaceholderEngine()
+
+    def _runtime_failed(self, message: str) -> None:
+        self.state = "MODEL_ERROR"
+        self.runtime_available = False
+        self.runtime_name = None
+        self.error_message = message
+        self.engine = PlaceholderEngine()
 
     def get_status_summary(self) -> dict[str, Any]:
         """Return full telemetry breakdown of model status."""
@@ -62,7 +101,7 @@ class ModelLifecycleManager:
             "checksum_verified": self.checksum_verified,
             "runtime_available": self.runtime_available,
             "runtime_name": self.runtime_name,
-            "is_ready": self.engine.is_ready(),
+            "is_ready": self._is_fully_ready(),
             "model_path": str(self.resolved_model_path) if self.resolved_model_path else None,
             "error_message": self.error_message,
         }
@@ -70,13 +109,12 @@ class ModelLifecycleManager:
     async def initialize(self) -> None:
         """Resolve model artifact, verify SHA-256, and load runtime engine."""
         async with self._lock:
+            self._reset_state()
             try:
                 await self._do_initialize()
             except Exception as e:
                 logger.error(f"Unexpected error during model initialization: {e}", exc_info=True)
-                self.state = "MODEL_ERROR"
-                self.error_message = str(e)
-                self.engine = PlaceholderEngine()
+                self._runtime_failed("Unexpected model initialization failure.")
 
     async def _do_initialize(self) -> None:
         # Step 1: Check explicitly configured MODEL_PATH
@@ -129,16 +167,21 @@ class ModelLifecycleManager:
             except Exception as e:
                 logger.warning(f"Could not read manifest for checksum verification: {e}")
 
+        if not expected_sha:
+            logger.error("Model integrity failure: no expected SHA-256 checksum is configured.")
+            self._reject_integrity("Expected SHA-256 checksum is missing.")
+            return
+
+        expected_sha = str(expected_sha).strip().lower()
+        if len(expected_sha) != 64 or any(char not in "0123456789abcdef" for char in expected_sha):
+            logger.error("Model integrity failure: configured SHA-256 checksum is invalid.")
+            self._reject_integrity("Expected SHA-256 checksum is invalid.")
+            return
+
         actual_sha = await asyncio.to_thread(compute_sha256, self.resolved_model_path)
-        if expected_sha and actual_sha != expected_sha:
-            logger.error(
-                f"Model integrity failure: expected SHA {expected_sha}, got {actual_sha}. "
-                "Rejecting artifact to prevent corrupt or untrusted execution."
-            )
-            self.state = "MODEL_INTEGRITY_FAILED"
-            self.error_message = f"Checksum mismatch: expected {expected_sha}, got {actual_sha}"
-            self.checksum_verified = False
-            self.engine = PlaceholderEngine()
+        if not hmac.compare_digest(actual_sha, expected_sha):
+            logger.error("Model integrity failure: SHA-256 mismatch. Rejecting artifact.")
+            self._reject_integrity("Model artifact checksum mismatch.")
             return
 
         self.checksum_verified = True
@@ -159,12 +202,10 @@ class ModelLifecycleManager:
                     return
                 else:
                     logger.warning("OnnxDetectionEngine failed is_ready check.")
-                    self.state = "MODEL_ERROR"
-                    self.engine = PlaceholderEngine()
+                    self._runtime_failed("ONNX Runtime engine failed its readiness check.")
             except Exception as e:
                 logger.warning(f"Could not initialize OnnxDetectionEngine: {e}")
-                self.state = "MODEL_ERROR"
-                self.engine = PlaceholderEngine()
+                self._runtime_failed("ONNX Runtime initialization failed.")
 
         elif suffix == ".pt":
             try:
@@ -180,17 +221,14 @@ class ModelLifecycleManager:
                     return
                 else:
                     logger.warning("DetectionEngine failed is_ready check.")
-                    self.state = "MODEL_ERROR"
-                    self.engine = PlaceholderEngine()
+                    self._runtime_failed("PyTorch runtime engine failed its readiness check.")
             except Exception as e:
                 logger.warning(f"Could not initialize DetectionEngine: {e}")
-                self.state = "MODEL_ERROR"
-                self.engine = PlaceholderEngine()
+                self._runtime_failed("PyTorch runtime initialization failed.")
 
         else:
             logger.error(f"Unsupported model artifact format: {suffix}")
-            self.state = "MODEL_ERROR"
-            self.engine = PlaceholderEngine()
+            self._runtime_failed("Unsupported model artifact format.")
 
     async def _try_download_from_s3(self) -> Path | None:
         """Download model artifact from private S3 into temporary runtime directory."""
