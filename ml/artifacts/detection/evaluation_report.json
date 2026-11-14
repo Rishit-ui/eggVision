@@ -1,0 +1,32 @@
+{
+  "model_name": "eggvision_detector_yolov8n",
+  "weights_path": "C:\\Users\\Rishit\\OneDrive\\Desktop\\eggVision\\ml\\artifacts\\detection\\weights\\best.pt",
+  "test_dataset": "C:\\Users\\Rishit\\OneDrive\\Desktop\\eggVision\\ml\\data\\processed\\egg_detection_yolo",
+  "test_split_samples": 7,
+  "confidence_threshold": 0.25,
+  "iou_threshold": 0.5,
+  "metrics": {
+    "mAP50": 0.995,
+    "mAP50_95": 0.94,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  },
+  "confusion_matrix": {
+    "true_positives": 44,
+    "false_positives": 0,
+    "false_negatives": 0
+  },
+  "latency_benchmark": {
+    "mean_ms": 199.54,
+    "median_ms": 197.86,
+    "p95_ms": 207.95,
+    "min_ms": 192.15,
+    "max_ms": 208.66,
+    "samples_measured": 7
+  },
+  "sample_predictions_plot": "C:\\Users\\Rishit\\OneDrive\\Desktop\\eggVision\\ml\\artifacts\\detection\\sample_predictions.png",
+  "validation_passed": true,
+  "model_status": "VALIDATED",
+  "evaluation_timestamp": "2026-11-14T17:39:23.911708+00:00"
+}

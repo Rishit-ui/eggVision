@@ -30,9 +30,11 @@ To transition from the current **Functional Research MVP** to a validated, produ
 - [ ] **Dataset Publication:** Compile all images, masks, and breakout records into an immutable versioned dataset with `manifest.json`.
 
 ### 2.3 Machine Learning Model Development & Validation
-- [ ] **Air-Cell Segmentation Network:** Train a lightweight U-Net (ResNet-18 or MobileNetV3 encoder) on annotated transillumination candling images to segment the air cell silhouette. Validate that Dice coefficient exceeds $0.92$ on independent test eggs.
-- [ ] **Multimodal Freshness Regressor:** Train a gradient-boosted decision tree (XGBoost) or multi-layer perceptron combining the air cell area ratio with storage temperature, relative humidity, and storage duration to predict Haugh units.
-- [ ] **Sign-off on Model Card:** Execute independent test evaluation ($n \ge 358$ eggs) verifying mean absolute error $MAE \le 4.0\,HU$. Register the validated checkpoint in the model registry and update `InferenceEngine`.
+- [x] **Model A — Egg Detection Network (COMPLETED):** Trained and validated Ultralytics YOLOv8n detector on `afshin-dini/Egg-Detection` (51 images, 423 bounding boxes). Held-out test evaluation: mAP@0.50 = 0.9950, mAP@0.50:0.95 = 0.9400, Precision = 1.0000, Recall = 1.0000, F1 = 1.0000, Mean Latency = 199.54 ms. Registered in `ml/inference/detection_engine.py`.
+- [ ] **Model B — Egg Segmentation Network:** Train a lightweight U-Net or YOLOv8-seg (ResNet-18 or MobileNetV3 encoder) on annotated candling/reflectance images to segment the egg contour and air cell silhouette. Validate that Dice coefficient exceeds $0.92$ on independent test eggs.
+- [ ] **Model C — Surface Defect Classifier:** Train multi-class YOLO detector / classifier for visible external defects (hairline cracks, punctured cracks, breakage, stains).
+- [ ] **Model D — Multimodal Freshness Regressor:** Train a gradient-boosted decision tree (XGBoost) or multi-layer perceptron combining the air cell area ratio with storage temperature, relative humidity, and storage duration to predict Haugh units.
+- [ ] **Sign-off on Candling Freshness Model Card:** Execute independent test evaluation ($n \ge 358$ eggs) verifying mean absolute error $MAE \le 4.0\,HU$. Register the validated checkpoint in the model registry and update `InferenceEngine`.
 
 ### 2.4 Cloud Infrastructure & Production Hardening
 - [ ] **Production Object Storage Provisioning:** Set up an AWS S3, Cloudflare R2, or RustFS bucket; populate `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, and `S3_SECRET_KEY` in the Render dashboard; and switch `S3_REQUIRED=true`.

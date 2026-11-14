@@ -28,6 +28,7 @@ Running the script is safe – it only reads existing files and writes the updat
 import base64
 import csv
 import hashlib
+import json
 import os
 import shutil
 from datetime import datetime
@@ -59,6 +60,7 @@ DECISION_TO_CATEGORY = {
     # Any other decision can be placed in 'ambiguous' or a new folder later.
 }
 
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
@@ -69,6 +71,7 @@ def compute_base64_md5(file_path: Path) -> str:
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return base64.b64encode(h.digest()).decode()
+
 
 # ---------------------------------------------------------------------------
 # Main processing
@@ -99,15 +102,26 @@ def main():
         row["review_status"] = "reviewed"
         row["review_timestamp"] = review_timestamp
         row["reviewer"] = reviewer
-        # Re‑compute MD5 correctly (Base64) and set flag
+        # Re‑compute MD5 correctly (Base64) and verify against original metadata
         image_path = RAW_DIR / f"{row['image_id']}.jpg"
-        if image_path.exists():
-            # The original Open Images MD5 is not stored in this CSV.
-            # We assume the computed value is the reference, so we set True.
-            row["md5_matches_original"] = "True"
-        else:
+        meta_path = RAW_DIR / f"{row['image_id']}_meta.json"
+        if not image_path.exists():
             print(f"⚠️  Image file not found for {row['image_id']}: {image_path}")
-            row["md5_matches_original"] = "False"
+            row["md5_matches_original"] = "FALSE"
+        else:
+            computed_md5 = compute_base64_md5(image_path)
+            original_md5 = None
+            if meta_path.exists():
+                try:
+                    with meta_path.open("r", encoding="utf-8") as mf:
+                        meta_data = json.load(mf)
+                        original_md5 = meta_data.get("original_md5_base64")
+                except Exception as e:
+                    print(f"⚠️  Could not read metadata for {row['image_id']}: {e}")
+            if original_md5:
+                row["md5_matches_original"] = "TRUE" if computed_md5 == original_md5 else "FALSE"
+            else:
+                row["md5_matches_original"] = "UNKNOWN"
 
     # Write updated CSV back (overwrite)
     with INSPECTION_CSV.open("w", newline="", encoding="utf-8") as f:
@@ -133,6 +147,7 @@ def main():
         print(f"📁 Copied {src.name} → {target_subdir}/")
 
     print("✅ Image organisation complete. Empty categories remain for future use.")
+
 
 if __name__ == "__main__":
     main()
