@@ -1,0 +1,50 @@
+{
+  "model_name": "eggvision_detector_yolov8n",
+  "model_architecture": "yolov8n",
+  "task": "detection",
+  "classes": {
+    "0": "egg"
+  },
+  "training_dataset": "afshin-dini/Egg-Detection",
+  "training_samples": 36,
+  "validation_samples": 8,
+  "test_samples": 7,
+  "input_resolution": [
+    640,
+    640
+  ],
+  "epochs_requested": 30,
+  "batch_size": 8,
+  "seed": 42,
+  "hardware_device": "CPU",
+  "training_duration_seconds": 406.2,
+  "weights_path": "C:\\Users\\Rishit\\OneDrive\\Desktop\\eggVision\\ml\\artifacts\\detection\\weights\\best.pt",
+  "weights_sha256": "dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732",
+  "weights_size_bytes": 6492138,
+  "training_metrics": {
+    "metrics/precision(B)": 0.999252303723978,
+    "metrics/recall(B)": 1.0,
+    "metrics/mAP50(B)": 0.995,
+    "metrics/mAP50-95(B)": 0.9275875877748359,
+    "fitness": 0.9275875877748359
+  },
+  "status": "VALIDATED",
+  "created_at": "2026-11-14T17:32:10.084684+00:00",
+  "completed_at": "2026-11-14T17:38:56.317143+00:00",
+  "evaluation_metrics": {
+    "mAP50": 0.995,
+    "mAP50_95": 0.94,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  },
+  "latency_benchmark": {
+    "mean_ms": 199.54,
+    "median_ms": 197.86,
+    "p95_ms": 207.95,
+    "min_ms": 192.15,
+    "max_ms": 208.66,
+    "samples_measured": 7
+  },
+  "evaluated_at": "2026-11-14T17:39:23.911708+00:00"
+}

@@ -45,11 +45,14 @@ docker-compose.override.yml
 *.pkl
 mlruns/
 mlartifacts/
+ml/artifacts/**/weights/
 
 # Dataset
 dataset/images/
 dataset/raw/
 dataset/processed/
+ml/data/external/**/images/
+ml/data/processed/**/images/
 
 # Uploads
 uploads/
@@ -84,3 +87,7 @@ __pycache__/
 # FiftyOne local database and cache
 .fiftyone/
 ml/data/fiftyone_cache/
+
+# Ultralytics YOLO cache files
+ml/data/processed/**/*.cache
+ml/data/external/**/*.cache

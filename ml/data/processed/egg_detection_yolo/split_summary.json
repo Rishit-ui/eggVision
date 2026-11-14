@@ -1,0 +1,92 @@
+{
+  "dataset_name": "egg_detection_yolo",
+  "output_directory": "C:\\Users\\Rishit\\OneDrive\\Desktop\\eggVision\\ml\\data\\processed\\egg_detection_yolo",
+  "split_level": "image-level",
+  "scientific_disclosure": "Splitting is strictly image-level because individual physical egg specimens are not tracked or identified across frames in the afshin-dini/Egg-Detection dataset. Zero SHA-256 image overlap is mathematically guaranteed across partitions.",
+  "random_seed": 42,
+  "split_ratios": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "total_images": 51,
+  "partitions": {
+    "train": {
+      "image_count": 36,
+      "annotation_count": 306,
+      "images": [
+        "sample32.jpg",
+        "sample30.jpg",
+        "sample27.jpg",
+        "sample2.jpg",
+        "sample13.jpg",
+        "sample50.jpg",
+        "sample33.jpg",
+        "sample18.jpg",
+        "sample36.jpg",
+        "sample24.jpg",
+        "sample38.jpg",
+        "sample29.jpg",
+        "sample20.jpg",
+        "sample12.jpg",
+        "sample45.jpg",
+        "sample44.jpg",
+        "sample19.jpg",
+        "sample31.jpg",
+        "sample41.jpg",
+        "sample1.jpg",
+        "sample49.jpg",
+        "sample26.jpg",
+        "sample4.jpg",
+        "sample8.jpg",
+        "sample47.jpg",
+        "sample37.jpg",
+        "sample35.jpg",
+        "sample28.jpg",
+        "sample3.jpg",
+        "sample48.jpg",
+        "sample51.jpg",
+        "sample42.jpg",
+        "sample39.jpg",
+        "sample5.jpg",
+        "sample21.jpg",
+        "sample9.jpg"
+      ]
+    },
+    "val": {
+      "image_count": 8,
+      "annotation_count": 73,
+      "images": [
+        "sample7.jpg",
+        "sample11.jpg",
+        "sample34.jpg",
+        "sample43.jpg",
+        "sample14.jpg",
+        "sample40.jpg",
+        "sample15.jpg",
+        "sample17.jpg"
+      ]
+    },
+    "test": {
+      "image_count": 7,
+      "annotation_count": 44,
+      "images": [
+        "sample22.jpg",
+        "sample23.jpg",
+        "sample25.jpg",
+        "sample6.jpg",
+        "sample10.jpg",
+        "sample16.jpg",
+        "sample46.jpg"
+      ]
+    }
+  },
+  "leakage_verification": {
+    "train_val_overlap": 0,
+    "train_test_overlap": 0,
+    "val_test_overlap": 0,
+    "leakage_detected": false,
+    "status": "PASSED_ZERO_LEAKAGE"
+  },
+  "timestamp": "2026-11-14T17:31:52.780443+00:00"
+}

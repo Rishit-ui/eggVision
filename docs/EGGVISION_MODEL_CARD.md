@@ -1,17 +1,20 @@
 # EggVision AI — Formal Machine Learning Model Card
-**Document Version:** 1.0.0  
+**Document Version:** 1.1.0  
 **Format:** Mitchell et al. (2019) Model Cards for Model Reporting  
-**Model Name:** `EggVision-Screening-Placeholder`  
-**Current Registered Version:** `0.1.0`  
-**Deployment Status:** `MODEL_NOT_READY` (Placeholder Engine Active)
+**Active Registered Model:** `eggvision_detector_yolov8n`  
+**Current Version:** `1.0.0`  
+**Deployment Status:** `VALIDATED` (Model A — Visible Egg Shell Detector Active)
 
 ---
 
 ## 1. Model Details
 
 - **Developing Organization:** EggVision AI Research Project.
-- **Model Type:** Heuristic Optical Candidate Screener & Morphometric Normalizer (`ml.vision.VisionPipeline`) paired with an abstract inference placeholder (`ml.inference.PlaceholderEngine`).
-- **Checkpoints / Weights:** No machine learning checkpoint weights are currently loaded.
+- **Model Name:** `eggvision_detector_yolov8n`
+- **Architecture:** Ultralytics YOLOv8n (Nano detection backbone: 73 layers, 3,132,707 parameters, 8.6 GFLOPs).
+- **Task:** Visible egg presence screening and bounding-box localization.
+- **Trained Artifact:** `ml/artifacts/detection/weights/best.pt` (6,492,138 bytes).
+- **Artifact SHA-256:** `dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732`.
 - **License:** MIT License.
 - **Contact:** Research IT Supervisor (`admin@eggvision.org`).
 
@@ -20,38 +23,65 @@
 ## 2. Intended Use & Scope
 
 ### 2.1 Primary Intended Uses
-- Real-time screening of poultry egg capture frames inside controlled scanning chambers.
-- Identification of capture flaws (blur, specular glare, deep shadows, frame boundary clipping, low resolution).
-- Geometric normalization ($512 \times 512$ canonical orientation) to support future model training.
-- Longitudinal recording of environmental telemetry (storage duration, temperature, humidity) linked to physical specimens.
+- Real-time optical screening to detect whether one or more eggs are present in a capture frame.
+- Precise bounding-box localization ($[x_1, y_1, x_2, y_2]$) of visible eggs against diverse backgrounds.
+- Rejection of non-egg objects or empty capture chambers.
+- Upstream candidate localization feeding geometric normalization pipelines.
 
 ### 2.2 Explicit Out-of-Scope & Prohibited Uses
-- **Food Safety Decisions:** The system **must not** be used to certify eggs as safe for human consumption or free from pathogens (*Salmonella enteritidis*, *Escherichia coli*).
-- **Commercial USDA Grading:** The current software cannot substitute for an authorized USDA or EU egg candling inspector.
-- **Automated Processing Lines:** The system is not rated for high-speed conveyor sorting ($> 60\,\text{eggs/minute}$).
+- **Food Safety Certification:** The model **must not** be used to certify eggs as safe for human consumption, Salmonella-free, or pathogen-free.
+- **Candling Freshness or Haugh Unit Estimation:** This model operates solely on exterior visible-spectrum RGB images. It does **not** estimate internal albumen quality, yolk degradation, or Haugh Unit.
+- **Commercial High-Speed Sorting:** Not validated for high-speed industrial sorting ($> 60\,\text{eggs/minute}$).
 
 ---
 
-## 3. Factors, Subpopulations & Environmental Sensitivity
+## 3. Training & Validation Data
 
-The optical performance of capture screening is sensitive to:
-1. **Eggshell Pigmentation:** Heavy brown and dark speckled eggshells exhibit significantly higher light attenuation ($> 10\times$ extinction coefficient compared to white shells), requiring higher LED transillumination intensity to illuminate internal air cells.
-2. **Ambient Stray Light:** Operating outside a sealed enclosure allows extraneous reflections that corrupt Laplacian blur and shadow calculations.
-3. **Dust & Shell Contamination:** Surface feather debris or manure can distort contour solidity calculations and mimic shell cracks.
-
----
-
-## 4. Current Quantitative Performance & Evaluation
-
-- **Egg Detection Accuracy:** $0\%$ ML-driven detection (operates via non-ML candidate contour screening).
-- **Model Readiness:** `is_ready() == False`.
-- **Inference Time:** $0.0\,\text{ms}$ (Placeholder returns immediately).
-- **Haugh Unit Prediction Error:** Not applicable (no predictions generated).
+- **Primary Dataset:** [`afshin-dini/Egg-Detection`](https://huggingface.co/datasets/afshin-dini/Egg-Detection) (Hugging Face).
+- **Pinned Revision:** `d425996c959623b3960fca27f53b16f060b0a474` (MIT License).
+- **Total Corpus:** 51 images, 423 annotated egg instances.
+- **Classes:** Original classes `white-egg` (229) and `brown-egg` (194) mapped to canonical class `0: egg`.
+- **Partitioning Protocol (Seed 42):**
+  - **Train Partition (70%):** 36 images, 306 bounding boxes.
+  - **Validation Partition (15%):** 8 images, 73 bounding boxes.
+  - **Held-Out Test Partition (15%):** 7 images, 44 bounding boxes.
+- **Scientific Disclosure on Partitioning:** Splitting is performed at the **image level** because physical egg specimen identifiers were not tracked across frames in the external source dataset. Zero SHA-256 image overlap is mathematically proven between partitions.
 
 ---
 
-## 5. Ethical Considerations & Consumer Safety Disclaimers
+## 4. Quantitative Performance on Held-Out Test Split
 
-1. **Anti-Hallucination Policy:** Under no circumstances will EggVision synthesize or fake an AI prediction, confidence percentage, or freshness grade.
-2. **Foodborne Illness Mitigation:** Consuming spoiled or contaminated eggs poses severe health risks (salmonellosis). Because optical candling cannot detect microbial contamination, EggVision explicitly informs users that optical captures cannot guarantee biological safety.
-3. **Data Integrity:** Scans recorded under this system maintain provenance linking the raw image, camera parameters, and physical specimen UUID for auditable scientific review.
+Evaluation performed on strictly isolated test split (7 images, 44 egg instances, `conf=0.25`, `iou=0.50`):
+
+| Metric | Target Baseline | Measured Value | Validation Status |
+| :--- | :--- | :--- | :--- |
+| **mAP@0.50** | $\ge 0.5000$ | **0.9950** | **PASSED** |
+| **mAP@0.50:0.95** | $\ge 0.5000$ | **0.9400** | **PASSED** |
+| **Precision** | $\ge 0.8000$ | **1.0000** | **PASSED** |
+| **Recall** | $\ge 0.8000$ | **1.0000** | **PASSED** |
+| **F1 Score** | $\ge 0.8000$ | **1.0000** | **PASSED** |
+| **True Positives** | — | **44** | — |
+| **False Positives** | — | **0** | — |
+| **False Negatives** | — | **0** | — |
+| **Mean Inference Latency** | $\le 500\,\text{ms}$ | **199.54 ms** | **PASSED** |
+| **p95 Latency** | $\le 500\,\text{ms}$ | **207.95 ms** | **PASSED** |
+
+*Hardware during evaluation:* AMD Ryzen 7 7435HS CPU (8 cores / 16 threads). Lightweight deployment footprint: ~6.5 MB model weights.
+
+Visual prediction plots on test images are archived at `ml/artifacts/detection/sample_predictions.png`.
+
+---
+
+## 5. Architectural Integration & Fallback Strategy
+
+- The model is registered via `ml/inference/detection_engine.py` implementing `InferenceEngine`.
+- **Safe Fallback:** If weights are missing, 0 bytes, or fail SHA-256 verification, `get_inference_engine()` automatically falls back to `PlaceholderEngine` returning `status: "model_not_ready"` without runtime crashes.
+- **Scientific Integrity:** The inference adapter reports detection bounding boxes and confidence while leaving candling freshness parameters (`freshness_class`, `freshness_score`, `predicted_haugh_unit`) as `None`, explicitly disclosing that candling hardware is required for internal quality metrics.
+
+---
+
+## 6. Ethical Considerations & Consumer Safety Disclaimers
+
+1. **Anti-Hallucination Guarantee:** EggVision never synthesizes artificial predictions or fabricates freshness grades when unmeasured.
+2. **Foodborne Pathogen Risk:** Optical detection confirms egg presence and outer boundary geometry only; it cannot guarantee biological safety or detect Salmonella.
+3. **Data Provenance:** Training parameters, data splits, and model checkpoints are immutably fingerprinted with SHA-256 digests.

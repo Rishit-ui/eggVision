@@ -151,3 +151,19 @@ Every published version of the EggVision dataset is distributed with an immutabl
   }
 }
 ```
+
+---
+
+## 7. Phase 1 & 1.1 Foundation Implementation Status
+
+As part of Phase 1 and Phase 1.1 Foundation, EggVision AI has implemented and verified the automated dataset pipeline:
+
+1. **Integrated External Dataset:** `afshin-dini/Egg-Detection` (MIT License) pinned to Git commit `d425996c959623b3960fca27f53b16f060b0a474`.
+2. **Corpus Size:** 51 images, 423 bounding boxes (229 white-egg, 194 brown-egg mapped to class 0: `egg`).
+3. **Integrity Validation:** Validated via `ml/scripts/validate_dataset.py`: 0 corruptions, 0 duplicates, 0 missing labels, 0 orphaned labels, 0 bounding box boundary violations (`ml/data/reports/dataset_validation_report.json`).
+4. **Partitioning & Leakage Check:** Partitioned via `ml/scripts/split_dataset.py` (seed = 42) into:
+   - Train: 36 images (306 boxes)
+   - Val: 8 images (73 boxes)
+   - Test: 7 images (44 boxes)
+   Zero SHA-256 image overlap verified across all partitions (`ml/data/processed/egg_detection_yolo/split_summary.json`).
+5. **Scientific Splitting Disclosure:** Partitioning is image-level because individual physical egg specimens were not tracked across frames in the external source dataset. Full laboratory physical entity tracking (UUIDv4) remains required for internal candling freshness trials (Phases 2-5).

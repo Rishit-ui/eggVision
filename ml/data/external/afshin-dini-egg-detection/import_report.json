@@ -1,0 +1,5597 @@
+{
+  "dataset_name": "afshin-dini/Egg-Detection",
+  "repository_url": "https://huggingface.co/datasets/afshin-dini/Egg-Detection",
+  "revision_pinned": "d425996c959623b3960fca27f53b16f060b0a474",
+  "commit_hash": "d425996c959623b3960fca27f53b16f060b0a474",
+  "license": "MIT",
+  "total_images_downloaded": 51,
+  "total_images_expected": 51,
+  "total_annotations": 423,
+  "class_distribution_original": {
+    "white-egg": 229,
+    "brown-egg": 194
+  },
+  "class_distribution_mapped": {
+    "egg": 423
+  },
+  "validation_status": "PASSED",
+  "validation_errors": [],
+  "failed_downloads": [],
+  "import_timestamp": "2026-11-14T17:26:48.531687+00:00",
+  "completion_timestamp": "2026-11-14T17:31:25.932654+00:00",
+  "image_hashes": {
+    "sample1.jpg": "ae0bf07a38a24857639df584f3d756d34c2176d1bd8960f82cda40b1a5c46a0b",
+    "sample10.jpg": "9b2a79389df7d0331089dce9d7357d118f7fa57b6ca05dffd7541f22e2b8bbe5",
+    "sample11.jpg": "657ee9ff8f7ebf50c267c7f5da8fc36c7811e2c4b4b614bc16ba85a9a8b5e5e6",
+    "sample12.jpg": "3a2cdee0e47064b36d9517d19298e095d8142877cdba701f870365bd049109a7",
+    "sample13.jpg": "e40ef6ddc078a8a324e0f735bcc5819d4414274ec79aeed0318ef26d2b4d1f5d",
+    "sample14.jpg": "b3acba1eec96518a73822ccaf4bfe430f8f504bc2f8b5cd9836e308a32fe5014",
+    "sample15.jpg": "6ab9cd2fe2d8b6ae672522ef040322cf299388af3cc88a9bb98501132aea4eba",
+    "sample16.jpg": "eafd038c8518a05b4745792adefb1c881f7786352cdc55685cdfc0111dc5508f",
+    "sample17.jpg": "55b3c00f9c48c6f8f8a3e36c051bf0370b7425e86dac7579f840368fba7f0e9f",
+    "sample18.jpg": "5128a39e1bde3d06abfe33037dfb8fe291fc970c30b7428e5ac2565e9a8055e2",
+    "sample19.jpg": "ac7ca143bafba83185a46de14ec8ba125be2bfaab113345f5e61646f74f12ae7",
+    "sample2.jpg": "8ff6cd09788f75540e48cb4b32be5f02113d679ff36d2b373b54b765e3bb075a",
+    "sample20.jpg": "5cc7935e0b2fb9b4f6291c8787786578963a4cace02ed2d4077716d4942aff94",
+    "sample21.jpg": "8f81d34c5e55cf68150fa3ebddcf3a60015fd97ca11d484f12bd5a28815c03fc",
+    "sample22.jpg": "c67e62c7e5fbe20d2bb14e9052d753c608152142268564c0e019b8d1f775fcf6",
+    "sample23.jpg": "c1ae52923572aa9cc3e428fdae4fd5e5e03a94f62a4bee5e0aaabcbb38b7673f",
+    "sample24.jpg": "0c735ad68e062a38c077bd2ad39bab986ed75b2e8d8822fbabc46a08d4c9c971",
+    "sample25.jpg": "cbadfb53e677298415ad139337696be352736d5c2a5a70a38ce3095fe5c4867b",
+    "sample26.jpg": "0db04a488dd2e694401131e80690e2f451db4762585cb5af166b8869477a71c7",
+    "sample27.jpg": "78c7d78b5eb9e44f86130fe6ac2b878ab0b8111455ad366a02c751a0db596b69",
+    "sample28.jpg": "e9d93606dd790a78cc0536ada85ad6c141262dc94f1d80f1cd53cc5199478617",
+    "sample29.jpg": "62ad7a8b20a4f7c21baf412cfd5a335da5c6af920c4b4cb7af7f277e357b92ac",
+    "sample3.jpg": "bc8dc2fbafa711ee488c6b9a0843a7452d8aab3a781c585104459b97f7fff526",
+    "sample30.jpg": "6de1ae356ae329aac4cbb9e85f7540077dcc8bc7cfdae9cbba922526fb811f5c",
+    "sample31.jpg": "a13987ce39cbc0f683ae92df4598a1513b4b2f5bf7ef2ccdfefbe4b6a4281c1c",
+    "sample32.jpg": "537b412bf0b789bfd09c38bf61dc946e0923525df896abcbd52fc8ef67f378be",
+    "sample33.jpg": "b2ee6bd08f0d1f1bc1a20f40aa44e42b5a274925216d7430d13cc1b7f3e943af",
+    "sample34.jpg": "e57cf73b1619e981ebe1890df2112846fd69c1b548e1598e5cbc0f830424cbac",
+    "sample35.jpg": "1f05b9c016b6ea6bd13044bd100eb66803177b3ee7ba3805c9c2a4ad95e1a948",
+    "sample36.jpg": "a7c5b4b9ac34e6e2d58afba6f05dab96a4377079b518918bfbb20bba396fd354",
+    "sample37.jpg": "77268dd24f6e32ca2043cf7fda429fca7a2a5cecd653bc53203b014ed2d2f86f",
+    "sample38.jpg": "58c4215d61b6cbbf6c0e501fd1168a1ca5593313e1f0adcea24c259a4741f8d7",
+    "sample39.jpg": "425bd92a797687607929e1c9a2526b3744c7a3696345f4f0b6b33edfb361dd78",
+    "sample4.jpg": "98a0a061ea5ab93abc8692e471b1abbe4b763d43c21c7f215b7b471404f93e31",
+    "sample40.jpg": "93ce44c0b8c41e69761a9f32635ed6992a4fce4f2dbb152012e045f4ffd037fa",
+    "sample41.jpg": "cf7ead7d41d6c90bb7348675fc54cd6c2713fd503f0775b90038f7423a3bc4e1",
+    "sample42.jpg": "ed68640a4011161f2e38088113ebbfea548777e8792a8dad1f01439ece0ce8bb",
+    "sample43.jpg": "2f6b3ee4e7bee02eddc717c523b3e4915a4e28ad4c45d52620d848db76ee9265",
+    "sample44.jpg": "c67449c9c35025bacb8152b959f2fe6d81639d384d6c124a9adc2fde9867f69a",
+    "sample45.jpg": "ac30cf2827b7835cf40b88b302583e509ea870b66dfe731d1bc8c23f64862a50",
+    "sample46.jpg": "330e2865d341c523f8e641cc7f89b375d130526037fe9bfdb2dcd89b7541535f",
+    "sample47.jpg": "6a4211d354017b096824179f58eff80dbeb8c8bd718aa503672ab7a8e3b724e9",
+    "sample48.jpg": "db3b44ddee016f6dd4880ddc8811741cbd2493a321af97b3539209a073b19d76",
+    "sample49.jpg": "85e3735bd119253a9bc5ce54dd237d7a8931e6972b88353ceb396d95e0b40f2c",
+    "sample5.jpg": "5172f616a998a271428fbc2635667743a4b8d20a389502550a0012ca3983bcd2",
+    "sample6.jpg": "afe42c54096acca25b0af614dfd63cce91a3dc2612e755439e92067cfff36b26",
+    "sample7.jpg": "5731905b34794edc3c7a07e53cd50b03522e2fdca76ab20d176d9176410a68b8",
+    "sample8.jpg": "2bb2a612903708ad1c05e15d9fbf2b77319aca4821a81a9eaf5fe6d35d01235f",
+    "sample9.jpg": "ffd1ffb052f283829c5eb0daae73abccee38a33d8d45850149dff64206a970ce",
+    "sample50.jpg": "00b3844753d5192529db7c2a6626d7968dc4e81ea177c5b6a93c42eaad0e915e",
+    "sample51.jpg": "950036783adf6d1025709e5a3643c8a1eb4e1783d9ce2e4a751a4ecd27849bce"
+  },
+  "per_image_metadata": {
+    "sample1.jpg": {
+      "image_id": "sample1",
+      "filename": "sample1.jpg",
+      "remote_path": "data/images/train/sample1.jpg",
+      "file_size_bytes": 7108791,
+      "sha256": "ae0bf07a38a24857639df584f3d756d34c2176d1bd8960f82cda40b1a5c46a0b",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.276014,
+          "yc": 0.575502,
+          "w": 0.169977,
+          "h": 0.126104
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.456098,
+          "yc": 0.572056,
+          "w": 0.162626,
+          "h": 0.122659
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.27895,
+          "yc": 0.701458,
+          "w": 0.169719,
+          "h": 0.125615
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.461288,
+          "yc": 0.435512,
+          "w": 0.16538,
+          "h": 0.125414
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.274545,
+          "yc": 0.436891,
+          "w": 0.172272,
+          "h": 0.119214
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.45961,
+          "yc": 0.294461,
+          "w": 0.174484,
+          "h": 0.139506
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.278538,
+          "yc": 0.298781,
+          "w": 0.177778,
+          "h": 0.135801
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.441625,
+          "yc": 0.840306,
+          "w": 0.158218,
+          "h": 0.133132
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.272935,
+          "yc": 0.838031,
+          "w": 0.168138,
+          "h": 0.140987
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.448353,
+          "yc": 0.706721,
+          "w": 0.16334,
+          "h": 0.12753
+        }
+      ]
+    },
+    "sample10.jpg": {
+      "image_id": "sample10",
+      "filename": "sample10.jpg",
+      "remote_path": "data/images/train/sample10.jpg",
+      "file_size_bytes": 7365568,
+      "sha256": "9b2a79389df7d0331089dce9d7357d118f7fa57b6ca05dffd7541f22e2b8bbe5",
+      "annotation_count": 8,
+      "original_counts": {
+        "white-egg": 8,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 8
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.752222,
+          "yc": 0.508522,
+          "w": 0.171356,
+          "h": 0.125759
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.545724,
+          "yc": 0.768827,
+          "w": 0.169054,
+          "h": 0.132307
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.728104,
+          "yc": 0.771221,
+          "w": 0.158952,
+          "h": 0.126138
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.593027,
+          "yc": 0.222498,
+          "w": 0.169349,
+          "h": 0.139415
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.77627,
+          "yc": 0.224979,
+          "w": 0.166706,
+          "h": 0.143385
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.770979,
+          "yc": 0.375062,
+          "w": 0.175966,
+          "h": 0.132966
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.568234,
+          "yc": 0.505766,
+          "w": 0.160787,
+          "h": 0.123001
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.563871,
+          "yc": 0.637037,
+          "w": 0.164005,
+          "h": 0.131272
+        }
+      ]
+    },
+    "sample11.jpg": {
+      "image_id": "sample11",
+      "filename": "sample11.jpg",
+      "remote_path": "data/images/train/sample11.jpg",
+      "file_size_bytes": 7371720,
+      "sha256": "657ee9ff8f7ebf50c267c7f5da8fc36c7811e2c4b4b614bc16ba85a9a8b5e5e6",
+      "annotation_count": 8,
+      "original_counts": {
+        "white-egg": 8,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 8
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.589091,
+          "yc": 0.222274,
+          "w": 0.169239,
+          "h": 0.138507
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.752378,
+          "yc": 0.645941,
+          "w": 0.184676,
+          "h": 0.127344
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.767812,
+          "yc": 0.374921,
+          "w": 0.175856,
+          "h": 0.132718
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.749621,
+          "yc": 0.50826,
+          "w": 0.17255,
+          "h": 0.126515
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.566323,
+          "yc": 0.505986,
+          "w": 0.160972,
+          "h": 0.122795
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.561362,
+          "yc": 0.636225,
+          "w": 0.164279,
+          "h": 0.130238
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.727019,
+          "yc": 0.771837,
+          "w": 0.16042,
+          "h": 0.122795
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.544823,
+          "yc": 0.768736,
+          "w": 0.169792,
+          "h": 0.132304
+        }
+      ]
+    },
+    "sample12.jpg": {
+      "image_id": "sample12",
+      "filename": "sample12.jpg",
+      "remote_path": "data/images/train/sample12.jpg",
+      "file_size_bytes": 7380077,
+      "sha256": "3a2cdee0e47064b36d9517d19298e095d8142877cdba701f870365bd049109a7",
+      "annotation_count": 8,
+      "original_counts": {
+        "white-egg": 8,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 8
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.770185,
+          "yc": 0.22865,
+          "w": 0.169352,
+          "h": 0.131481
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.733471,
+          "yc": 0.768704,
+          "w": 0.159428,
+          "h": 0.123043
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.549565,
+          "yc": 0.767959,
+          "w": 0.168687,
+          "h": 0.135446
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.753977,
+          "yc": 0.642684,
+          "w": 0.183244,
+          "h": 0.128006
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.748684,
+          "yc": 0.505002,
+          "w": 0.171336,
+          "h": 0.125526
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.565441,
+          "yc": 0.50525,
+          "w": 0.160751,
+          "h": 0.123046
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.763899,
+          "yc": 0.37154,
+          "w": 0.173981,
+          "h": 0.13247
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.581979,
+          "yc": 0.221455,
+          "w": 0.168687,
+          "h": 0.137929
+        }
+      ]
+    },
+    "sample13.jpg": {
+      "image_id": "sample13",
+      "filename": "sample13.jpg",
+      "remote_path": "data/images/train/sample13.jpg",
+      "file_size_bytes": 6872643,
+      "sha256": "e40ef6ddc078a8a324e0f735bcc5819d4414274ec79aeed0318ef26d2b4d1f5d",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.733304,
+          "yc": 0.769792,
+          "w": 0.159319,
+          "h": 0.122837
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.564063,
+          "yc": 0.635026,
+          "w": 0.164831,
+          "h": 0.126104
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.749841,
+          "yc": 0.505408,
+          "w": 0.172546,
+          "h": 0.124864
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.565167,
+          "yc": 0.506028,
+          "w": 0.16042,
+          "h": 0.122795
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.764451,
+          "yc": 0.372276,
+          "w": 0.1742,
+          "h": 0.132304
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.581705,
+          "yc": 0.362972,
+          "w": 0.174752,
+          "h": 0.126932
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.770514,
+          "yc": 0.228806,
+          "w": 0.169792,
+          "h": 0.130652
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.581429,
+          "yc": 0.222398,
+          "w": 0.167586,
+          "h": 0.139335
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.550557,
+          "yc": 0.76855,
+          "w": 0.167589,
+          "h": 0.133589
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.755079,
+          "yc": 0.64286,
+          "w": 0.181918,
+          "h": 0.127798
+        }
+      ]
+    },
+    "sample14.jpg": {
+      "image_id": "sample14",
+      "filename": "sample14.jpg",
+      "remote_path": "data/images/train/sample14.jpg",
+      "file_size_bytes": 7122293,
+      "sha256": "b3acba1eec96518a73822ccaf4bfe430f8f504bc2f8b5cd9836e308a32fe5014",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.628232,
+          "yc": 0.227443,
+          "w": 0.168138,
+          "h": 0.137267
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.642288,
+          "yc": 0.667894,
+          "w": 0.170893,
+          "h": 0.127758
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.511085,
+          "yc": 0.498172,
+          "w": 0.160972,
+          "h": 0.121558
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.685838,
+          "yc": 0.535383,
+          "w": 0.169792,
+          "h": 0.124864
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.74896,
+          "yc": 0.410105,
+          "w": 0.170341,
+          "h": 0.130652
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.578065,
+          "yc": 0.364213,
+          "w": 0.172546,
+          "h": 0.124864
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.807092,
+          "yc": 0.273666,
+          "w": 0.170949,
+          "h": 0.126518
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.401658,
+          "yc": 0.746037,
+          "w": 0.171445,
+          "h": 0.130238
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.463125,
+          "yc": 0.62167,
+          "w": 0.160972,
+          "h": 0.125275
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.576136,
+          "yc": 0.783042,
+          "w": 0.153251,
+          "h": 0.122383
+        }
+      ]
+    },
+    "sample15.jpg": {
+      "image_id": "sample15",
+      "filename": "sample15.jpg",
+      "remote_path": "data/images/train/sample15.jpg",
+      "file_size_bytes": 6489476,
+      "sha256": "6ab9cd2fe2d8b6ae672522ef040322cf299388af3cc88a9bb98501132aea4eba",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 6,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.570655,
+          "yc": 0.594754,
+          "w": 0.170675,
+          "h": 0.131577
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.778241,
+          "yc": 0.456331,
+          "w": 0.182579,
+          "h": 0.127408
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.587325,
+          "yc": 0.456331,
+          "w": 0.165913,
+          "h": 0.125027
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.77586,
+          "yc": 0.314929,
+          "w": 0.182579,
+          "h": 0.136342
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.585737,
+          "yc": 0.31225,
+          "w": 0.170675,
+          "h": 0.133363
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.767525,
+          "yc": 0.596839,
+          "w": 0.186551,
+          "h": 0.122646
+        }
+      ]
+    },
+    "sample16.jpg": {
+      "image_id": "sample16",
+      "filename": "sample16.jpg",
+      "remote_path": "data/images/train/sample16.jpg",
+      "file_size_bytes": 6632042,
+      "sha256": "eafd038c8518a05b4745792adefb1c881f7786352cdc55685cdfc0111dc5508f",
+      "annotation_count": 4,
+      "original_counts": {
+        "white-egg": 4,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 4
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.775463,
+          "yc": 0.31344,
+          "w": 0.181786,
+          "h": 0.134554
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.583753,
+          "yc": 0.310761,
+          "w": 0.169881,
+          "h": 0.132768
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.778639,
+          "yc": 0.453948,
+          "w": 0.183376,
+          "h": 0.127411
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.572639,
+          "yc": 0.594159,
+          "w": 0.173056,
+          "h": 0.131577
+        }
+      ]
+    },
+    "sample17.jpg": {
+      "image_id": "sample17",
+      "filename": "sample17.jpg",
+      "remote_path": "data/images/train/sample17.jpg",
+      "file_size_bytes": 6548899,
+      "sha256": "55b3c00f9c48c6f8f8a3e36c051bf0370b7425e86dac7579f840368fba7f0e9f",
+      "annotation_count": 4,
+      "original_counts": {
+        "white-egg": 4,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 4
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.585012,
+          "yc": 0.600957,
+          "w": 0.170896,
+          "h": 0.132718
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.780989,
+          "yc": 0.453766,
+          "w": 0.183571,
+          "h": 0.128584
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.581979,
+          "yc": 0.465344,
+          "w": 0.164831,
+          "h": 0.125275
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.777956,
+          "yc": 0.594342,
+          "w": 0.181918,
+          "h": 0.121967
+        }
+      ]
+    },
+    "sample18.jpg": {
+      "image_id": "sample18",
+      "filename": "sample18.jpg",
+      "remote_path": "data/images/train/sample18.jpg",
+      "file_size_bytes": 6604484,
+      "sha256": "5128a39e1bde3d06abfe33037dfb8fe291fc970c30b7428e5ac2565e9a8055e2",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 6,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.278504,
+          "yc": 0.531704,
+          "w": 0.180817,
+          "h": 0.128998
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.457393,
+          "yc": 0.525915,
+          "w": 0.168138,
+          "h": 0.124038
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.648133,
+          "yc": 0.520539,
+          "w": 0.175856,
+          "h": 0.127344
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.667151,
+          "yc": 0.659668,
+          "w": 0.178614,
+          "h": 0.130238
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.29642,
+          "yc": 0.672484,
+          "w": 0.163727,
+          "h": 0.131892
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.477237,
+          "yc": 0.672898,
+          "w": 0.167034,
+          "h": 0.134373
+        }
+      ]
+    },
+    "sample19.jpg": {
+      "image_id": "sample19",
+      "filename": "sample19.jpg",
+      "remote_path": "data/images/train/sample19.jpg",
+      "file_size_bytes": 6496279,
+      "sha256": "ac7ca143bafba83185a46de14ec8ba125be2bfaab113345f5e61646f74f12ae7",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 6,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.547778,
+          "yc": 0.610136,
+          "w": 0.169352,
+          "h": 0.12999
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.377103,
+          "yc": 0.666696,
+          "w": 0.17332,
+          "h": 0.136935
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.48295,
+          "yc": 0.476177,
+          "w": 0.166706,
+          "h": 0.124035
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.421427,
+          "yc": 0.346683,
+          "w": 0.170671,
+          "h": 0.134953
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.247778,
+          "yc": 0.401755,
+          "w": 0.173981,
+          "h": 0.121059
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.301028,
+          "yc": 0.534722,
+          "w": 0.175966,
+          "h": 0.127014
+        }
+      ]
+    },
+    "sample2.jpg": {
+      "image_id": "sample2",
+      "filename": "sample2.jpg",
+      "remote_path": "data/images/train/sample2.jpg",
+      "file_size_bytes": 6764105,
+      "sha256": "8ff6cd09788f75540e48cb4b32be5f02113d679ff36d2b373b54b765e3bb075a",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.500744,
+          "yc": 0.241995,
+          "w": 0.16869,
+          "h": 0.136937
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.332717,
+          "yc": 0.793709,
+          "w": 0.163396,
+          "h": 0.138921
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.510666,
+          "yc": 0.792469,
+          "w": 0.154137,
+          "h": 0.141401
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.325771,
+          "yc": 0.657765,
+          "w": 0.175966,
+          "h": 0.127014
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.510336,
+          "yc": 0.52083,
+          "w": 0.161412,
+          "h": 0.121059
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.326432,
+          "yc": 0.528023,
+          "w": 0.168029,
+          "h": 0.12255
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.509344,
+          "yc": 0.382654,
+          "w": 0.164719,
+          "h": 0.12751
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.328416,
+          "yc": 0.393816,
+          "w": 0.164061,
+          "h": 0.121059
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.516951,
+          "yc": 0.656525,
+          "w": 0.165384,
+          "h": 0.124534
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.329408,
+          "yc": 0.24919,
+          "w": 0.170013,
+          "h": 0.137433
+        }
+      ]
+    },
+    "sample20.jpg": {
+      "image_id": "sample20",
+      "filename": "sample20.jpg",
+      "remote_path": "data/images/train/sample20.jpg",
+      "file_size_bytes": 6521994,
+      "sha256": "5cc7935e0b2fb9b4f6291c8787786578963a4cace02ed2d4077716d4942aff94",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 6,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.259701,
+          "yc": 0.345033,
+          "w": 0.169964,
+          "h": 0.13036
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.444279,
+          "yc": 0.499618,
+          "w": 0.16381,
+          "h": 0.124588
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.24855,
+          "yc": 0.492408,
+          "w": 0.183039,
+          "h": 0.124013
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.44774,
+          "yc": 0.353686,
+          "w": 0.173813,
+          "h": 0.132664
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.43505,
+          "yc": 0.633147,
+          "w": 0.168426,
+          "h": 0.129782
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.250241,
+          "yc": 0.63557,
+          "w": 0.176885,
+          "h": 0.136701
+        }
+      ]
+    },
+    "sample21.jpg": {
+      "image_id": "sample21",
+      "filename": "sample21.jpg",
+      "remote_path": "data/images/train/sample21.jpg",
+      "file_size_bytes": 6935252,
+      "sha256": "8f81d34c5e55cf68150fa3ebddcf3a60015fd97ca11d484f12bd5a28815c03fc",
+      "annotation_count": 3,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 3
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.254319,
+          "yc": 0.500195,
+          "w": 0.18381,
+          "h": 0.122284
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.264315,
+          "yc": 0.352243,
+          "w": 0.169967,
+          "h": 0.128628
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.255856,
+          "yc": 0.643243,
+          "w": 0.176118,
+          "h": 0.134973
+        }
+      ]
+    },
+    "sample22.jpg": {
+      "image_id": "sample22",
+      "filename": "sample22.jpg",
+      "remote_path": "data/images/train/sample22.jpg",
+      "file_size_bytes": 6034167,
+      "sha256": "c67e62c7e5fbe20d2bb14e9052d753c608152142268564c0e019b8d1f775fcf6",
+      "annotation_count": 3,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 3
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.264315,
+          "yc": 0.333209,
+          "w": 0.168426,
+          "h": 0.130933
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.414669,
+          "yc": 0.502502,
+          "w": 0.167659,
+          "h": 0.128051
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.384291,
+          "yc": 0.640647,
+          "w": 0.169964,
+          "h": 0.129782
+        }
+      ]
+    },
+    "sample23.jpg": {
+      "image_id": "sample23",
+      "filename": "sample23.jpg",
+      "remote_path": "data/images/train/sample23.jpg",
+      "file_size_bytes": 6924622,
+      "sha256": "c1ae52923572aa9cc3e428fdae4fd5e5e03a94f62a4bee5e0aaabcbb38b7673f",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.619033,
+          "yc": 0.342772,
+          "w": 0.183813,
+          "h": 0.13786
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.811076,
+          "yc": 0.345859,
+          "w": 0.183813,
+          "h": 0.139918
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.610117,
+          "yc": 0.485263,
+          "w": 0.165982,
+          "h": 0.126543
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.800103,
+          "yc": 0.495036,
+          "w": 0.178327,
+          "h": 0.12963
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.600516,
+          "yc": 0.624152,
+          "w": 0.185185,
+          "h": 0.138889
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.789815,
+          "yc": 0.630324,
+          "w": 0.18244,
+          "h": 0.134774
+        }
+      ]
+    },
+    "sample24.jpg": {
+      "image_id": "sample24",
+      "filename": "sample24.jpg",
+      "remote_path": "data/images/train/sample24.jpg",
+      "file_size_bytes": 6723646,
+      "sha256": "0c735ad68e062a38c077bd2ad39bab986ed75b2e8d8822fbabc46a08d4c9c971",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.327538,
+          "yc": 0.479604,
+          "w": 0.187927,
+          "h": 0.13786
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.517525,
+          "yc": 0.479603,
+          "w": 0.167351,
+          "h": 0.131687
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.708882,
+          "yc": 0.487834,
+          "w": 0.179696,
+          "h": 0.139918
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.325479,
+          "yc": 0.619007,
+          "w": 0.181071,
+          "h": 0.132716
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.507235,
+          "yc": 0.626208,
+          "w": 0.168724,
+          "h": 0.126543
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.705453,
+          "yc": 0.62878,
+          "w": 0.181071,
+          "h": 0.133745
+        }
+      ]
+    },
+    "sample25.jpg": {
+      "image_id": "sample25",
+      "filename": "sample25.jpg",
+      "remote_path": "data/images/train/sample25.jpg",
+      "file_size_bytes": 6609129,
+      "sha256": "cbadfb53e677298415ad139337696be352736d5c2a5a70a38ce3095fe5c4867b",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.340569,
+          "yc": 0.617464,
+          "w": 0.175582,
+          "h": 0.131689
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.515466,
+          "yc": 0.544418,
+          "w": 0.163234,
+          "h": 0.12963
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.682133,
+          "yc": 0.477546,
+          "w": 0.189299,
+          "h": 0.12963
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.43522,
+          "yc": 0.747608,
+          "w": 0.170096,
+          "h": 0.149179
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.595713,
+          "yc": 0.676106,
+          "w": 0.172841,
+          "h": 0.133745
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.769239,
+          "yc": 0.60409,
+          "w": 0.18244,
+          "h": 0.125516
+        }
+      ]
+    },
+    "sample26.jpg": {
+      "image_id": "sample26",
+      "filename": "sample26.jpg",
+      "remote_path": "data/images/train/sample26.jpg",
+      "file_size_bytes": 6681442,
+      "sha256": "0db04a488dd2e694401131e80690e2f451db4762585cb5af166b8869477a71c7",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.547703,
+          "yc": 0.400386,
+          "w": 0.183813,
+          "h": 0.141977
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.732887,
+          "yc": 0.405016,
+          "w": 0.178327,
+          "h": 0.134774
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.531242,
+          "yc": 0.541846,
+          "w": 0.181068,
+          "h": 0.122428
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.722599,
+          "yc": 0.555735,
+          "w": 0.174213,
+          "h": 0.12963
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.525068,
+          "yc": 0.68948,
+          "w": 0.176954,
+          "h": 0.13786
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.717799,
+          "yc": 0.696682,
+          "w": 0.186558,
+          "h": 0.141974
+        }
+      ]
+    },
+    "sample27.jpg": {
+      "image_id": "sample27",
+      "filename": "sample27.jpg",
+      "remote_path": "data/images/train/sample27.jpg",
+      "file_size_bytes": 6530700,
+      "sha256": "78c7d78b5eb9e44f86130fe6ac2b878ab0b8111455ad366a02c751a0db596b69",
+      "annotation_count": 4,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 4
+      },
+      "mapped_counts": {
+        "egg": 4
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.557303,
+          "yc": 0.390613,
+          "w": 0.170096,
+          "h": 0.128601
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.3488,
+          "yc": 0.527443,
+          "w": 0.170099,
+          "h": 0.126543
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.734945,
+          "yc": 0.541846,
+          "w": 0.176954,
+          "h": 0.128599
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.745919,
+          "yc": 0.399356,
+          "w": 0.18793,
+          "h": 0.139918
+        }
+      ]
+    },
+    "sample28.jpg": {
+      "image_id": "sample28",
+      "filename": "sample28.jpg",
+      "remote_path": "data/images/train/sample28.jpg",
+      "file_size_bytes": 6812182,
+      "sha256": "e9d93606dd790a78cc0536ada85ad6c141262dc94f1d80f1cd53cc5199478617",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 4
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.362517,
+          "yc": 0.387011,
+          "w": 0.172837,
+          "h": 0.125516
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.536042,
+          "yc": 0.534645,
+          "w": 0.168724,
+          "h": 0.126543
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.557991,
+          "yc": 0.393183,
+          "w": 0.17421,
+          "h": 0.12963
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.745233,
+          "yc": 0.398842,
+          "w": 0.186558,
+          "h": 0.138889
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.352915,
+          "yc": 0.531044,
+          "w": 0.170096,
+          "h": 0.125516
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.73083,
+          "yc": 0.542876,
+          "w": 0.179696,
+          "h": 0.130657
+        }
+      ]
+    },
+    "sample29.jpg": {
+      "image_id": "sample29",
+      "filename": "sample29.jpg",
+      "remote_path": "data/images/train/sample29.jpg",
+      "file_size_bytes": 6978726,
+      "sha256": "62ad7a8b20a4f7c21baf412cfd5a335da5c6af920c4b4cb7af7f277e357b92ac",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.311078,
+          "yc": 0.394213,
+          "w": 0.171468,
+          "h": 0.119343
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.496262,
+          "yc": 0.398328,
+          "w": 0.17421,
+          "h": 0.133745
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.305589,
+          "yc": 0.527958,
+          "w": 0.171468,
+          "h": 0.123455
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.49146,
+          "yc": 0.538247,
+          "w": 0.167351,
+          "h": 0.123457
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.304904,
+          "yc": 0.670961,
+          "w": 0.16461,
+          "h": 0.12963
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.494205,
+          "yc": 0.677135,
+          "w": 0.170096,
+          "h": 0.131687
+        }
+      ]
+    },
+    "sample3.jpg": {
+      "image_id": "sample3",
+      "filename": "sample3.jpg",
+      "remote_path": "data/images/train/sample3.jpg",
+      "file_size_bytes": 6993844,
+      "sha256": "bc8dc2fbafa711ee488c6b9a0843a7452d8aab3a781c585104459b97f7fff526",
+      "annotation_count": 5,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 5
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.49773,
+          "yc": 0.240921,
+          "w": 0.166121,
+          "h": 0.13901
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.510035,
+          "yc": 0.792923,
+          "w": 0.152278,
+          "h": 0.13901
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.327379,
+          "yc": 0.656797,
+          "w": 0.177655,
+          "h": 0.127473
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.508497,
+          "yc": 0.520383,
+          "w": 0.161505,
+          "h": 0.122284
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.321997,
+          "yc": 0.390312,
+          "w": 0.176118,
+          "h": 0.118244
+        }
+      ]
+    },
+    "sample30.jpg": {
+      "image_id": "sample30",
+      "filename": "sample30.jpg",
+      "remote_path": "data/images/train/sample30.jpg",
+      "file_size_bytes": 6991727,
+      "sha256": "6de1ae356ae329aac4cbb9e85f7540077dcc8bc7cfdae9cbba922526fb811f5c",
+      "annotation_count": 5,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 5
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.313819,
+          "yc": 0.388554,
+          "w": 0.168724,
+          "h": 0.120372
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.500377,
+          "yc": 0.391641,
+          "w": 0.176958,
+          "h": 0.136833
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.308333,
+          "yc": 0.523328,
+          "w": 0.171468,
+          "h": 0.126543
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.495575,
+          "yc": 0.53053,
+          "w": 0.16461,
+          "h": 0.124487
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.295987,
+          "yc": 0.670448,
+          "w": 0.193416,
+          "h": 0.132716
+        }
+      ]
+    },
+    "sample31.jpg": {
+      "image_id": "sample31",
+      "filename": "sample31.jpg",
+      "remote_path": "data/images/train/sample31.jpg",
+      "file_size_bytes": 6796801,
+      "sha256": "a13987ce39cbc0f683ae92df4598a1513b4b2f5bf7ef2ccdfefbe4b6a4281c1c",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.315876,
+          "yc": 0.373123,
+          "w": 0.178327,
+          "h": 0.13066
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.504876,
+          "yc": 0.390139,
+          "w": 0.166253,
+          "h": 0.123457
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.293477,
+          "yc": 0.505541,
+          "w": 0.174487,
+          "h": 0.124692
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.483601,
+          "yc": 0.528997,
+          "w": 0.166257,
+          "h": 0.12716
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.263024,
+          "yc": 0.652454,
+          "w": 0.199177,
+          "h": 0.134566
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.458085,
+          "yc": 0.666034,
+          "w": 0.16461,
+          "h": 0.132098
+        }
+      ]
+    },
+    "sample32.jpg": {
+      "image_id": "sample32",
+      "filename": "sample32.jpg",
+      "remote_path": "data/images/train/sample32.jpg",
+      "file_size_bytes": 6551536,
+      "sha256": "537b412bf0b789bfd09c38bf61dc946e0923525df896abcbd52fc8ef67f378be",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 4
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.316523,
+          "yc": 0.519737,
+          "w": 0.164606,
+          "h": 0.123457
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.502531,
+          "yc": 0.52159,
+          "w": 0.174487,
+          "h": 0.129628
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.68854,
+          "yc": 0.516034,
+          "w": 0.171194,
+          "h": 0.125928
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.320638,
+          "yc": 0.666652,
+          "w": 0.172837,
+          "h": 0.135804
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.500061,
+          "yc": 0.66233,
+          "w": 0.166253,
+          "h": 0.12716
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.700886,
+          "yc": 0.662331,
+          "w": 0.179425,
+          "h": 0.134568
+        }
+      ]
+    },
+    "sample33.jpg": {
+      "image_id": "sample33",
+      "filename": "sample33.jpg",
+      "remote_path": "data/images/train/sample33.jpg",
+      "file_size_bytes": 7053554,
+      "sha256": "b2ee6bd08f0d1f1bc1a20f40aa44e42b5a274925216d7430d13cc1b7f3e943af",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 7,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.502531,
+          "yc": 0.294428,
+          "w": 0.171194,
+          "h": 0.12963
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.686893,
+          "yc": 0.297516,
+          "w": 0.1679,
+          "h": 0.128395
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.498416,
+          "yc": 0.438255,
+          "w": 0.179425,
+          "h": 0.128395
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.701708,
+          "yc": 0.438255,
+          "w": 0.171194,
+          "h": 0.128395
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.514053,
+          "yc": 0.581467,
+          "w": 0.1679,
+          "h": 0.125925
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.700061,
+          "yc": 0.578997,
+          "w": 0.174487,
+          "h": 0.128395
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.504178,
+          "yc": 0.719121,
+          "w": 0.171194,
+          "h": 0.137036
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.703353,
+          "yc": 0.720972,
+          "w": 0.177778,
+          "h": 0.135804
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.510762,
+          "yc": 0.8648,
+          "w": 0.171194,
+          "h": 0.139506
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.700885,
+          "yc": 0.860479,
+          "w": 0.172841,
+          "h": 0.14568
+        }
+      ]
+    },
+    "sample34.jpg": {
+      "image_id": "sample34",
+      "filename": "sample34.jpg",
+      "remote_path": "data/images/train/sample34.jpg",
+      "file_size_bytes": 7595096,
+      "sha256": "e57cf73b1619e981ebe1890df2112846fd69c1b548e1598e5cbc0f830424cbac",
+      "annotation_count": 7,
+      "original_counts": {
+        "white-egg": 4,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 7
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.521462,
+          "yc": 0.299985,
+          "w": 0.179425,
+          "h": 0.135804
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.705,
+          "yc": 0.309861,
+          "w": 0.174484,
+          "h": 0.14815
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.504177,
+          "yc": 0.43949,
+          "w": 0.181071,
+          "h": 0.138271
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.700886,
+          "yc": 0.454306,
+          "w": 0.192593,
+          "h": 0.135804
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.663024,
+          "yc": 0.729616,
+          "w": 0.182715,
+          "h": 0.155556
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.45644,
+          "yc": 0.861713,
+          "w": 0.184362,
+          "h": 0.162964
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.645741,
+          "yc": 0.873442,
+          "w": 0.177778,
+          "h": 0.156791
+        }
+      ]
+    },
+    "sample35.jpg": {
+      "image_id": "sample35",
+      "filename": "sample35.jpg",
+      "remote_path": "data/images/train/sample35.jpg",
+      "file_size_bytes": 6682808,
+      "sha256": "1f05b9c016b6ea6bd13044bd100eb66803177b3ee7ba3805c9c2a4ad95e1a948",
+      "annotation_count": 5,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 3
+      },
+      "mapped_counts": {
+        "egg": 5
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.502531,
+          "yc": 0.446281,
+          "w": 0.181068,
+          "h": 0.134566
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.696769,
+          "yc": 0.459861,
+          "w": 0.181071,
+          "h": 0.137039
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.659734,
+          "yc": 0.731467,
+          "w": 0.186009,
+          "h": 0.151853
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.455617,
+          "yc": 0.862948,
+          "w": 0.186009,
+          "h": 0.165434
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.65068,
+          "yc": 0.874676,
+          "w": 0.181068,
+          "h": 0.159258
+        }
+      ]
+    },
+    "sample36.jpg": {
+      "image_id": "sample36",
+      "filename": "sample36.jpg",
+      "remote_path": "data/images/train/sample36.jpg",
+      "file_size_bytes": 7366077,
+      "sha256": "a7c5b4b9ac34e6e2d58afba6f05dab96a4377079b518918bfbb20bba396fd354",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 5
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.107469,
+          "yc": 0.524059,
+          "w": 0.204117,
+          "h": 0.134566
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.295946,
+          "yc": 0.51912,
+          "w": 0.189299,
+          "h": 0.144444
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.481133,
+          "yc": 0.512948,
+          "w": 0.187655,
+          "h": 0.139506
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.667963,
+          "yc": 0.514183,
+          "w": 0.19918,
+          "h": 0.141977
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.853972,
+          "yc": 0.514182,
+          "w": 0.192593,
+          "h": 0.132098
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.109939,
+          "yc": 0.666652,
+          "w": 0.199177,
+          "h": 0.130863
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.301708,
+          "yc": 0.665417,
+          "w": 0.187655,
+          "h": 0.135804
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.490185,
+          "yc": 0.659861,
+          "w": 0.192593,
+          "h": 0.141974
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.674549,
+          "yc": 0.660479,
+          "w": 0.186009,
+          "h": 0.138274
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.863849,
+          "yc": 0.655541,
+          "w": 0.209054,
+          "h": 0.14815
+        }
+      ]
+    },
+    "sample37.jpg": {
+      "image_id": "sample37",
+      "filename": "sample37.jpg",
+      "remote_path": "data/images/train/sample37.jpg",
+      "file_size_bytes": 6706633,
+      "sha256": "77268dd24f6e32ca2043cf7fda429fca7a2a5cecd653bc53203b014ed2d2f86f",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 9,
+        "brown-egg": 1
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.106647,
+          "yc": 0.337023,
+          "w": 0.205761,
+          "h": 0.138271
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.297593,
+          "yc": 0.333935,
+          "w": 0.186005,
+          "h": 0.141977
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.481131,
+          "yc": 0.328997,
+          "w": 0.194239,
+          "h": 0.146912
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.677017,
+          "yc": 0.324059,
+          "w": 0.190946,
+          "h": 0.146912
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.869608,
+          "yc": 0.317886,
+          "w": 0.200823,
+          "h": 0.151853
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.110761,
+          "yc": 0.47591,
+          "w": 0.194239,
+          "h": 0.141974
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.301708,
+          "yc": 0.476529,
+          "w": 0.187655,
+          "h": 0.150618
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.486893,
+          "yc": 0.472207,
+          "w": 0.195883,
+          "h": 0.141974
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.677839,
+          "yc": 0.47591,
+          "w": 0.189302,
+          "h": 0.134568
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.868786,
+          "yc": 0.468503,
+          "w": 0.192593,
+          "h": 0.139506
+        }
+      ]
+    },
+    "sample38.jpg": {
+      "image_id": "sample38",
+      "filename": "sample38.jpg",
+      "remote_path": "data/images/train/sample38.jpg",
+      "file_size_bytes": 6764266,
+      "sha256": "58c4215d61b6cbbf6c0e501fd1168a1ca5593313e1f0adcea24c259a4741f8d7",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 1,
+        "brown-egg": 5
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.303355,
+          "yc": 0.451837,
+          "w": 0.184362,
+          "h": 0.138271
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.497593,
+          "yc": 0.45801,
+          "w": 0.187652,
+          "h": 0.140742
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.679486,
+          "yc": 0.466651,
+          "w": 0.182715,
+          "h": 0.140742
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.295124,
+          "yc": 0.591959,
+          "w": 0.187655,
+          "h": 0.134568
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.477841,
+          "yc": 0.599368,
+          "w": 0.177778,
+          "h": 0.137039
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.672078,
+          "yc": 0.612331,
+          "w": 0.184362,
+          "h": 0.14568
+        }
+      ]
+    },
+    "sample39.jpg": {
+      "image_id": "sample39",
+      "filename": "sample39.jpg",
+      "remote_path": "data/images/train/sample39.jpg",
+      "file_size_bytes": 6399746,
+      "sha256": "425bd92a797687607929e1c9a2526b3744c7a3696345f4f0b6b33edfb361dd78",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 0,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.305,
+          "yc": 0.451837,
+          "w": 0.187652,
+          "h": 0.140742
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.492655,
+          "yc": 0.45801,
+          "w": 0.190946,
+          "h": 0.143212
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.684431,
+          "yc": 0.466648,
+          "w": 0.199193,
+          "h": 0.145672
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.297593,
+          "yc": 0.59443,
+          "w": 0.186005,
+          "h": 0.134568
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.477839,
+          "yc": 0.600603,
+          "w": 0.171194,
+          "h": 0.134568
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.670432,
+          "yc": 0.612948,
+          "w": 0.187655,
+          "h": 0.141977
+        }
+      ]
+    },
+    "sample4.jpg": {
+      "image_id": "sample4",
+      "filename": "sample4.jpg",
+      "remote_path": "data/images/train/sample4.jpg",
+      "file_size_bytes": 6984592,
+      "sha256": "98a0a061ea5ab93abc8692e471b1abbe4b763d43c21c7f215b7b471404f93e31",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.325842,
+          "yc": 0.56422,
+          "w": 0.166888,
+          "h": 0.125742
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.426976,
+          "yc": 0.82061,
+          "w": 0.158429,
+          "h": 0.143626
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.590403,
+          "yc": 0.783118,
+          "w": 0.156124,
+          "h": 0.133244
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.379292,
+          "yc": 0.685348,
+          "w": 0.166118,
+          "h": 0.124591
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.543874,
+          "yc": 0.65247,
+          "w": 0.163046,
+          "h": 0.125744
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.496577,
+          "yc": 0.520671,
+          "w": 0.162275,
+          "h": 0.12286
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.448125,
+          "yc": 0.388294,
+          "w": 0.165351,
+          "h": 0.128051
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.270853,
+          "yc": 0.432419,
+          "w": 0.172275,
+          "h": 0.118247
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.390828,
+          "yc": 0.255052,
+          "w": 0.167655,
+          "h": 0.136126
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.220479,
+          "yc": 0.299467,
+          "w": 0.179193,
+          "h": 0.131513
+        }
+      ]
+    },
+    "sample40.jpg": {
+      "image_id": "sample40",
+      "filename": "sample40.jpg",
+      "remote_path": "data/images/train/sample40.jpg",
+      "file_size_bytes": 6772141,
+      "sha256": "93ce44c0b8c41e69761a9f32635ed6992a4fce4f2dbb152012e045f4ffd037fa",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 1,
+        "brown-egg": 14
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.444917,
+          "yc": 0.263565,
+          "w": 0.181071,
+          "h": 0.139506
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.633396,
+          "yc": 0.263565,
+          "w": 0.179425,
+          "h": 0.137036
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.823519,
+          "yc": 0.266651,
+          "w": 0.204114,
+          "h": 0.140742
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.435865,
+          "yc": 0.398132,
+          "w": 0.182715,
+          "h": 0.134568
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.625987,
+          "yc": 0.401837,
+          "w": 0.187655,
+          "h": 0.141977
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.80788,
+          "yc": 0.403688,
+          "w": 0.179425,
+          "h": 0.140739
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.432571,
+          "yc": 0.53517,
+          "w": 0.182715,
+          "h": 0.144447
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.615288,
+          "yc": 0.537023,
+          "w": 0.182718,
+          "h": 0.138271
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.804588,
+          "yc": 0.541961,
+          "w": 0.199177,
+          "h": 0.140742
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.426811,
+          "yc": 0.67591,
+          "w": 0.187655,
+          "h": 0.141974
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.614464,
+          "yc": 0.680232,
+          "w": 0.177778,
+          "h": 0.138271
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.80212,
+          "yc": 0.684552,
+          "w": 0.190946,
+          "h": 0.141977
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.42434,
+          "yc": 0.822206,
+          "w": 0.186009,
+          "h": 0.150618
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.612819,
+          "yc": 0.822207,
+          "w": 0.181068,
+          "h": 0.155556
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.800475,
+          "yc": 0.825911,
+          "w": 0.200823,
+          "h": 0.150618
+        }
+      ]
+    },
+    "sample41.jpg": {
+      "image_id": "sample41",
+      "filename": "sample41.jpg",
+      "remote_path": "data/images/train/sample41.jpg",
+      "file_size_bytes": 7050932,
+      "sha256": "cf7ead7d41d6c90bb7348675fc54cd6c2713fd503f0775b90038f7423a3bc4e1",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 1,
+        "brown-egg": 14
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.368375,
+          "yc": 0.175294,
+          "w": 0.189302,
+          "h": 0.138271
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.558497,
+          "yc": 0.178379,
+          "w": 0.184362,
+          "h": 0.139506
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.751913,
+          "yc": 0.172206,
+          "w": 0.186009,
+          "h": 0.151853
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.366728,
+          "yc": 0.315417,
+          "w": 0.189302,
+          "h": 0.139504
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.552738,
+          "yc": 0.317886,
+          "w": 0.192593,
+          "h": 0.141977
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.744506,
+          "yc": 0.316652,
+          "w": 0.19753,
+          "h": 0.141974
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.363436,
+          "yc": 0.458627,
+          "w": 0.192593,
+          "h": 0.141977
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.548623,
+          "yc": 0.455541,
+          "w": 0.184362,
+          "h": 0.130863
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.737098,
+          "yc": 0.453688,
+          "w": 0.189302,
+          "h": 0.134568
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.361791,
+          "yc": 0.597516,
+          "w": 0.182715,
+          "h": 0.130866
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.549444,
+          "yc": 0.595047,
+          "w": 0.186005,
+          "h": 0.143209
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.737098,
+          "yc": 0.591961,
+          "w": 0.186009,
+          "h": 0.141977
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.363437,
+          "yc": 0.735787,
+          "w": 0.186009,
+          "h": 0.150618
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.550266,
+          "yc": 0.737023,
+          "w": 0.184362,
+          "h": 0.148147
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.741214,
+          "yc": 0.738256,
+          "w": 0.197533,
+          "h": 0.14815
+        }
+      ]
+    },
+    "sample42.jpg": {
+      "image_id": "sample42",
+      "filename": "sample42.jpg",
+      "remote_path": "data/images/train/sample42.jpg",
+      "file_size_bytes": 7041148,
+      "sha256": "ed68640a4011161f2e38088113ebbfea548777e8792a8dad1f01439ece0ce8bb",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 1,
+        "brown-egg": 14
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.132984,
+          "yc": 0.266034,
+          "w": 0.199177,
+          "h": 0.144444
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.322283,
+          "yc": 0.267886,
+          "w": 0.195883,
+          "h": 0.140742
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.509939,
+          "yc": 0.27159,
+          "w": 0.186009,
+          "h": 0.14568
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.693479,
+          "yc": 0.27159,
+          "w": 0.194239,
+          "h": 0.143209
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.882778,
+          "yc": 0.27159,
+          "w": 0.194239,
+          "h": 0.14568
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.137922,
+          "yc": 0.407392,
+          "w": 0.195883,
+          "h": 0.135801
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.328046,
+          "yc": 0.408627,
+          "w": 0.197533,
+          "h": 0.138271
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.513231,
+          "yc": 0.409244,
+          "w": 0.172837,
+          "h": 0.132098
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.692654,
+          "yc": 0.412948,
+          "w": 0.186009,
+          "h": 0.139506
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.878662,
+          "yc": 0.414183,
+          "w": 0.186009,
+          "h": 0.139506
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.137098,
+          "yc": 0.551219,
+          "w": 0.19753,
+          "h": 0.149382
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.323107,
+          "yc": 0.547516,
+          "w": 0.184362,
+          "h": 0.141977
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.504177,
+          "yc": 0.549985,
+          "w": 0.181071,
+          "h": 0.146915
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.684425,
+          "yc": 0.550603,
+          "w": 0.182718,
+          "h": 0.143209
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.877016,
+          "yc": 0.556158,
+          "w": 0.199177,
+          "h": 0.144444
+        }
+      ]
+    },
+    "sample43.jpg": {
+      "image_id": "sample43",
+      "filename": "sample43.jpg",
+      "remote_path": "data/images/train/sample43.jpg",
+      "file_size_bytes": 7038010,
+      "sha256": "2f6b3ee4e7bee02eddc717c523b3e4915a4e28ad4c45d52620d848db76ee9265",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 12
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.234218,
+          "yc": 0.128379,
+          "w": 0.190949,
+          "h": 0.148147
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.425987,
+          "yc": 0.129614,
+          "w": 0.182715,
+          "h": 0.150618
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.612819,
+          "yc": 0.12591,
+          "w": 0.184362,
+          "h": 0.153085
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.234218,
+          "yc": 0.269737,
+          "w": 0.19753,
+          "h": 0.146915
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.421873,
+          "yc": 0.275294,
+          "w": 0.187655,
+          "h": 0.138271
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.611174,
+          "yc": 0.272207,
+          "w": 0.190946,
+          "h": 0.144444
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.230103,
+          "yc": 0.412948,
+          "w": 0.192593,
+          "h": 0.137036
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.419403,
+          "yc": 0.411713,
+          "w": 0.182715,
+          "h": 0.139506
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.611174,
+          "yc": 0.415417,
+          "w": 0.181071,
+          "h": 0.137039
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.234218,
+          "yc": 0.54875,
+          "w": 0.190949,
+          "h": 0.134568
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.420227,
+          "yc": 0.551837,
+          "w": 0.187655,
+          "h": 0.140742
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.610351,
+          "yc": 0.554922,
+          "w": 0.189299,
+          "h": 0.139506
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.235865,
+          "yc": 0.68517,
+          "w": 0.187655,
+          "h": 0.138271
+        },
+        {
+          "line": 14,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.418581,
+          "yc": 0.691343,
+          "w": 0.177778,
+          "h": 0.130866
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.600475,
+          "yc": 0.691343,
+          "w": 0.186009,
+          "h": 0.135801
+        }
+      ]
+    },
+    "sample44.jpg": {
+      "image_id": "sample44",
+      "filename": "sample44.jpg",
+      "remote_path": "data/images/train/sample44.jpg",
+      "file_size_bytes": 7146558,
+      "sha256": "c67449c9c35025bacb8152b959f2fe6d81639d384d6c124a9adc2fde9867f69a",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 3,
+        "brown-egg": 12
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.17249,
+          "yc": 0.155541,
+          "w": 0.205761,
+          "h": 0.155556
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.362614,
+          "yc": 0.15801,
+          "w": 0.187655,
+          "h": 0.153088
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.555207,
+          "yc": 0.158626,
+          "w": 0.187655,
+          "h": 0.146915
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.179074,
+          "yc": 0.303072,
+          "w": 0.202467,
+          "h": 0.139506
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.369196,
+          "yc": 0.302454,
+          "w": 0.190946,
+          "h": 0.135801
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.556852,
+          "yc": 0.302454,
+          "w": 0.194239,
+          "h": 0.138271
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.179897,
+          "yc": 0.441961,
+          "w": 0.194239,
+          "h": 0.138271
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.366729,
+          "yc": 0.441961,
+          "w": 0.179425,
+          "h": 0.140742
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.558497,
+          "yc": 0.442577,
+          "w": 0.187655,
+          "h": 0.137039
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.18128,
+          "yc": 0.581347,
+          "w": 0.196237,
+          "h": 0.13503
+        },
+        {
+          "line": 11,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.367513,
+          "yc": 0.580991,
+          "w": 0.181944,
+          "h": 0.138604
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.561367,
+          "yc": 0.578132,
+          "w": 0.18671,
+          "h": 0.135744
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.186996,
+          "yc": 0.721736,
+          "w": 0.184805,
+          "h": 0.145749
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.369894,
+          "yc": 0.721022,
+          "w": 0.184802,
+          "h": 0.147178
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.556126,
+          "yc": 0.717092,
+          "w": 0.185757,
+          "h": 0.139318
+        }
+      ]
+    },
+    "sample45.jpg": {
+      "image_id": "sample45",
+      "filename": "sample45.jpg",
+      "remote_path": "data/images/train/sample45.jpg",
+      "file_size_bytes": 6992477,
+      "sha256": "ac30cf2827b7835cf40b88b302583e509ea870b66dfe731d1bc8c23f64862a50",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 10
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.45963,
+          "yc": 0.128315,
+          "w": 0.174325,
+          "h": 0.138604
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.642528,
+          "yc": 0.165466,
+          "w": 0.178138,
+          "h": 0.151463
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.83019,
+          "yc": 0.20619,
+          "w": 0.189567,
+          "h": 0.147178
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.412475,
+          "yc": 0.267633,
+          "w": 0.179091,
+          "h": 0.140032
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.596326,
+          "yc": 0.305856,
+          "w": 0.177183,
+          "h": 0.136458
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.775415,
+          "yc": 0.348366,
+          "w": 0.179091,
+          "h": 0.137173
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.355795,
+          "yc": 0.407665,
+          "w": 0.181948,
+          "h": 0.124313
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.538218,
+          "yc": 0.438385,
+          "w": 0.179087,
+          "h": 0.132887
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.725881,
+          "yc": 0.480538,
+          "w": 0.192424,
+          "h": 0.13003
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.302927,
+          "yc": 0.536265,
+          "w": 0.180992,
+          "h": 0.13003
+        },
+        {
+          "line": 11,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.478204,
+          "yc": 0.571631,
+          "w": 0.182897,
+          "h": 0.133604
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.669201,
+          "yc": 0.614855,
+          "w": 0.189567,
+          "h": 0.137175
+        },
+        {
+          "line": 13,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.248629,
+          "yc": 0.663438,
+          "w": 0.192424,
+          "h": 0.132887
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.429623,
+          "yc": 0.706305,
+          "w": 0.173373,
+          "h": 0.147178
+        },
+        {
+          "line": 15,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.614426,
+          "yc": 0.752743,
+          "w": 0.171465,
+          "h": 0.148606
+        }
+      ]
+    },
+    "sample46.jpg": {
+      "image_id": "sample46",
+      "filename": "sample46.jpg",
+      "remote_path": "data/images/train/sample46.jpg",
+      "file_size_bytes": 7555896,
+      "sha256": "330e2865d341c523f8e641cc7f89b375d130526037fe9bfdb2dcd89b7541535f",
+      "annotation_count": 11,
+      "original_counts": {
+        "white-egg": 4,
+        "brown-egg": 7
+      },
+      "mapped_counts": {
+        "egg": 11
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.435813,
+          "yc": 0.149606,
+          "w": 0.17623,
+          "h": 0.152178
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.615379,
+          "yc": 0.165324,
+          "w": 0.18671,
+          "h": 0.156466
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.812568,
+          "yc": 0.187471,
+          "w": 0.192424,
+          "h": 0.157894
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.590134,
+          "yc": 0.308213,
+          "w": 0.183853,
+          "h": 0.139318
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.373896,
+          "yc": 0.430742,
+          "w": 0.178135,
+          "h": 0.127173
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.558699,
+          "yc": 0.443958,
+          "w": 0.181948,
+          "h": 0.133601
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.754458,
+          "yc": 0.467536,
+          "w": 0.200046,
+          "h": 0.139318
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.345794,
+          "yc": 0.566844,
+          "w": 0.190522,
+          "h": 0.142175
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.525835,
+          "yc": 0.581846,
+          "w": 0.180995,
+          "h": 0.139318
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.718737,
+          "yc": 0.605782,
+          "w": 0.197189,
+          "h": 0.142889
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.504401,
+          "yc": 0.724023,
+          "w": 0.185754,
+          "h": 0.143606
+        }
+      ]
+    },
+    "sample47.jpg": {
+      "image_id": "sample47",
+      "filename": "sample47.jpg",
+      "remote_path": "data/images/train/sample47.jpg",
+      "file_size_bytes": 7584976,
+      "sha256": "6a4211d354017b096824179f58eff80dbeb8c8bd718aa503672ab7a8e3b724e9",
+      "annotation_count": 9,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 7
+      },
+      "mapped_counts": {
+        "egg": 9
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.400475,
+          "yc": 0.156528,
+          "w": 0.184362,
+          "h": 0.159261
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.773972,
+          "yc": 0.13912,
+          "w": 0.20082,
+          "h": 0.166667
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.59142,
+          "yc": 0.293565,
+          "w": 0.187655,
+          "h": 0.137036
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.40788,
+          "yc": 0.429366,
+          "w": 0.182718,
+          "h": 0.139506
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.593067,
+          "yc": 0.427515,
+          "w": 0.184362,
+          "h": 0.135804
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.788952,
+          "yc": 0.426281,
+          "w": 0.204114,
+          "h": 0.130866
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.415289,
+          "yc": 0.575047,
+          "w": 0.200823,
+          "h": 0.146915
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.783189,
+          "yc": 0.563318,
+          "w": 0.199177,
+          "h": 0.14568
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.787305,
+          "yc": 0.703441,
+          "w": 0.207407,
+          "h": 0.137036
+        }
+      ]
+    },
+    "sample48.jpg": {
+      "image_id": "sample48",
+      "filename": "sample48.jpg",
+      "remote_path": "data/images/train/sample48.jpg",
+      "file_size_bytes": 7736866,
+      "sha256": "db3b44ddee016f6dd4880ddc8811741cbd2493a321af97b3539209a073b19d76",
+      "annotation_count": 8,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 6
+      },
+      "mapped_counts": {
+        "egg": 8
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.416111,
+          "yc": 0.160848,
+          "w": 0.186005,
+          "h": 0.153085
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.784835,
+          "yc": 0.159614,
+          "w": 0.192593,
+          "h": 0.150618
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.4227,
+          "yc": 0.303442,
+          "w": 0.186015,
+          "h": 0.134568
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.420225,
+          "yc": 0.43801,
+          "w": 0.177778,
+          "h": 0.139506
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.419403,
+          "yc": 0.577516,
+          "w": 0.186009,
+          "h": 0.146912
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.416113,
+          "yc": 0.722578,
+          "w": 0.182722,
+          "h": 0.140742
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.795534,
+          "yc": 0.575663,
+          "w": 0.190942,
+          "h": 0.148147
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.793889,
+          "yc": 0.71949,
+          "w": 0.194239,
+          "h": 0.139506
+        }
+      ]
+    },
+    "sample49.jpg": {
+      "image_id": "sample49",
+      "filename": "sample49.jpg",
+      "remote_path": "data/images/train/sample49.jpg",
+      "file_size_bytes": 7646956,
+      "sha256": "85e3735bd119253a9bc5ce54dd237d7a8931e6972b88353ceb396d95e0b40f2c",
+      "annotation_count": 9,
+      "original_counts": {
+        "white-egg": 2,
+        "brown-egg": 7
+      },
+      "mapped_counts": {
+        "egg": 9
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.412819,
+          "yc": 0.165787,
+          "w": 0.182715,
+          "h": 0.148147
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.780721,
+          "yc": 0.162083,
+          "w": 0.194239,
+          "h": 0.150615
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.415288,
+          "yc": 0.308997,
+          "w": 0.187652,
+          "h": 0.138271
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.416935,
+          "yc": 0.441095,
+          "w": 0.187652,
+          "h": 0.138271
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.412819,
+          "yc": 0.583688,
+          "w": 0.186009,
+          "h": 0.141974
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.597181,
+          "yc": 0.579368,
+          "w": 0.186009,
+          "h": 0.135804
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.412819,
+          "yc": 0.723194,
+          "w": 0.182715,
+          "h": 0.146915
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.598828,
+          "yc": 0.727516,
+          "w": 0.189302,
+          "h": 0.162964
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.792244,
+          "yc": 0.726281,
+          "w": 0.200823,
+          "h": 0.148147
+        }
+      ]
+    },
+    "sample5.jpg": {
+      "image_id": "sample5",
+      "filename": "sample5.jpg",
+      "remote_path": "data/images/train/sample5.jpg",
+      "file_size_bytes": 6919403,
+      "sha256": "5172f616a998a271428fbc2635667743a4b8d20a389502550a0012ca3983bcd2",
+      "annotation_count": 5,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 5
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.399226,
+          "yc": 0.6751,
+          "w": 0.160582,
+          "h": 0.131233
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.227555,
+          "yc": 0.805786,
+          "w": 0.159196,
+          "h": 0.141895
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.387599,
+          "yc": 0.399342,
+          "w": 0.170549,
+          "h": 0.126252
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.214835,
+          "yc": 0.272675,
+          "w": 0.170549,
+          "h": 0.123757
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.219816,
+          "yc": 0.53639,
+          "w": 0.167226,
+          "h": 0.122929
+        }
+      ]
+    },
+    "sample6.jpg": {
+      "image_id": "sample6",
+      "filename": "sample6.jpg",
+      "remote_path": "data/images/train/sample6.jpg",
+      "file_size_bytes": 6985768,
+      "sha256": "afe42c54096acca25b0af614dfd63cce91a3dc2612e755439e92067cfff36b26",
+      "annotation_count": 6,
+      "original_counts": {
+        "white-egg": 6,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 6
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.209481,
+          "yc": 0.268492,
+          "w": 0.164583,
+          "h": 0.121706
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.38329,
+          "yc": 0.396543,
+          "w": 0.170734,
+          "h": 0.126319
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.395597,
+          "yc": 0.66966,
+          "w": 0.15997,
+          "h": 0.131513
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.392905,
+          "yc": 0.531228,
+          "w": 0.159196,
+          "h": 0.119975
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.224861,
+          "yc": 0.800883,
+          "w": 0.156892,
+          "h": 0.140164
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.216017,
+          "yc": 0.533188,
+          "w": 0.171505,
+          "h": 0.123435
+        }
+      ]
+    },
+    "sample7.jpg": {
+      "image_id": "sample7",
+      "filename": "sample7.jpg",
+      "remote_path": "data/images/train/sample7.jpg",
+      "file_size_bytes": 7146223,
+      "sha256": "5731905b34794edc3c7a07e53cd50b03522e2fdca76ab20d176d9176410a68b8",
+      "annotation_count": 8,
+      "original_counts": {
+        "white-egg": 8,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 8
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.583097,
+          "yc": 0.647107,
+          "w": 0.16458,
+          "h": 0.130935
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.588249,
+          "yc": 0.232094,
+          "w": 0.166888,
+          "h": 0.137279
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.771136,
+          "yc": 0.227769,
+          "w": 0.166888,
+          "h": 0.141317
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.581943,
+          "yc": 0.368798,
+          "w": 0.166888,
+          "h": 0.13036
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.774982,
+          "yc": 0.377739,
+          "w": 0.177655,
+          "h": 0.130935
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.580405,
+          "yc": 0.514442,
+          "w": 0.160737,
+          "h": 0.121706
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.763444,
+          "yc": 0.512423,
+          "w": 0.17458,
+          "h": 0.125744
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.754216,
+          "yc": 0.774841,
+          "w": 0.1592,
+          "h": 0.124648
+        }
+      ]
+    },
+    "sample8.jpg": {
+      "image_id": "sample8",
+      "filename": "sample8.jpg",
+      "remote_path": "data/images/train/sample8.jpg",
+      "file_size_bytes": 7174178,
+      "sha256": "2bb2a612903708ad1c05e15d9fbf2b77319aca4821a81a9eaf5fe6d35d01235f",
+      "annotation_count": 10,
+      "original_counts": {
+        "white-egg": 10,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 10
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.59248,
+          "yc": 0.223752,
+          "w": 0.169444,
+          "h": 0.137049
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.775766,
+          "yc": 0.224998,
+          "w": 0.166121,
+          "h": 0.144524
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.579744,
+          "yc": 0.362047,
+          "w": 0.168337,
+          "h": 0.131233
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.77189,
+          "yc": 0.375337,
+          "w": 0.178304,
+          "h": 0.131235
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.569777,
+          "yc": 0.507402,
+          "w": 0.159474,
+          "h": 0.122929
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.751402,
+          "yc": 0.509479,
+          "w": 0.172765,
+          "h": 0.12376
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.563686,
+          "yc": 0.637392,
+          "w": 0.16501,
+          "h": 0.130404
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.744757,
+          "yc": 0.640714,
+          "w": 0.168337,
+          "h": 0.12376
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.547627,
+          "yc": 0.770702,
+          "w": 0.168337,
+          "h": 0.132897
+        },
+        {
+          "line": 10,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.730913,
+          "yc": 0.771533,
+          "w": 0.160582,
+          "h": 0.12625
+        }
+      ]
+    },
+    "sample9.jpg": {
+      "image_id": "sample9",
+      "filename": "sample9.jpg",
+      "remote_path": "data/images/train/sample9.jpg",
+      "file_size_bytes": 7176727,
+      "sha256": "ffd1ffb052f283829c5eb0daae73abccee38a33d8d45850149dff64206a970ce",
+      "annotation_count": 9,
+      "original_counts": {
+        "white-egg": 9,
+        "brown-egg": 0
+      },
+      "mapped_counts": {
+        "egg": 9
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.591372,
+          "yc": 0.222506,
+          "w": 0.165013,
+          "h": 0.139541
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.775766,
+          "yc": 0.224583,
+          "w": 0.168337,
+          "h": 0.143695
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.578636,
+          "yc": 0.359556,
+          "w": 0.163905,
+          "h": 0.127912
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.771971,
+          "yc": 0.37536,
+          "w": 0.175437,
+          "h": 0.132768
+        },
+        {
+          "line": 5,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.568352,
+          "yc": 0.506342,
+          "w": 0.161147,
+          "h": 0.122649
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.752123,
+          "yc": 0.50902,
+          "w": 0.173056,
+          "h": 0.125625
+        },
+        {
+          "line": 7,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.562796,
+          "yc": 0.637324,
+          "w": 0.165909,
+          "h": 0.130982
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.729499,
+          "yc": 0.770391,
+          "w": 0.161147,
+          "h": 0.125623
+        },
+        {
+          "line": 9,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.546521,
+          "yc": 0.769497,
+          "w": 0.168294,
+          "h": 0.132173
+        }
+      ]
+    },
+    "sample50.jpg": {
+      "image_id": "sample50",
+      "filename": "sample50.jpg",
+      "remote_path": "data/images/val/sample50.jpg",
+      "file_size_bytes": 7753818,
+      "sha256": "00b3844753d5192529db7c2a6626d7968dc4e81ea177c5b6a93c42eaad0e915e",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 10
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.56002,
+          "yc": 0.808039,
+          "w": 0.190946,
+          "h": 0.149382
+        },
+        {
+          "line": 2,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.199527,
+          "yc": 0.246311,
+          "w": 0.181071,
+          "h": 0.139506
+        },
+        {
+          "line": 3,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.378127,
+          "yc": 0.248163,
+          "w": 0.182715,
+          "h": 0.138271
+        },
+        {
+          "line": 4,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.563313,
+          "yc": 0.25125,
+          "w": 0.181071,
+          "h": 0.141974
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.19212,
+          "yc": 0.383349,
+          "w": 0.189299,
+          "h": 0.137036
+        },
+        {
+          "line": 6,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.374013,
+          "yc": 0.385201,
+          "w": 0.181068,
+          "h": 0.143209
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.564959,
+          "yc": 0.390756,
+          "w": 0.200823,
+          "h": 0.137039
+        },
+        {
+          "line": 8,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.189651,
+          "yc": 0.527176,
+          "w": 0.187655,
+          "h": 0.125925
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.375658,
+          "yc": 0.527793,
+          "w": 0.187652,
+          "h": 0.132098
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.569074,
+          "yc": 0.529645,
+          "w": 0.202467,
+          "h": 0.135804
+        },
+        {
+          "line": 11,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.186357,
+          "yc": 0.662361,
+          "w": 0.184362,
+          "h": 0.129628
+        },
+        {
+          "line": 12,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.368251,
+          "yc": 0.661744,
+          "w": 0.189299,
+          "h": 0.135804
+        },
+        {
+          "line": 13,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.55755,
+          "yc": 0.663596,
+          "w": 0.189306,
+          "h": 0.134568
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.187181,
+          "yc": 0.796928,
+          "w": 0.182715,
+          "h": 0.149382
+        },
+        {
+          "line": 15,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.367427,
+          "yc": 0.804337,
+          "w": 0.181071,
+          "h": 0.149382
+        }
+      ]
+    },
+    "sample51.jpg": {
+      "image_id": "sample51",
+      "filename": "sample51.jpg",
+      "remote_path": "data/images/val/sample51.jpg",
+      "file_size_bytes": 7815587,
+      "sha256": "950036783adf6d1025709e5a3643c8a1eb4e1783d9ce2e4a751a4ecd27849bce",
+      "annotation_count": 15,
+      "original_counts": {
+        "white-egg": 5,
+        "brown-egg": 10
+      },
+      "mapped_counts": {
+        "egg": 15
+      },
+      "boxes": [
+        {
+          "line": 1,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.108991,
+          "yc": 0.293225,
+          "w": 0.187652,
+          "h": 0.137036
+        },
+        {
+          "line": 2,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.291708,
+          "yc": 0.292608,
+          "w": 0.184362,
+          "h": 0.130866
+        },
+        {
+          "line": 3,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.467017,
+          "yc": 0.287052,
+          "w": 0.176131,
+          "h": 0.139506
+        },
+        {
+          "line": 4,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.658786,
+          "yc": 0.287052,
+          "w": 0.190946,
+          "h": 0.132101
+        },
+        {
+          "line": 5,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.846442,
+          "yc": 0.285823,
+          "w": 0.184365,
+          "h": 0.137024
+        },
+        {
+          "line": 6,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.107346,
+          "yc": 0.42409,
+          "w": 0.19753,
+          "h": 0.134568
+        },
+        {
+          "line": 7,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.294178,
+          "yc": 0.425324,
+          "w": 0.186009,
+          "h": 0.137036
+        },
+        {
+          "line": 8,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.47607,
+          "yc": 0.425324,
+          "w": 0.187655,
+          "h": 0.137036
+        },
+        {
+          "line": 9,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.657141,
+          "yc": 0.421003,
+          "w": 0.184362,
+          "h": 0.140742
+        },
+        {
+          "line": 10,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.848087,
+          "yc": 0.42409,
+          "w": 0.190949,
+          "h": 0.134568
+        },
+        {
+          "line": 11,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.109815,
+          "yc": 0.564214,
+          "w": 0.195886,
+          "h": 0.143209
+        },
+        {
+          "line": 12,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.295,
+          "yc": 0.559892,
+          "w": 0.184365,
+          "h": 0.134566
+        },
+        {
+          "line": 13,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.474425,
+          "yc": 0.561744,
+          "w": 0.181071,
+          "h": 0.133333
+        },
+        {
+          "line": 14,
+          "original_class_id": 1,
+          "original_class_name": "brown-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.657141,
+          "yc": 0.56483,
+          "w": 0.187655,
+          "h": 0.139506
+        },
+        {
+          "line": 15,
+          "original_class_id": 0,
+          "original_class_name": "white-egg",
+          "mapped_class_id": 0,
+          "mapped_class_name": "egg",
+          "xc": 0.852202,
+          "yc": 0.559275,
+          "w": 0.202467,
+          "h": 0.138271
+        }
+      ]
+    }
+  }
+}
