@@ -10,7 +10,9 @@ Covers:
 5. PredictionService integration (status reflecting engine state).
 """
 
+import hashlib
 import json
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -216,39 +218,151 @@ class TestInferenceEngines:
 
     @pytest.mark.asyncio
     async def test_detection_engine_with_mocked_yolo(self, tmp_path: Path):
+        fake_bytes = b"dummy_yolo_weights_data_v1"
+        fake_sha256 = hashlib.sha256(fake_bytes).hexdigest()
         fake_weights = tmp_path / "best.pt"
-        fake_weights.write_bytes(b"dummy_weights")
+        fake_weights.write_bytes(fake_bytes)
+
         meta_file = tmp_path / "model_metadata.json"
         meta_file.write_text(
-            json.dumps({"model_name": "eggvision_detector_yolov8n", "weights_sha256": "fake"}),
+            json.dumps({
+                "model_name": "eggvision_detector_yolov8n",
+                "weights_sha256": fake_sha256,
+            }),
             encoding="utf-8",
         )
 
-        with patch("ultralytics.YOLO") as MockYOLO:
-            mock_instance = MagicMock()
-            MockYOLO.return_value = mock_instance
+        mock_ultralytics = MagicMock()
+        mock_yolo_cls = MagicMock()
+        mock_instance = MagicMock()
+        mock_yolo_cls.return_value = mock_instance
+        mock_ultralytics.YOLO = mock_yolo_cls
 
-            # Mock prediction result
-            mock_box = MagicMock()
-            mock_box.__len__.return_value = 1
-            mock_box.conf.cpu().numpy.return_value = np.array([0.94])
-            mock_box.xyxy.cpu().numpy.return_value = np.array([[50.0, 60.0, 150.0, 180.0]])
+        # Mock prediction result
+        mock_box = MagicMock()
+        mock_box.__len__.return_value = 1
+        mock_box.conf.cpu().numpy.return_value = np.array([0.94])
+        mock_box.xyxy.cpu().numpy.return_value = np.array([[50.0, 60.0, 150.0, 180.0]])
 
-            mock_res = MagicMock()
-            mock_res.boxes = mock_box
-            mock_instance.predict.return_value = [mock_res]
+        mock_res = MagicMock()
+        mock_res.boxes = mock_box
+        mock_instance.predict.return_value = [mock_res]
 
+        with patch.dict(sys.modules, {"ultralytics": mock_ultralytics}):
             engine = DetectionEngine(weights_path=fake_weights, metadata_path=meta_file)
             assert engine.is_ready() is True
 
             test_img = np.zeros((200, 200, 3), dtype=np.uint8)
             pred = await engine.predict(test_img)
 
+            # Verify status and confidence
             assert pred.status == "completed"
             assert pred.confidence == 0.94
-            assert pred.freshness_class is None  # Scientifically honest: not candling
+
+            # Verify latency field
+            assert pred.inference_time_ms is not None
+            assert pred.inference_time_ms >= 0
+
+            # Verify bounding-box explanation
+            assert any("Detected 1 egg(s)" in exp for exp in pred.explanation)
             assert any("Primary egg localized" in exp for exp in pred.explanation)
             assert any("candling internal freshness" in exp for exp in pred.explanation)
+
+            # Verify freshness fields are scientifically honest (None for visible shell detector)
+            assert pred.freshness_class is None
+            assert pred.freshness_score is None
+            assert pred.predicted_haugh_unit is None
+            assert pred.crack_probability is None
+            assert pred.blood_spot_probability is None
+
+    @pytest.mark.asyncio
+    async def test_detection_engine_integrity_mismatch_rejected(self, tmp_path: Path):
+        """A declared weights_sha256 that does not match actual bytes must be rejected."""
+        fake_weights = tmp_path / "best.pt"
+        fake_weights.write_bytes(b"actual_file_contents_differ_from_declared_hash")
+        meta_file = tmp_path / "model_metadata.json"
+        meta_file.write_text(
+            json.dumps({
+                "model_name": "eggvision_detector_yolov8n",
+                "weights_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            }),
+            encoding="utf-8",
+        )
+
+        mock_ultralytics = MagicMock()
+        with patch.dict(sys.modules, {"ultralytics": mock_ultralytics}):
+            engine = DetectionEngine(weights_path=fake_weights, metadata_path=meta_file)
+            assert engine.is_ready() is False
+            assert engine.model is None
+
+            info = engine.get_model_info()
+            assert info.is_ready is False
+            assert info.version == "none"
+            assert "rejected by integrity check" in info.description
+
+            # Predict returns model_not_ready
+            test_img = np.zeros((100, 100, 3), dtype=np.uint8)
+            res = await engine.predict(test_img)
+            assert res.status == "model_not_ready"
+            assert "not loaded or verified" in res.error_message
+
+            # Factory function get_inference_engine falls back to PlaceholderEngine
+            fallback_engine = get_inference_engine(weights_path=fake_weights, metadata_path=meta_file)
+            assert isinstance(fallback_engine, PlaceholderEngine)
+            assert fallback_engine.is_ready() is False
+
+    def test_detection_engine_missing_metadata(self, tmp_path: Path):
+        """Missing metadata file logs a warning but allows loading if weights exist."""
+        fake_weights = tmp_path / "best.pt"
+        fake_weights.write_bytes(b"weights_without_meta")
+        missing_meta = tmp_path / "nonexistent_meta.json"
+
+        mock_ultralytics = MagicMock()
+        mock_ultralytics.YOLO.return_value = MagicMock()
+
+        with patch.dict(sys.modules, {"ultralytics": mock_ultralytics}):
+            engine = DetectionEngine(weights_path=fake_weights, metadata_path=missing_meta)
+            assert engine.is_ready() is True
+            info = engine.get_model_info()
+            assert info.is_ready is True
+            assert info.version == "yolov8n-egg-detector-v1.0"
+            assert info.dataset_version == "afshin-dini/Egg-Detection"
+
+    def test_detection_engine_without_ultralytics_installed(self, tmp_path: Path):
+        """When ultralytics is not installed, engine falls back cleanly to PlaceholderEngine."""
+        fake_bytes = b"valid_checkpoint_bytes"
+        fake_sha = hashlib.sha256(fake_bytes).hexdigest()
+        fake_weights = tmp_path / "best.pt"
+        fake_weights.write_bytes(fake_bytes)
+        meta_file = tmp_path / "model_metadata.json"
+        meta_file.write_text(
+            json.dumps({"weights_sha256": fake_sha}),
+            encoding="utf-8",
+        )
+
+        with patch.dict(sys.modules, {"ultralytics": None}):
+            engine = DetectionEngine(weights_path=fake_weights, metadata_path=meta_file)
+            assert engine.is_ready() is False
+            assert engine.model is None
+
+            info = engine.get_model_info()
+            assert info.is_ready is False
+
+            fallback = get_inference_engine(weights_path=fake_weights, metadata_path=meta_file)
+            assert isinstance(fallback, PlaceholderEngine)
+            assert fallback.is_ready() is False
+
+    def test_prediction_service_engine_compatibility(self):
+        """Ensure prediction_service exports match and engine interface is compatible."""
+        from app.services.prediction_service import get_current_inference_engine, inference_engine, prediction_service
+
+        engine = prediction_service.get_engine()
+        assert engine is not None
+        assert hasattr(engine, "is_ready")
+        assert hasattr(engine, "predict")
+        assert hasattr(engine, "get_model_info")
+        assert inference_engine is not None
+        assert get_current_inference_engine() is not None
 
     @pytest.mark.asyncio
     async def test_real_trained_detector_inference(self):

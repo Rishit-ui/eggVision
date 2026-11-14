@@ -1,8 +1,21 @@
 """EggVision AI — Egg Detection Inference Engine.
 
 Integrates trained Ultralytics YOLO egg detector into the EggVision inference pipeline.
-Safely falls back to PlaceholderEngine if model weights or metadata are unavailable.
+Safely falls back to PlaceholderEngine if model weights, metadata, or ML dependencies are unavailable.
+Strictly verifies SHA-256 artifact integrity and rejects checkpoints on checksum mismatch.
 Preserves scientific honesty: visible egg detection does not fabricate candling freshness metrics.
+
+Production Runtime Requirements:
+When deploying actual YOLO model weights (e.g. ml/artifacts/detection/weights/best.pt)
+to a backend runtime, the environment requires:
+    - ultralytics==8.4.212
+    - torch>=2.2.0
+    - torchvision>=0.17.0
+    - opencv-python-headless>=4.9.0
+    - numpy>=1.26.0
+These are tracked in ml/requirements.txt. In environments where these packages are
+not installed (such as lightweight backend CI test runners), the engine safely
+falls back to PlaceholderEngine without crashing.
 """
 
 import hashlib
@@ -57,25 +70,41 @@ class DetectionEngine(InferenceEngine):
         if not self.weights_path.exists():
             logger.info(f"Detector weights not found at {self.weights_path}. Remaining uninitialized.")
             self._is_ready = False
+            self.model = None
             return
 
         if self.weights_path.stat().st_size == 0:
             logger.warning(f"Detector weights file at {self.weights_path} is empty.")
             self._is_ready = False
+            self.model = None
             return
 
-        # Load metadata if present
+        # Load metadata if present and enforce SHA-256 checksum integrity
         if self.metadata_path.exists():
             try:
                 with self.metadata_path.open("r", encoding="utf-8") as f:
                     self._metadata = json.load(f)
-                expected_sha = self._metadata.get("weights_sha256")
-                if expected_sha:
-                    actual_sha = compute_sha256(self.weights_path)
-                    if actual_sha != expected_sha:
-                        logger.warning(f"Weight SHA-256 mismatch: expected {expected_sha[:8]}, got {actual_sha[:8]}")
             except Exception as e:
-                logger.warning(f"Could not parse model metadata: {e}")
+                logger.warning(f"Could not parse model metadata at {self.metadata_path}: {e}")
+                self._metadata = {}
+
+            expected_sha = self._metadata.get("weights_sha256")
+            if expected_sha:
+                actual_sha = compute_sha256(self.weights_path)
+                if actual_sha != expected_sha:
+                    logger.error(
+                        f"Weight SHA-256 mismatch: expected {expected_sha}, got {actual_sha}. "
+                        "Rejecting checkpoint to prevent execution of unverified or corrupt weights."
+                    )
+                    self._is_ready = False
+                    self.model = None
+                    self._metadata = {}
+                    return
+        else:
+            logger.warning(
+                f"Model metadata not found at {self.metadata_path}. Proceeding without declared metadata."
+            )
+            self._metadata = {}
 
         try:
             from ultralytics import YOLO
@@ -100,7 +129,7 @@ class DetectionEngine(InferenceEngine):
                 version="none",
                 model_type="yolo_detection",
                 is_ready=False,
-                description="Detector weights missing or corrupt. Fallback active.",
+                description="Detector weights missing, corrupt, or rejected by integrity check. Fallback active.",
             )
 
         version = self._metadata.get("model_name", "yolov8n-egg-detector-v1.0")
@@ -202,7 +231,7 @@ def get_inference_engine(
     weights_path: Path | None = None,
     metadata_path: Path | None = None,
 ) -> InferenceEngine:
-    """Factory function returning DetectionEngine if weights exist, else PlaceholderEngine."""
+    """Factory function returning DetectionEngine if weights exist and pass verification, else PlaceholderEngine."""
     weights = Path(weights_path) if weights_path else DEFAULT_WEIGHTS
     meta = Path(metadata_path) if metadata_path else DEFAULT_METADATA
 
@@ -211,6 +240,10 @@ def get_inference_engine(
             engine = DetectionEngine(weights_path=weights, metadata_path=meta)
             if engine.is_ready():
                 return engine
+            logger.warning(
+                "DetectionEngine initialized but is not ready (missing dependencies, corrupt file, or SHA-256 mismatch). "
+                "Falling back to PlaceholderEngine."
+            )
         except Exception as e:
             logger.warning(f"Could not initialize DetectionEngine: {e}. Falling back to PlaceholderEngine.")
 

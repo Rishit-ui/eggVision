@@ -23,3 +23,14 @@ pytest>=8.0.0
 pytest-asyncio>=0.23.0
 ruff>=0.2.0
 coverage>=7.5.0
+
+# --- Production ML Inference Runtime Stack ---
+# When deploying actual YOLO model weights (e.g. ml/artifacts/detection/weights/best.pt)
+# for live production inference, the backend runtime environment also requires:
+#   torch>=2.2.0
+#   torchvision>=0.17.0
+#   ultralytics==8.4.212
+# These dependencies are pinned in ml/requirements.txt to keep lightweight backend
+# CI and test runs fast and independent of the complete ML training stack.
+# When weights or ML dependencies are absent, backend falls back safely to PlaceholderEngine.
+
