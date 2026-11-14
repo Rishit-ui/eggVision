@@ -21,5 +21,10 @@ class ModelInfoResponse(BaseModel):
     dataset_version: str | None = None
     metrics: dict | None = None
     trained_at: datetime | None = None
+    state: str = "MODEL_NOT_READY"
+    artifact_available: bool = False
+    checksum_verified: bool = False
+    runtime_available: bool = False
+    runtime_name: str | None = None
     
     model_config = ConfigDict(from_attributes=True)

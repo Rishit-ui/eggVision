@@ -20,6 +20,7 @@ from app.routers import (
     result,
     scan,
 )
+from app.services.model_loader import model_manager
 from app.services.storage_service import storage_service
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Starting EggVision API (python=%s, environment=%s)", sys.version.split()[0], settings.APP_ENV)
     await storage_service.ensure_ready()
+    await model_manager.initialize()
     try:
         yield
     finally:

@@ -1,0 +1,96 @@
+{
+  "manifest_version": "1.0.0",
+  "model_name": "eggvision_detector_yolov8n",
+  "model_version": "1.0.0",
+  "task": "detection",
+  "classes": {
+    "0": "egg"
+  },
+  "input_resolution": [
+    640,
+    640
+  ],
+  "input_color_format": "RGB",
+  "input_normalization": "scale_0_to_1",
+  "onnx_artifact": {
+    "key": "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx",
+    "filename": "eggvision_detector.onnx",
+    "sha256": "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1",
+    "size_bytes": 12746280,
+    "format": "onnx",
+    "opset": 17
+  },
+  "original_checkpoint": {
+    "filename": "best.pt",
+    "sha256": "dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732",
+    "size_bytes": 6492138,
+    "architecture": "yolov8n"
+  },
+  "provenance": {
+    "dataset_source": "afshin-dini/Egg-Detection",
+    "dataset_revision": "d425996c959623b3960fca27f53b16f060b0a474",
+    "training_commit": "0e1f8dd1e36532d109e6a545604eb9ec8b55a42a",
+    "training_library": "ultralytics==8.4.212",
+    "runtime_library": "onnxruntime>=1.17.0",
+    "training_epochs": 30,
+    "training_samples": 36,
+    "validation_samples": 8,
+    "test_samples": 7
+  },
+  "evaluation_metrics": {
+    "mAP50": 0.995,
+    "mAP50_95": 0.94,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  },
+  "onnx_export_details": {
+    "inputs": [
+      {
+        "name": "images",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output0",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          5,
+          8400
+        ]
+      }
+    ],
+    "latency_benchmark": {
+      "mean_ms": 46.38,
+      "median_ms": 44.47,
+      "p95_ms": 56.13,
+      "min_ms": 42.06,
+      "max_ms": 69.8,
+      "runs": 20,
+      "device": "CPU"
+    }
+  },
+  "onnx_equivalence": {
+    "total_images": 8,
+    "count_matches": 8,
+    "total_box_pairs": 73,
+    "mean_iou": 0.9961,
+    "min_iou": 0.9658,
+    "mean_confidence_diff": 0.0022,
+    "max_confidence_diff": 0.01,
+    "mean_pt_latency_ms": 405.96,
+    "mean_onnx_latency_ms": 48.27,
+    "speedup_factor": 8.41
+  },
+  "manifest_key": "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/manifest.json",
+  "created_at": "2026-11-14T18:36:52.454275+00:00",
+  "status": "VALIDATED"
+}

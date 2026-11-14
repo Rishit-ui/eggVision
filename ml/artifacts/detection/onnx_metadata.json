@@ -1,0 +1,68 @@
+{
+  "model_name": "eggvision_detector_yolov8n",
+  "model_architecture": "yolov8n",
+  "format": "onnx",
+  "task": "detection",
+  "classes": {
+    "0": "egg"
+  },
+  "input_resolution": [
+    640,
+    640
+  ],
+  "input_color_format": "RGB",
+  "input_normalization": "scale_0_to_1",
+  "output_layout": "yolov8_raw_candidates [batch, 4_box_coords_plus_1_cls, 8400_anchors]",
+  "nms_strategy": "runtime_postprocessing_nms",
+  "pt_checkpoint_sha256": "dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732",
+  "pt_checkpoint_size_bytes": 6492138,
+  "onnx_sha256": "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1",
+  "onnx_size_bytes": 12746280,
+  "graph_validation": {
+    "ir_version": 8,
+    "producer_name": "pytorch",
+    "producer_version": "2.15.0",
+    "opset_imports": [
+      {
+        "domain": "",
+        "version": 17
+      }
+    ]
+  },
+  "runtime_validation": {
+    "inputs": [
+      {
+        "name": "images",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output0",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          5,
+          8400
+        ]
+      }
+    ],
+    "latency_benchmark": {
+      "mean_ms": 46.38,
+      "median_ms": 44.47,
+      "p95_ms": 56.13,
+      "min_ms": 42.06,
+      "max_ms": 69.8,
+      "runs": 20,
+      "device": "CPU"
+    }
+  },
+  "exported_at": "2026-11-14T18:33:08.226191+00:00",
+  "status": "VALIDATED"
+}
