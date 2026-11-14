@@ -29,6 +29,14 @@ class Settings(BaseSettings):
     BOOTSTRAP_TOKEN: str | None = None
 
     MODEL_PATH: str | None = None
+    MODEL_S3_ENDPOINT: str | None = None
+    MODEL_S3_BUCKET: str | None = None
+    MODEL_S3_ACCESS_KEY: str | None = None
+    MODEL_S3_SECRET_KEY: str | None = None
+    MODEL_S3_REGION: str = "us-east-1"
+    MODEL_ARTIFACT_KEY: str | None = None
+    MODEL_ARTIFACT_SHA256: str | None = None
+    MODEL_VERSION: str = "1.0.0"
     INFERENCE_DEVICE: str = "cpu"
 
     APP_ENV: str = "development"
