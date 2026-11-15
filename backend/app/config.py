@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     MODEL_S3_SECRET_KEY: str | None = None
     MODEL_S3_REGION: str = "auto"
     MODEL_ARTIFACT_KEY: str | None = None
+    MODEL_ARTIFACT_URL: str | None = None
+    MODEL_ARTIFACT_MAX_BYTES: int = 100_000_000
     MODEL_ARTIFACT_SHA256: str | None = None
     MODEL_VERSION: str = "1.0.0"
     INFERENCE_DEVICE: str = "cpu"
@@ -100,6 +102,19 @@ class Settings(BaseSettings):
                     raise ValueError("MODEL_PATH must point to an .onnx artifact in production; PyTorch checkpoints are prohibited")
                 if not self.MODEL_ARTIFACT_SHA256:
                     raise ValueError("MODEL_ARTIFACT_SHA256 must be provided when MODEL_PATH is configured in production")
+            if self.MODEL_ARTIFACT_URL:
+                parsed_model_url = urlparse(self.MODEL_ARTIFACT_URL)
+                if (
+                    parsed_model_url.scheme.lower() != "https"
+                    or not parsed_model_url.netloc
+                    or parsed_model_url.username is not None
+                    or parsed_model_url.password is not None
+                ):
+                    raise ValueError("MODEL_ARTIFACT_URL must be a valid HTTPS URL without embedded credentials")
+                if not self.MODEL_ARTIFACT_SHA256:
+                    raise ValueError("MODEL_ARTIFACT_SHA256 must be provided when MODEL_ARTIFACT_URL is configured")
+            if self.MODEL_ARTIFACT_MAX_BYTES <= 0:
+                raise ValueError("MODEL_ARTIFACT_MAX_BYTES must be positive")
             if self.MODEL_ARTIFACT_KEY:
                 if not self.MODEL_ARTIFACT_SHA256:
                     raise ValueError("MODEL_ARTIFACT_SHA256 must be provided when MODEL_ARTIFACT_KEY is configured in production")
