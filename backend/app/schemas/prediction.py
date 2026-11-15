@@ -26,5 +26,6 @@ class ModelInfoResponse(BaseModel):
     checksum_verified: bool = False
     runtime_available: bool = False
     runtime_name: str | None = None
+    failure_reason: str | None = None
     
     model_config = ConfigDict(from_attributes=True)

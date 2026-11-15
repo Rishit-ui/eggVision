@@ -57,17 +57,17 @@ python ml/scripts/verify_onnx_equivalence.py `
 - Mean Confidence Difference $\le 0.03$
 - $100\%$ detection count agreement on validation images
 
-### Step 3: Publish Model Artifact to Object Storage
+### Step 3: Publish Model Artifact to Object Storage (Cloudflare R2 or S3)
 
 Upload the verified ONNX model and its cryptographic manifest to the dedicated models bucket:
 
 ```powershell
-# Requires AWS / S3 credentials configured in environment
-$env:MODEL_S3_ENDPOINT = "https://s3.us-east-1.amazonaws.com"
+# For Cloudflare R2:
+$env:MODEL_S3_ENDPOINT = "https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 $env:MODEL_S3_BUCKET = "eggvision-models"
 $env:MODEL_S3_ACCESS_KEY = "your-access-key"
 $env:MODEL_S3_SECRET_KEY = "your-secret-key"
-$env:MODEL_S3_REGION = "us-east-1"
+$env:MODEL_S3_REGION = "auto"
 
 python ml/scripts/publish_model_artifact.py `
   --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx `
@@ -77,16 +77,22 @@ python ml/scripts/publish_model_artifact.py `
   --output-dir ml/artifacts/detection
 ```
 
-*Note: If S3 credentials are not set, the script executes in **offline mode**, generating `manifest.json` locally without attempting cloud network calls.*
+*Note: If S3 credentials are not set, the script executes in **offline mode**, generating `manifest.json` locally after strictly validating manifest schema and ONNX equivalence reports.*
 
 ### Step 4: Verify Artifact Integrity
 
 Validate that a local or remote artifact matches its declared cryptographic signature and can be executed by ONNX Runtime:
 
 ```powershell
+# Local Verification
 python ml/scripts/verify_model_artifact.py `
   --manifest ml/artifacts/detection/manifest.json `
-  --local-path ml/artifacts/detection/weights/eggvision_detector.onnx
+  --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx
+
+# Remote R2 / S3 Verification
+python ml/scripts/verify_model_artifact.py `
+  --remote-key "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx" `
+  --expected-sha "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1"
 ```
 
 ---
@@ -99,7 +105,7 @@ Model artifacts are stored under an immutable, content-addressed path:
 eggvision/detection/{version}/{sha256}/model.onnx
 ```
 
-### Canonical Production Values (Phase 2 Release)
+### Canonical Production Values (Phase 2 & Phase 3)
 - **Version**: `v1`
 - **SHA-256**: `81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1`
 - **Canonical Key**:
@@ -115,11 +121,11 @@ When updating the backend service on Render to serve the new model version, conf
 MODEL_VERSION="v1"
 MODEL_ARTIFACT_KEY="eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx"
 MODEL_ARTIFACT_SHA256="81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1"
-MODEL_S3_ENDPOINT="https://s3.us-east-1.amazonaws.com"
+MODEL_S3_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 MODEL_S3_BUCKET="eggvision-models"
 MODEL_S3_ACCESS_KEY="<production-models-s3-access-key>"
 MODEL_S3_SECRET_KEY="<production-models-s3-secret-key>"
-MODEL_S3_REGION="us-east-1"
+MODEL_S3_REGION="auto"
 ```
 
 ---

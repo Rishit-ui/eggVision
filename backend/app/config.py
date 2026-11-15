@@ -30,10 +30,10 @@ class Settings(BaseSettings):
 
     MODEL_PATH: str | None = None
     MODEL_S3_ENDPOINT: str | None = None
-    MODEL_S3_BUCKET: str | None = None
+    MODEL_S3_BUCKET: str = "eggvision-models"
     MODEL_S3_ACCESS_KEY: str | None = None
     MODEL_S3_SECRET_KEY: str | None = None
-    MODEL_S3_REGION: str = "us-east-1"
+    MODEL_S3_REGION: str = "auto"
     MODEL_ARTIFACT_KEY: str | None = None
     MODEL_ARTIFACT_SHA256: str | None = None
     MODEL_VERSION: str = "1.0.0"
@@ -95,6 +95,17 @@ class Settings(BaseSettings):
                 raise ValueError("BOOTSTRAP_TOKEN must be a unique value of at least 32 characters in production")
             if self.S3_REQUIRED and not all((self.S3_ENDPOINT, self.S3_BUCKET, self.S3_ACCESS_KEY, self.S3_SECRET_KEY)):
                 raise ValueError("S3-compatible object storage must be fully configured in production")
+            if self.MODEL_PATH:
+                if not self.MODEL_PATH.endswith(".onnx"):
+                    raise ValueError("MODEL_PATH must point to an .onnx artifact in production; PyTorch checkpoints are prohibited")
+                if not self.MODEL_ARTIFACT_SHA256:
+                    raise ValueError("MODEL_ARTIFACT_SHA256 must be provided when MODEL_PATH is configured in production")
+            if self.MODEL_ARTIFACT_KEY:
+                if not self.MODEL_ARTIFACT_SHA256:
+                    raise ValueError("MODEL_ARTIFACT_SHA256 must be provided when MODEL_ARTIFACT_KEY is configured in production")
+                clean_sha = self.MODEL_ARTIFACT_SHA256.strip().lower()
+                if len(clean_sha) != 64 or any(c not in "0123456789abcdef" for c in clean_sha):
+                    raise ValueError("MODEL_ARTIFACT_SHA256 must be a valid 64-character hexadecimal SHA-256 digest")
         return self
 
 

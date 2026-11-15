@@ -19,6 +19,7 @@ falls back to PlaceholderEngine without crashing.
 """
 
 import hashlib
+import hmac
 import json
 import logging
 import time
@@ -26,6 +27,8 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+from ml.inference.manifest_validator import validate_sha256_format
 
 from .engine import InferenceEngine, ModelInfo, PredictionResult
 from .placeholder import PlaceholderEngine
@@ -88,14 +91,22 @@ class DetectionEngine(InferenceEngine):
                 logger.warning(f"Could not parse model metadata at {self.metadata_path}: {e}")
                 self._metadata = {}
 
-            expected_sha = self._metadata.get("weights_sha256")
-            if expected_sha:
-                actual_sha = compute_sha256(self.weights_path)
-                if actual_sha != expected_sha:
-                    logger.error(
-                        f"Weight SHA-256 mismatch: expected {expected_sha}, got {actual_sha}. "
-                        "Rejecting checkpoint to prevent execution of unverified or corrupt weights."
-                    )
+            raw_expected_sha = self._metadata.get("weights_sha256")
+            if raw_expected_sha:
+                try:
+                    expected_sha = validate_sha256_format(raw_expected_sha)
+                    actual_sha = compute_sha256(self.weights_path)
+                    if not hmac.compare_digest(actual_sha, expected_sha):
+                        logger.error(
+                            f"Weight SHA-256 mismatch: expected {expected_sha}, got {actual_sha}. "
+                            "Rejecting checkpoint to prevent execution of unverified or corrupt weights."
+                        )
+                        self._is_ready = False
+                        self.model = None
+                        self._metadata = {}
+                        return
+                except Exception as e:
+                    logger.error(f"Invalid weight SHA-256 format or integrity failure: {e}")
                     self._is_ready = False
                     self.model = None
                     self._metadata = {}

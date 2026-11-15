@@ -7,39 +7,12 @@ from app.services.model_loader import model_manager
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ml.inference.detection_engine import get_inference_engine
-from ml.inference.onnx_detection_engine import get_onnx_inference_engine
-
 logger = logging.getLogger("prediction_service")
-_inference_engine = None
 
 
 def get_current_inference_engine():
-    global _inference_engine
-    # 1. Prefer engine from ModelLifecycleManager if ready
-    manager_engine = model_manager.get_engine()
-    if manager_engine and manager_engine.is_ready():
-        _inference_engine = manager_engine
-        return _inference_engine
-
-    if _inference_engine is not None and _inference_engine.is_ready():
-        return _inference_engine
-
-    # 2. Try ONNX detection engine
-    onnx_engine = get_onnx_inference_engine()
-    if onnx_engine.is_ready():
-        _inference_engine = onnx_engine
-        return _inference_engine
-
-    # 3. Try PyTorch detection engine
-    pt_engine = get_inference_engine()
-    if pt_engine.is_ready():
-        _inference_engine = pt_engine
-        return _inference_engine
-
-    # 4. Fallback to placeholder
-    _inference_engine = onnx_engine
-    return _inference_engine
+    """Use only the lifecycle manager's integrity-verified engine."""
+    return model_manager.get_engine()
 
 
 class _EngineProxy:
