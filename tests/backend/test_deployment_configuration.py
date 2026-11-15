@@ -68,3 +68,19 @@ def test_redis_health_client_cleanup_is_guaranteed() -> None:
     assert "finally:" in source
     assert "await client.aclose()" in source
 
+
+
+def test_production_requires_checksum_for_https_model_url():
+    with pytest.raises(ValueError, match="MODEL_ARTIFACT_SHA256"):
+        production_settings(
+            MODEL_ARTIFACT_URL="https://github.com/example/repo/releases/download/v1/model.onnx",
+            MODEL_ARTIFACT_SHA256=None,
+        )
+
+
+def test_production_rejects_non_https_model_url():
+    with pytest.raises(ValueError, match="HTTPS"):
+        production_settings(
+            MODEL_ARTIFACT_URL="http://example.com/model.onnx",
+            MODEL_ARTIFACT_SHA256="a" * 64,
+        )
