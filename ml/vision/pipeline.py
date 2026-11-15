@@ -51,7 +51,9 @@ class PipelineResult:
                 },
                 "detections": [],
                 "limitations": [
-                    "No trained, validated egg detector is installed.",
+                    "This stage performs non-ML contour screening; it is not the production YOLOv8n detector.",
+                    "Visible egg localization is performed separately by the production ONNX detection service.",
+
                     (
                         "A contour compatible with the candling chamber silhouette is not proof that an egg is present."
                         if self.detection.capture_mode == "controlled_candling"
@@ -162,5 +164,5 @@ class VisionPipeline:
             segmentation=segmentation,
             normalization=normalization,
             can_proceed_to_inference=False,
-            error="A candidate contour was found, but egg identity is unverified because no validated egg detector is installed.",
+            error="A candidate contour was recorded by the non-ML capture screen; visible egg localization is performed by the separate ONNX detector.",
         )
