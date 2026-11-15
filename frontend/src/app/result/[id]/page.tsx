@@ -265,6 +265,17 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                     : "None (Clean)"}
                 </span>
               </div>
+              {scan?.image_quality_warnings && scan.image_quality_warnings.length > 0 && (
+                <div className="pt-2 border-t border-border/40">
+                  <span className="text-xs font-semibold">Capture-screening warnings</span>
+                  <ul className="mt-1 list-disc pl-4 space-y-1 text-muted-foreground">
+                    {scan.image_quality_warnings.map((warning) => (
+                      <li key={warning}>{warning.replaceAll("_", " ").toLowerCase()}</li>
+                    ))}
+                  </ul>
+                  {scan.recommendation && <p className="mt-2 text-muted-foreground">{scan.recommendation}</p>}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
