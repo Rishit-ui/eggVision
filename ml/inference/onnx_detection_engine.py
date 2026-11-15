@@ -273,6 +273,14 @@ class OnnxDetectionEngine(InferenceEngine):
                     detected_scores.append(round(float(filtered_scores[i]), 4))
 
             n_detected = len(detected_boxes)
+            detection_payload = [
+                {
+                    "label": "egg",
+                    "confidence": float(score),
+                    "bbox": box,
+                }
+                for box, score in zip(detected_boxes, detected_scores, strict=True)
+            ]
             explanations: list[str] = []
             max_conf = 0.0
 
@@ -300,6 +308,7 @@ class OnnxDetectionEngine(InferenceEngine):
                 explanation=explanations,
                 inference_time_ms=round(elapsed_ms, 2),
                 model_version=self.get_model_info().version,
+                detections=detection_payload,
                 # Candling freshness parameters intentionally left None
                 freshness_class=None,
                 freshness_score=None,

@@ -16,7 +16,7 @@ def get_current_inference_engine():
 
 
 class _EngineProxy:
-    """Proxy object so module-level `inference_engine` always delegates to current engine."""
+    """Proxy object so module-level inference_engine always delegates to current engine."""
 
     def is_ready(self) -> bool:
         return get_current_inference_engine().is_ready()
@@ -42,52 +42,84 @@ class PredictionService:
         image: Any | None = None,
     ) -> Prediction:
         existing = await self.get_prediction_by_scan_id(db, scan_id)
-        if existing:
+        # Preserve a completed structured detection result. Older records that
+        # only contain legacy prose are eligible for a fresh detector run.
+        if (
+            existing
+            and existing.status == "COMPLETED"
+            and isinstance(existing.explanation, dict)
+            and existing.explanation.get("task") == "visible_shell_detection"
+            and isinstance(existing.explanation.get("detections"), list)
+        ):
             return existing
 
         engine = self.get_engine()
         model_info = engine.get_model_info()
 
         if engine.is_ready() and image is not None:
-            # Run real detection on provided image
-            res = await engine.predict(image)
-            status = "COMPLETED" if res.status == "completed" else "FAILED"
-            prediction = Prediction(
-                scan_id=scan_id,
-                status=status,
-                model_version=res.model_version or model_info.version,
-                confidence=res.confidence,
-                inference_time_ms=res.inference_time_ms,
-                explanation={
-                    "detection_details": res.explanation,
-                    "inference_time_ms": res.inference_time_ms,
-                    "model_status": "VALIDATED",
-                },
-            )
-        elif engine.is_ready():
-            # Model is ready in registry; awaiting image upload inference
-            prediction = Prediction(
-                scan_id=scan_id,
-                status="READY",
-                model_version=model_info.version,
-                explanation={
-                    "model": model_info.version,
-                    "model_type": model_info.model_type,
-                    "notice": "Detection model is verified and ready for image input.",
-                },
-            )
-        else:
-            prediction = Prediction(
-                scan_id=scan_id,
-                status="MODEL_NOT_READY",
-                model_version=model_info.version,
-                explanation={
-                    "reason": "No validated inference model is deployed.",
-                    "action": "Train and validate a model against held-out egg- and farm-level ground truth before enabling predictions.",
-                },
-            )
+            result = await engine.predict(image)
+            if result.status == "completed":
+                status = "COMPLETED"
+                explanation = {
+                    "task": "visible_shell_detection",
+                    "model_status": "READY",
+                    "detection_count": len(result.detections),
+                    "detections": result.detections,
+                    "detection_details": result.explanation,
+                    "limitations": [
+                        "Visible shell object localization only.",
+                        "No freshness, internal quality, crack, spoilage, contamination, or food-safety assessment was performed.",
+                    ],
+                }
+            else:
+                status = "MODEL_NOT_READY" if result.status == "model_not_ready" else "FAILED"
+                explanation = {
+                    "task": "visible_shell_detection",
+                    "model_status": status,
+                    "reason": result.error_message or "The detector did not complete inference.",
+                    "detection_details": result.explanation,
+                }
 
-        db.add(prediction)
+            values = {
+                "status": status,
+                "model_version": result.model_version or model_info.version,
+                "confidence": result.confidence,
+                "inference_time_ms": result.inference_time_ms,
+                "explanation": explanation,
+            }
+        elif engine.is_ready():
+            values = {
+                "status": "IMAGE_UNAVAILABLE",
+                "model_version": model_info.version,
+                "confidence": None,
+                "inference_time_ms": None,
+                "explanation": {
+                    "task": "visible_shell_detection",
+                    "model_status": "READY",
+                    "reason": "The original scan image could not be retrieved or decoded for inference.",
+                },
+            }
+        else:
+            values = {
+                "status": "MODEL_NOT_READY",
+                "model_version": model_info.version,
+                "confidence": None,
+                "inference_time_ms": None,
+                "explanation": {
+                    "task": "visible_shell_detection",
+                    "model_status": "MODEL_NOT_READY",
+                    "reason": "No integrity-verified detection runtime is available.",
+                },
+            }
+
+        if existing:
+            for key, value in values.items():
+                setattr(existing, key, value)
+            prediction = existing
+        else:
+            prediction = Prediction(scan_id=scan_id, **values)
+            db.add(prediction)
+
         await db.commit()
         await db.refresh(prediction)
         return prediction

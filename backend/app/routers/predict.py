@@ -41,13 +41,15 @@ async def predict_scan(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    # Image quality gates: reject corrupted, blurry, or over-dense images
-    if scan.image_quality not in {"GOOD", "ACCEPTABLE"} or "MULTIPLE_EGGS_DETECTED" in (
-        scan.image_quality_warnings or []
-    ):
-        raise HTTPException(
-            status_code=409,
-            detail="Prediction blocked: image quality did not pass the required scan gate. Retake the image before analysis.",
+    # Capture-quality and contour metrics are advisory. They come from a
+    # separate non-ML screening stage and must not suppress the trained YOLO
+    # detector (for example, when the contour stage cannot isolate an egg).
+    if scan.image_quality not in {"GOOD", "ACCEPTABLE"} or scan.image_quality_warnings:
+        logger.info(
+            "prediction_capture_screening_advisory scan_id=%s quality=%s warnings=%s",
+            scan.id,
+            scan.image_quality,
+            scan.image_quality_warnings or [],
         )
 
     # Securely retrieve original scan image from object storage and decode to BGR numpy array

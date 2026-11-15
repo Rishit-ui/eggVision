@@ -93,22 +93,21 @@ export default function ScanPage() {
       // 1. Upload scan and execute Computer Vision Image Quality + Normalization Pipeline
       const scanResponse = await api.uploadScan(selectedImage, metadata);
 
-      // Check Quality Gating
-      if (scanResponse.retake_recommended || scanResponse.image_quality === 'POOR') {
-        setQualityReport({
-          image_quality: scanResponse.image_quality || 'POOR',
-          warnings: scanResponse.image_quality_warnings || [],
-          retake_recommended: true,
-          recommendation: scanResponse.recommendation || 'Capture screening could not produce a usable candidate region. Adjust the background, framing, focus, or lighting and try again.',
-          processed_image_url: scanResponse.processed_image_url,
-        });
-        setIsScanning(false);
-        return; // DO NOT FORCE PREDICTION
+      // The non-ML capture screen is advisory, not an egg-identity gate.
+      // Let the trained detector evaluate the original image even when that
+      // contour stage reports inconclusive or recommends a retake.
+
+      // 2. Run the integrity-verified ONNX visible-shell detector against
+      // the original image saved for this scan. Detection failure must not
+      // discard the successfully persisted capture report.
+      try {
+        await api.requestPrediction(scanResponse.id);
+      } catch (predictionError) {
+        console.error("Egg detection could not be completed:", predictionError);
       }
 
-      // This research build has no validated egg detector/model. The report
-      // presents the evidence state instead of forcing an egg prediction.
-      // 2. Redirect to the transparent capture report.
+      // 3. Show capture evidence and the detector result (or an explicit
+      // retry state if inference could not be reached).
       router.push(`/result/${scanResponse.id}`);
 
     } catch (err: any) {

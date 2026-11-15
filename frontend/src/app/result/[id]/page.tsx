@@ -2,26 +2,39 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, AlertTriangle, ShieldCheck, Sparkles, Scale } from "lucide-react";
+import { ArrowLeft, AlertTriangle, ShieldCheck, Sparkles, Scale, ScanLine, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { api, apiAssetUrl } from "@/lib/api";
-import { ScanResponse } from "@/lib/types";
+import { EggDetection, ScanResponse } from "@/lib/types";
 
 export default function ResultPage({ params }: { params: { id: string } }) {
   const [scan, setScan] = useState<ScanResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"normalized" | "original">("normalized");
+  const [viewMode, setViewMode] = useState<"normalized" | "original">("original");
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [artifactUrls, setArtifactUrls] = useState<{ original: string | null; processed: string | null }>({ original: null, processed: null });
 
   useEffect(() => {
     async function loadScan() {
       try {
         setLoading(true);
-        const data = await api.getScanResult(params.id);
+        let data = await api.getScanResult(params.id);
+        // Older scans and transient first-pass failures can have no prediction.
+        // Attempt inference once on page entry, then reload the persisted result.
+        if (!data.prediction) {
+          try {
+            await api.requestPrediction(params.id);
+            data = await api.getScanResult(params.id);
+          } catch (predictionErr) {
+            setPredictionError(predictionErr instanceof Error ? predictionErr.message : "Detection could not be completed.");
+          }
+        }
         setScan(data);
       } catch (err: any) {
         console.error(err);
@@ -61,6 +74,33 @@ export default function ResultPage({ params }: { params: { id: string } }) {
       createdUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [scan]);
+
+  const prediction = scan?.prediction;
+  const predictionExplanation =
+    prediction?.explanation && !Array.isArray(prediction.explanation)
+      ? prediction.explanation
+      : null;
+  const detections = Array.isArray(predictionExplanation?.detections)
+    ? (predictionExplanation.detections as EggDetection[])
+    : [];
+  const detectionCount = typeof predictionExplanation?.detection_count === "number"
+    ? predictionExplanation.detection_count
+    : detections.length;
+  const predictionCompleted = prediction?.status === "COMPLETED";
+
+  const runDetection = async () => {
+    setIsPredicting(true);
+    setPredictionError(null);
+    try {
+      await api.requestPrediction(params.id);
+      const refreshed = await api.getScanResult(params.id);
+      setScan(refreshed);
+    } catch (err) {
+      setPredictionError(err instanceof Error ? err.message : "Detection could not be completed.");
+    } finally {
+      setIsPredicting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -143,12 +183,56 @@ export default function ResultPage({ params }: { params: { id: string } }) {
             </CardHeader>
             <CardContent className="p-4 flex items-center justify-center bg-black/95 min-h-[340px]">
               {currentImageUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={currentImageUrl}
-                  alt="Egg Candling Inspection"
-                  className="max-h-[320px] max-w-full object-contain rounded-md shadow-md"
-                />
+                <div className="relative inline-block max-w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImageUrl}
+                    alt="Egg inspection capture"
+                    onLoad={(event) => setImageDimensions({
+                      width: event.currentTarget.naturalWidth,
+                      height: event.currentTarget.naturalHeight,
+                    })}
+                    className="block max-h-[320px] max-w-full object-contain rounded-md shadow-md"
+                  />
+                  {viewMode === "original" && imageDimensions && detections.length > 0 && (
+                    <svg
+                      aria-label="Egg detector bounding boxes"
+                      className="pointer-events-none absolute inset-0 h-full w-full"
+                      viewBox={`0 0 ${imageDimensions.width} ${imageDimensions.height}`}
+                      preserveAspectRatio="none"
+                    >
+                      {detections.map((detection, index) => {
+                        const [x1, y1, x2, y2] = detection.bbox;
+                        const strokeWidth = Math.max(imageDimensions.width, imageDimensions.height) * 0.004;
+                        return (
+                          <g key={index}>
+                            <rect
+                              x={x1}
+                              y={y1}
+                              width={Math.max(0, x2 - x1)}
+                              height={Math.max(0, y2 - y1)}
+                              fill="none"
+                              stroke="#22c55e"
+                              strokeWidth={strokeWidth}
+                            />
+                            <text
+                              x={x1}
+                              y={Math.max(strokeWidth * 5, y1 - strokeWidth)}
+                              fill="#22c55e"
+                              stroke="#111827"
+                              strokeWidth={strokeWidth * 0.8}
+                              paintOrder="stroke"
+                              fontSize={Math.max(20, strokeWidth * 5)}
+                              fontWeight="bold"
+                            >
+                              {detection.label} {(detection.confidence * 100).toFixed(1)}%
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  )}
+                </div>
               ) : (
                 <div className="text-center text-muted-foreground text-sm">
                   Image artifact unavailable.
@@ -181,12 +265,100 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                     : "None (Clean)"}
                 </span>
               </div>
+              {scan?.image_quality_warnings && scan.image_quality_warnings.length > 0 && (
+                <div className="pt-2 border-t border-border/40">
+                  <span className="text-xs font-semibold">Capture-screening warnings</span>
+                  <ul className="mt-1 list-disc pl-4 space-y-1 text-muted-foreground">
+                    {scan.image_quality_warnings.map((warning) => (
+                      <li key={warning}>{warning.replaceAll("_", " ").toLowerCase()}</li>
+                    ))}
+                  </ul>
+                  {scan.recommendation && <p className="mt-2 text-muted-foreground">{scan.recommendation}</p>}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
         {/* Right Column: Morphometry & Freshness Prediction */}
         <div className="md:col-span-7 space-y-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <ScanLine className="w-4 h-4 text-primary" /> ONNX Egg Detection
+                </CardTitle>
+                <Badge variant={predictionCompleted ? "default" : "outline"} className="text-xs font-mono">
+                  {prediction?.status || "PENDING"}
+                </Badge>
+              </div>
+              <CardDescription className="text-xs">
+                Visible shell localization using the verified YOLOv8n ONNX model. This is object detection, not freshness analysis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {predictionCompleted ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="rounded-lg border p-3">
+                      <span className="block text-xs text-muted-foreground">Eggs detected</span>
+                      <span className="text-2xl font-bold">{detectionCount}</span>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <span className="block text-xs text-muted-foreground">Best detection</span>
+                      <span className="text-2xl font-bold">
+                        {detections.length ? `${(Math.max(...detections.map((item) => item.confidence)) * 100).toFixed(1)}%` : "—"}
+                      </span>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <span className="block text-xs text-muted-foreground">Inference time</span>
+                      <span className="text-2xl font-bold">
+                        {prediction?.inference_time_ms != null ? `${prediction.inference_time_ms.toFixed(1)} ms` : "—"}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Model version: {prediction?.model_version || "Unknown"} · Bounding boxes use original-image pixel coordinates.
+                  </p>
+                  {detections.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Detection details</p>
+                      {detections.map((item, index) => (
+                        <div key={index} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm">
+                          <span className="font-medium">{item.label} #{index + 1}</span>
+                          <span className="text-muted-foreground">{(item.confidence * 100).toFixed(1)}% confidence</span>
+                          <span className="w-full text-xs text-muted-foreground">
+                            Box: [{item.bbox.map((value) => Math.round(value)).join(", ")}] px
+                          </span>
+                        </div>
+                      ))}
+                      <p className="text-xs text-green-700 dark:text-green-400">
+                        Bounding boxes are overlaid on the original image above.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="rounded-md border p-3 text-sm">
+                      No eggs were detected at the current model confidence threshold. Try a clearer, closer image with the full egg visible.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {predictionExplanation?.reason || predictionError || "Detection has not completed for this scan."}
+                  </p>
+                  <Button onClick={runDetection} disabled={isPredicting} size="sm">
+                    <RefreshCw className={`mr-2 h-4 w-4 ${isPredicting ? "animate-spin" : ""}`} />
+                    {isPredicting ? "Running detection…" : "Run detection"}
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                The detector only localizes visible eggs. It does not assess freshness, age, Haugh Unit, cracks, spoilage, contamination, or food safety.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Evidence state */}
           <Card>
             <CardHeader className="pb-3">
@@ -194,13 +366,13 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                 <Scale className="w-4 h-4 text-primary" /> Egg Presence Evidence
               </CardTitle>
               <CardDescription className="text-xs">
-                Capture mode: {analysis?.capture_mode?.replaceAll("_", " ") || "unknown"}. No trained egg detector is currently installed.
+                Capture mode: {analysis?.capture_mode?.replaceAll("_", " ") || "unknown"}. Candidate contours below are separate from the ONNX detector result above.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm">
-                <p className="font-semibold">{analysis?.status || "INFERENCE_ERROR"}</p>
-                <p className="text-xs text-muted-foreground mt-1">{analysis?.message || "Analysis evidence was unavailable."}</p>
+              <div className="mb-4 p-3 rounded-lg border border-border bg-muted/30 text-sm">
+                <p className="font-semibold">Capture screening: {analysis?.status || "INFERENCE_ERROR"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{analysis?.message || "Capture-analysis evidence was unavailable."}</p>
               </div>
               {analysis?.limitations && analysis.limitations.length > 0 && (
                 <ul className="mb-4 list-disc pl-5 space-y-1 text-xs text-muted-foreground">
@@ -290,7 +462,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
       {/* Scientific Disclaimer */}
       <div className="bg-muted/40 border border-border rounded-lg p-4 text-xs text-muted-foreground flex items-center justify-between">
         <span>
-          <strong>Scientific Disclaimer:</strong> This research build records capture quality and candidate-contour evidence only. It does not establish egg identity, visible defects, freshness, microbiological contamination, or food safety.
+          <strong>Scientific Disclaimer:</strong> The ONNX model localizes visible egg shells only. Capture-quality and contour metrics are screening evidence; no freshness, defect, microbiological contamination, or food-safety assessment is performed.
         </span>
         <Button variant="outline" size="sm" asChild className="shrink-0 ml-4">
           <Link href="/scan">Scan Another Egg</Link>
