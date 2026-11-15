@@ -27,7 +27,7 @@ def test_multiple_isolated_eggs_block_pipeline_progression():
     assert result.quality.retake_recommended is True
 
 
-def test_single_candidate_contour_abstains_without_a_validated_detector():
+def test_single_candidate_contour_is_not_treated_as_egg_detection():
     image = np.full((400, 400, 3), (10, 10, 15), dtype=np.uint8)
     cv2.ellipse(image, (200, 200), (70, 120), 0, 0, 360, (40, 140, 230), -1)
 
@@ -40,5 +40,7 @@ def test_single_candidate_contour_abstains_without_a_validated_detector():
     assert result.can_proceed_to_inference is False
     assert evidence["status"] == "UNCERTAIN"
     assert evidence["model"]["validated_egg_detector"] is False
+    assert any("non-ML contour screening" in item for item in evidence["limitations"])
+    assert not any("No trained, validated egg detector is installed." == item for item in evidence["limitations"])
     assert "candidate_geometry" in result.to_dict()
     assert "geometry" not in result.to_dict()
