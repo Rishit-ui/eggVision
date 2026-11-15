@@ -41,6 +41,6 @@ def test_single_candidate_contour_is_not_treated_as_egg_detection():
     assert evidence["status"] == "UNCERTAIN"
     assert evidence["model"]["validated_egg_detector"] is False
     assert any("non-ML contour screening" in item for item in evidence["limitations"])
-    assert not any("No trained, validated egg detector is installed." == item for item in evidence["limitations"])
+    assert "No trained, validated egg detector is installed." not in evidence["limitations"]
     assert "candidate_geometry" in result.to_dict()
     assert "geometry" not in result.to_dict()
