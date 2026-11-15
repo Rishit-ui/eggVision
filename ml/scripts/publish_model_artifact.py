@@ -216,7 +216,7 @@ def publish_artifact(
     client, s3_config = get_s3_client()
     bucket = s3_config["bucket"]
     onnx_key = manifest["onnx_artifact"]["key"]
-    manifest_key = manifest["manifest_key"]
+    manifest_key = manifest.get("manifest_key") or f"{onnx_key.rsplit('/', 1)[0]}/manifest.json"
     expected_sha = manifest["onnx_artifact"]["sha256"]
     expected_size = manifest["onnx_artifact"]["size_bytes"]
 
@@ -251,17 +251,31 @@ def publish_artifact(
     try:
         head_resp = client.head_object(Bucket=bucket, Key=onnx_key)
         existing_size = head_resp.get("ContentLength")
-        if existing_size == expected_size:
-            logger.info(
-                f"Artifact already exists at s3://{bucket}/{onnx_key} with matching size ({existing_size} bytes). "
-                "Will verify round-trip without overwriting."
+        if existing_size != expected_size:
+            conflict_err = (
+                f"Existing remote object at s3://{bucket}/{onnx_key} has incorrect size "
+                f"({existing_size} bytes vs expected {expected_size} bytes). "
+                "Overwriting an existing content-addressed artifact is prohibited. "
+                "A new version or key prefix is required."
             )
-            object_already_exists = True
-        else:
-            logger.warning(
-                f"Artifact exists at s3://{bucket}/{onnx_key} but size differs "
-                f"({existing_size} vs expected {expected_size}). Re-uploading."
-            )
+            logger.error(conflict_err)
+            report = {
+                "status": "OBJECT_CONFLICT",
+                "error": conflict_err,
+                "artifact_key": onnx_key,
+                "expected_size_bytes": expected_size,
+                "existing_size_bytes": existing_size,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+            with report_output.open("w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2)
+            return report
+
+        logger.info(
+            f"Artifact already exists at s3://{bucket}/{onnx_key} with matching size ({existing_size} bytes). "
+            "Will verify round-trip without overwriting."
+        )
+        object_already_exists = True
     except ClientError as e:
         error_code = str(e.response.get("Error", {}).get("Code", "")).lower()
         if error_code in ("404", "nosuchkey", "notfound"):
@@ -337,14 +351,26 @@ def publish_artifact(
         downloaded_sha = compute_sha256(tmp_path)
 
         if downloaded_size != expected_size or downloaded_sha != expected_sha:
-            mismatch_err = (
-                f"Roundtrip verification failed: expected ({expected_size} B, {expected_sha}), "
-                f"got ({downloaded_size} B, {downloaded_sha})"
-            )
+            if object_already_exists:
+                mismatch_err = (
+                    f"Existing remote object at s3://{bucket}/{onnx_key} has incorrect hash/size: "
+                    f"expected ({expected_size} B, {expected_sha}), got ({downloaded_size} B, {downloaded_sha}). "
+                    "Overwriting an existing content-addressed artifact is prohibited. "
+                    "A new version or key prefix is required."
+                )
+                failure_status = "OBJECT_CONFLICT"
+            else:
+                mismatch_err = (
+                    f"Roundtrip verification failed: expected ({expected_size} B, {expected_sha}), "
+                    f"got ({downloaded_size} B, {downloaded_sha})"
+                )
+                failure_status = "ROUNDTRIP_FAILED"
+
             logger.error(mismatch_err)
             report = {
-                "status": "ROUNDTRIP_FAILED",
+                "status": failure_status,
                 "error": mismatch_err,
+                "artifact_key": onnx_key,
                 "expected_sha256": expected_sha,
                 "downloaded_sha256": downloaded_sha,
                 "expected_size_bytes": expected_size,
@@ -367,6 +393,7 @@ def publish_artifact(
             "downloaded_sha256": downloaded_sha,
             "downloaded_size_bytes": downloaded_size,
             "verified_roundtrip": True,
+            "existing_object_reused": object_already_exists,
             "timestamp": datetime.now(UTC).isoformat(),
         }
     except Exception as e:
@@ -390,13 +417,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Publish model artifact to private S3 / Cloudflare R2.")
     parser.add_argument("--onnx-path", type=Path, default=DEFAULT_ONNX_PATH)
     parser.add_argument("--pt-path", type=Path, default=DEFAULT_PT_PATH)
-    parser.add_argument("--metadata", type=Path, default=DEFAULT_META_PATH)
-    parser.add_argument("--onnx-meta", type=Path, default=DEFAULT_ONNX_META_PATH)
-    parser.add_argument("--equiv-report", type=Path, default=DEFAULT_EQUIV_PATH)
+    parser.add_argument("--metadata-path", "--metadata", dest="metadata", type=Path, default=DEFAULT_META_PATH)
+    parser.add_argument("--onnx-meta-path", "--onnx-meta", dest="onnx_meta", type=Path, default=DEFAULT_ONNX_META_PATH)
+    parser.add_argument(
+        "--equivalence-report-path", "--equiv-report", dest="equiv_report", type=Path, default=DEFAULT_EQUIV_PATH
+    )
     parser.add_argument("--manifest-output", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument("--report-output", type=Path, default=DEFAULT_REPORT_PATH)
     parser.add_argument("--prefix", type=str, default="eggvision/detection/v1")
+    parser.add_argument("--version", type=str, default=None, help="Model version (overrides version segment in prefix)")
     args = parser.parse_args()
+
+    if args.version:
+        args.prefix = f"eggvision/detection/{args.version}"
 
     try:
         manifest = build_manifest(
@@ -415,6 +448,8 @@ def main() -> int:
         )
         print("\n=== PUBLISH ARTIFACT SUMMARY ===")
         print(f"Status:       {report['status']}")
+        if "error" in report:
+            print(f"Error:        {report['error']}")
         print(f"Artifact Key: {manifest['onnx_artifact']['key']}")
         print(f"ONNX SHA-256: {manifest['onnx_artifact']['sha256']}")
         print(f"Manifest:     {args.manifest_output}")

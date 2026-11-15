@@ -71,29 +71,47 @@ $env:MODEL_S3_REGION = "auto"
 ```powershell
 python ml/scripts/publish_model_artifact.py `
   --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx `
-  --metadata-path ml/artifacts/detection/onnx_metadata.json `
-  --equivalence-report-path ml/artifacts/detection/onnx_equivalence_report.json `
-  --version v1 `
-  --output-dir ml/artifacts/detection
+  --pt-path ml/artifacts/detection/weights/best.pt `
+  --metadata ml/artifacts/detection/model_metadata.json `
+  --onnx-meta ml/artifacts/detection/onnx_metadata.json `
+  --equiv-report ml/artifacts/detection/onnx_equivalence_report.json `
+  --manifest-output ml/artifacts/detection/manifest.json `
+  --report-output ml/artifacts/detection/publish_report.json `
+  --prefix eggvision/detection/v1
 ```
 
 **Expected Output:**
 ```text
-=== ARTIFACT PUBLICATION COMPLETE ===
-Status:           SUCCESS_VERIFIED
-Remote Key:       eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx
-Manifest Key:     eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/manifest.json
-SHA-256 Digest:   81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1
-SizeBytes:        12746280
-Equivalence:      PASSED
+=== PUBLISH ARTIFACT SUMMARY ===
+Status:       SUCCESS_VERIFIED
+Artifact Key: eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx
+ONNX SHA-256: 81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1
+Manifest:     ml/artifacts/detection/manifest.json
 ```
 
 ### Step 3: Verify Remote Object in R2
 
 ```powershell
 python ml/scripts/verify_model_artifact.py `
-  --remote-key "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx" `
+  --s3-key "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx" `
   --expected-sha "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1"
+```
+
+**Expected Output:**
+```text
+=== ARTIFACT VERIFICATION SUCCESSFUL ===
+Status:   VERIFIED
+SHA-256:  81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1
+Size:     12,746,280 bytes
+Runtime:  Ready (output shape: [1, 5, 8400])
+```
+
+### Step 4: Verify Local Artifact
+
+```powershell
+python ml/scripts/verify_model_artifact.py `
+  --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx `
+  --manifest ml/artifacts/detection/manifest.json
 ```
 
 **Expected Output:**

@@ -148,11 +148,11 @@ def verify_s3_artifact(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Verify local or remote model artifact.")
-    parser.add_argument("--onnx-path", type=Path, default=DEFAULT_ONNX_PATH)
+    parser.add_argument("--onnx-path", "--local-path", dest="onnx_path", type=Path, default=DEFAULT_ONNX_PATH)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument("--expected-sha", type=str, default=None)
-    parser.add_argument("--s3-key", type=str, default=None)
-    parser.add_argument("--s3-bucket", type=str, default=None)
+    parser.add_argument("--s3-key", "--remote-key", dest="s3_key", type=str, default=None)
+    parser.add_argument("--s3-bucket", "--bucket", dest="s3_bucket", type=str, default=None)
     args = parser.parse_args()
 
     try:
