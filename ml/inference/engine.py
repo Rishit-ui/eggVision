@@ -26,6 +26,7 @@ class PredictionResult:
     heatmap: np.ndarray | None = None
     inference_time_ms: float | None = None
     model_version: str | None = None
+    detections: list[dict] = field(default_factory=list)
     error_message: str | None = None
 
 
