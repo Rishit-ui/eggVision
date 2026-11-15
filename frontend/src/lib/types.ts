@@ -26,6 +26,13 @@ export interface AnalysisEvidence {
   message?: string | null;
 }
 
+export interface EggDetection {
+  label: string;
+  confidence: number;
+  /** [x1, y1, x2, y2] in original uploaded-image pixels. */
+  bbox: [number, number, number, number];
+}
+
 export interface PredictionResponse {
   id: string;
   scan_id: string;
