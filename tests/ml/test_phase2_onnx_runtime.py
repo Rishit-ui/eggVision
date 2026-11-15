@@ -338,18 +338,42 @@ class TestPredictEndpointAndStorageRetrieval:
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_predict_scan_409_when_quality_poor(self):
-        from fastapi import HTTPException
+    async def test_predict_scan_runs_even_when_capture_screening_is_poor(self):
         mock_db = AsyncMock()
+        scan_id = uuid.uuid4()
         mock_scan = MagicMock(spec=Scan)
+        mock_scan.id = scan_id
         mock_scan.image_quality = "POOR"
         mock_scan.image_quality_warnings = ["IMAGE_TOO_DARK"]
+        mock_scan.original_image_url = "/api/v1/artifacts/uploads/user/sample.jpg"
 
-        with patch("app.services.scan_service.scan_service.get_scan", return_value=mock_scan):
-            with pytest.raises(HTTPException) as exc_info:
-                await predict_scan(PredictRequest(scan_id=uuid.uuid4()), db=mock_db, current_user=None)
-            assert exc_info.value.status_code == 409
-            assert "image quality" in exc_info.value.detail
+        image = np.full((120, 160, 3), 180, dtype=np.uint8)
+        ok, encoded = cv2.imencode(".jpg", image)
+        assert ok
+        mock_prediction = Prediction(
+            scan_id=scan_id,
+            status="COMPLETED",
+            model_version="1.0.0",
+            confidence=0.9,
+            explanation={"task": "visible_shell_detection", "detections": []},
+        )
+
+        with (
+            patch("app.services.scan_service.scan_service.get_scan", new=AsyncMock(return_value=mock_scan)),
+            patch("app.services.storage_service.storage_service.get_image", new=AsyncMock(return_value=(encoded.tobytes(), "image/jpeg"))),
+            patch.object(prediction_service, "create_prediction", new=AsyncMock(return_value=mock_prediction)) as create_prediction,
+            patch("app.routers.predict.logger.info") as info_log,
+        ):
+            result = await predict_scan(
+                PredictRequest(scan_id=scan_id),
+                db=mock_db,
+                current_user=None,
+            )
+
+        assert result.status == "COMPLETED"
+        create_prediction.assert_awaited_once()
+        assert create_prediction.call_args.kwargs["image"].shape == (120, 160, 3)
+        assert any("prediction_capture_screening_advisory" in call.args[0] for call in info_log.call_args_list)
 
     @pytest.mark.asyncio
     async def test_predict_scan_e2e_with_image_retrieval(self):
