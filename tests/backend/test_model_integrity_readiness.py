@@ -199,3 +199,110 @@ async def test_model_info_reports_ready_only_for_fully_verified_runtime():
     assert response.runtime_available is True
     assert response.runtime_name == "onnxruntime"
     assert response.is_ready is True
+
+
+@pytest.mark.asyncio
+async def test_https_release_asset_is_downloaded_verified_and_loaded(monkeypatch, tmp_path: Path):
+    import io
+
+    contents = b"verified-release-model"
+    expected_sha = hashlib.sha256(contents).hexdigest()
+    monkeypatch.setattr(model_loader.settings, "MODEL_PATH", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_URL", "https://github.com/example/repo/releases/download/v1/model.onnx")
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", expected_sha)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_MAX_BYTES", 1024)
+    monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", None)
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_ONNX", tmp_path / "absent.onnx")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_PT", tmp_path / "absent.pt")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_MANIFEST", tmp_path / "absent.json")
+    monkeypatch.setattr(model_loader.tempfile, "gettempdir", lambda: str(tmp_path))
+
+    response = io.BytesIO(contents)
+    response.status = 200
+    response.headers = {"Content-Length": str(len(contents))}
+    response.geturl = lambda: "https://github.com/example/repo/releases/download/v1/model.onnx"
+    manager = ModelLifecycleManager()
+    engine = MagicMock()
+    engine.is_ready.return_value = True
+
+    with (
+        patch.object(model_loader, "urlopen", return_value=response),
+        patch("ml.inference.onnx_detection_engine.OnnxDetectionEngine", return_value=engine),
+    ):
+        await manager.initialize()
+
+    assert manager.state == "MODEL_READY"
+    assert manager.checksum_verified is True
+    assert manager.resolved_model_path is not None
+    assert manager.resolved_model_path.read_bytes() == contents
+    assert manager.get_engine() is engine
+
+
+@pytest.mark.asyncio
+async def test_https_release_asset_checksum_mismatch_is_rejected(monkeypatch, tmp_path: Path):
+    import io
+
+    contents = b"tampered-release-model"
+    monkeypatch.setattr(model_loader.settings, "MODEL_PATH", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_URL", "https://github.com/example/repo/releases/download/v1/model.onnx")
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", "0" * 64)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_MAX_BYTES", 1024)
+    monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", None)
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_ONNX", tmp_path / "absent.onnx")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_PT", tmp_path / "absent.pt")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_MANIFEST", tmp_path / "absent.json")
+    monkeypatch.setattr(model_loader.tempfile, "gettempdir", lambda: str(tmp_path))
+
+    response = io.BytesIO(contents)
+    response.status = 200
+    response.headers = {"Content-Length": str(len(contents))}
+    response.geturl = lambda: "https://github.com/example/repo/releases/download/v1/model.onnx"
+    manager = ModelLifecycleManager()
+
+    with (
+        patch.object(model_loader, "urlopen", return_value=response),
+        patch("ml.inference.onnx_detection_engine.OnnxDetectionEngine") as runtime,
+    ):
+        await manager.initialize()
+
+    runtime.assert_not_called()
+    assert manager.state == "MODEL_INTEGRITY_FAILED"
+    assert manager.checksum_verified is False
+    assert isinstance(manager.get_engine(), PlaceholderEngine)
+
+
+@pytest.mark.asyncio
+async def test_https_release_asset_rejects_non_https_url(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr(model_loader.settings, "MODEL_PATH", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_URL", "http://example.com/model.onnx")
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", "a" * 64)
+    monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", None)
+    monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", None)
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_ONNX", tmp_path / "absent.onnx")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_PT", tmp_path / "absent.pt")
+    monkeypatch.setattr(model_loader, "DEFAULT_LOCAL_MANIFEST", tmp_path / "absent.json")
+    manager = ModelLifecycleManager()
+
+    with patch.object(model_loader, "urlopen") as download:
+        await manager.initialize()
+
+    download.assert_not_called()
+    assert manager.state == "MODEL_INTEGRITY_FAILED"
+
+
+def test_production_requires_checksum_for_https_model_url():
+    with pytest.raises(ValueError, match="MODEL_ARTIFACT_SHA256"):
+        production_settings(
+            MODEL_ARTIFACT_URL="https://github.com/example/repo/releases/download/v1/model.onnx",
+            MODEL_ARTIFACT_SHA256=None,
+        )
+
+
+def test_production_rejects_non_https_model_url():
+    with pytest.raises(ValueError, match="HTTPS"):
+        production_settings(
+            MODEL_ARTIFACT_URL="http://example.com/model.onnx",
+            MODEL_ARTIFACT_SHA256="a" * 64,
+        )
