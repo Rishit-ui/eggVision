@@ -279,7 +279,7 @@ class OnnxDetectionEngine(InferenceEngine):
                     "confidence": float(score),
                     "bbox": box,
                 }
-                for box, score in zip(detected_boxes, detected_scores)
+                for box, score in zip(detected_boxes, detected_scores, strict=True)
             ]
             explanations: list[str] = []
             max_conf = 0.0
