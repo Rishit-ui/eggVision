@@ -1,6 +1,6 @@
 """EggVision AI — Model Lifecycle & Artifact Runtime Manager.
 
-Manages startup artifact resolution (local ONNX or private Cloudflare R2 / S3 download),
+Manages startup artifact resolution (local ONNX, HTTPS release asset, or private S3 / R2 download),
 cryptographic SHA-256 verification before execution, atomic caching in content-addressed
 runtime storage (/tmp/eggvision_models/<sha256>/model.onnx), and exposes fine-grained
 readiness telemetry (MODEL_READY, MODEL_NOT_READY, MODEL_DOWNLOADING, MODEL_INTEGRITY_FAILED,
@@ -17,6 +17,8 @@ import tempfile
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 from app.config import settings
 
@@ -147,8 +149,17 @@ class ModelLifecycleManager:
             self.resolved_model_path = DEFAULT_LOCAL_PT
             self.artifact_available = True
 
-        # Step 4: If still not found, attempt download from S3/R2 if configured
-        if not self.resolved_model_path:
+        # Step 4: Resolve a configured public HTTPS release asset before private S3/R2.
+        # An explicitly configured URL is authoritative; do not silently fetch a
+        # different artifact from another provider if that URL fails verification.
+        if not self.resolved_model_path and settings.MODEL_ARTIFACT_URL:
+            url_model_path = await self._try_download_from_url()
+            if url_model_path:
+                self.resolved_model_path = url_model_path
+                self.artifact_available = True
+
+        # Step 5: Retain the existing private S3 / Cloudflare R2 fallback when no URL is set.
+        elif not self.resolved_model_path:
             s3_model_path = await self._try_download_from_s3()
             if s3_model_path:
                 self.resolved_model_path = s3_model_path
@@ -270,6 +281,142 @@ class ModelLifecycleManager:
         else:
             logger.error(f"Unsupported model artifact format: {suffix}")
             self._runtime_failed("Unsupported model artifact format.")
+
+    async def _try_download_from_url(self) -> Path | None:
+        """Download a public HTTPS model asset into the verified content-addressed cache.
+
+        GitHub Release assets are public by design. The declared SHA-256 remains the
+        trust anchor; a successful HTTP response is never treated as proof of integrity.
+        """
+        artifact_url = settings.MODEL_ARTIFACT_URL
+        if not artifact_url:
+            return None
+
+        parsed_url = urlparse(artifact_url)
+        if (
+            parsed_url.scheme.lower() != "https"
+            or not parsed_url.hostname
+            or parsed_url.username is not None
+            or parsed_url.password is not None
+        ):
+            self._reject_integrity("Model artifact URL must be a valid HTTPS URL.")
+            return None
+
+        expected_sha = settings.MODEL_ARTIFACT_SHA256
+        if not expected_sha:
+            self._reject_integrity("Expected SHA-256 checksum is missing.")
+            return None
+
+        try:
+            expected_sha = validate_sha256_format(expected_sha)
+        except Exception:
+            self._reject_integrity("Expected SHA-256 checksum is invalid.")
+            return None
+
+        max_bytes = settings.MODEL_ARTIFACT_MAX_BYTES
+        if max_bytes <= 0:
+            self._runtime_failed("Model artifact download size limit must be positive.")
+            return None
+
+        self.state = "MODEL_DOWNLOADING"
+
+        # The same immutable cache is shared by the HTTPS and S3/R2 providers.
+        cache_base = Path(tempfile.gettempdir()) / "eggvision_models"
+        cache_dir = cache_base / expected_sha
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cached_file = cache_dir / "model.onnx"
+
+        if cached_file.exists() and cached_file.stat().st_size > 0:
+            existing_sha = await asyncio.to_thread(compute_sha256, cached_file)
+            if hmac.compare_digest(existing_sha, expected_sha):
+                logger.info("Using verified content-addressed HTTPS model cache.")
+                return cached_file
+            logger.warning("Cached model checksum mismatch. Evicting corrupted cache entry.")
+            cached_file.unlink()
+
+        tmp_download_file = cache_dir / f".download_{uuid.uuid4().hex[:12]}.part"
+
+        def _download() -> None:
+            request = Request(
+                artifact_url,
+                headers={
+                    "User-Agent": "EggVision-Model-Loader/1.0",
+                    "Accept": "application/octet-stream",
+                    "Accept-Encoding": "identity",
+                },
+            )
+            with urlopen(request, timeout=30) as response:
+                final_url = urlparse(response.geturl())
+                if (
+                    final_url.scheme.lower() != "https"
+                    or not final_url.hostname
+                    or final_url.username is not None
+                    or final_url.password is not None
+                ):
+                    raise ValueError("Artifact download redirected to a non-HTTPS URL.")
+
+                status = getattr(response, "status", 200)
+                if not 200 <= status < 300:
+                    raise ValueError(f"Artifact server returned HTTP {status}.")
+
+                content_length = response.headers.get("Content-Length")
+                declared_length = None
+                if content_length is not None:
+                    try:
+                        declared_length = int(content_length)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError("Artifact server returned an invalid Content-Length.") from exc
+                    if declared_length < 0 or declared_length > max_bytes:
+                        raise ValueError("Artifact exceeds the configured download size limit.")
+
+                downloaded = 0
+                with tmp_download_file.open("wb") as output:
+                    while True:
+                        chunk = response.read(1024 * 1024)
+                        if not chunk:
+                            break
+                        downloaded += len(chunk)
+                        if downloaded > max_bytes:
+                            raise ValueError("Artifact exceeds the configured download size limit.")
+                        output.write(chunk)
+
+                if declared_length is not None and downloaded != declared_length:
+                    raise ValueError("Artifact download was incomplete.")
+
+        try:
+            await asyncio.to_thread(_download)
+
+            if not tmp_download_file.exists() or tmp_download_file.stat().st_size == 0:
+                raise ValueError("Downloaded artifact is empty or missing.")
+
+            downloaded_sha = await asyncio.to_thread(compute_sha256, tmp_download_file)
+            if not hmac.compare_digest(downloaded_sha, expected_sha):
+                mismatch_error = (
+                    f"Downloaded HTTPS artifact checksum mismatch: expected {expected_sha}, "
+                    f"got {downloaded_sha}"
+                )
+                logger.error(mismatch_error)
+                self._reject_integrity("Model artifact checksum mismatch.")
+                return None
+
+            tmp_download_file.replace(cached_file)
+            logger.info(
+                "Downloaded and SHA-256 verified HTTPS model artifact (%s bytes).",
+                cached_file.stat().st_size,
+            )
+            return cached_file
+
+        except Exception as exc:
+            logger.error("Failed to download model artifact over HTTPS: %s", exc)
+            self.error_message = "HTTPS model artifact download failed."
+            return None
+
+        finally:
+            if tmp_download_file.exists():
+                try:
+                    tmp_download_file.unlink()
+                except OSError:
+                    pass
 
     async def _try_download_from_s3(self) -> Path | None:
         """Download model artifact from private S3 / Cloudflare R2 into content-addressed cache.
