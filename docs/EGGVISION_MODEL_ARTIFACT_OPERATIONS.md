@@ -71,10 +71,13 @@ $env:MODEL_S3_REGION = "auto"
 
 python ml/scripts/publish_model_artifact.py `
   --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx `
-  --metadata-path ml/artifacts/detection/onnx_metadata.json `
-  --equivalence-report-path ml/artifacts/detection/onnx_equivalence_report.json `
-  --version v1 `
-  --output-dir ml/artifacts/detection
+  --pt-path ml/artifacts/detection/weights/best.pt `
+  --metadata ml/artifacts/detection/model_metadata.json `
+  --onnx-meta ml/artifacts/detection/onnx_metadata.json `
+  --equiv-report ml/artifacts/detection/onnx_equivalence_report.json `
+  --manifest-output ml/artifacts/detection/manifest.json `
+  --report-output ml/artifacts/detection/publish_report.json `
+  --prefix eggvision/detection/v1
 ```
 
 *Note: If S3 credentials are not set, the script executes in **offline mode**, generating `manifest.json` locally after strictly validating manifest schema and ONNX equivalence reports.*
@@ -86,12 +89,12 @@ Validate that a local or remote artifact matches its declared cryptographic sign
 ```powershell
 # Local Verification
 python ml/scripts/verify_model_artifact.py `
-  --manifest ml/artifacts/detection/manifest.json `
-  --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx
+  --onnx-path ml/artifacts/detection/weights/eggvision_detector.onnx `
+  --manifest ml/artifacts/detection/manifest.json
 
 # Remote R2 / S3 Verification
 python ml/scripts/verify_model_artifact.py `
-  --remote-key "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx" `
+  --s3-key "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx" `
   --expected-sha "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1"
 ```
 

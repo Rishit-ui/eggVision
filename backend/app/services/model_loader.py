@@ -156,6 +156,15 @@ class ModelLifecycleManager:
 
         # If no artifact could be found
         if not self.resolved_model_path or not self.resolved_model_path.exists():
+            if self.state == "MODEL_INTEGRITY_FAILED":
+                logger.warning(
+                    f"Model resolution aborted due to integrity failure: {self.error_message}"
+                )
+                self.artifact_available = False
+                self.checksum_verified = False
+                self.engine = PlaceholderEngine()
+                return
+
             logger.info("No model artifact available locally or in S3/R2. Placeholder active.")
             self.state = "MODEL_NOT_READY"
             self.artifact_available = False
@@ -341,9 +350,10 @@ class ModelLifecycleManager:
             # Verify integrity on the downloaded temp file before moving to cache
             downloaded_sha = await asyncio.to_thread(compute_sha256, tmp_download_file)
             if not hmac.compare_digest(downloaded_sha, expected_sha):
-                raise ValueError(
-                    f"Downloaded artifact checksum mismatch: expected {expected_sha}, got {downloaded_sha}"
-                )
+                mismatch_err = f"Downloaded artifact checksum mismatch: expected {expected_sha}, got {downloaded_sha}"
+                logger.error(mismatch_err)
+                self._reject_integrity(mismatch_err)
+                return None
 
             # Atomic rename into permanent cache path
             tmp_download_file.replace(cached_file)

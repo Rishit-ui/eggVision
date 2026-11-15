@@ -439,3 +439,234 @@ class TestContentAddressedCacheReliability:
 
         mock_s3.download_file.assert_not_called()
         assert manager2.state == "MODEL_READY"
+
+
+class TestPhase31HardeningRegressions:
+    """Regression tests for Phase 3.1 hardening items."""
+
+    @pytest.mark.asyncio
+    async def test_s3_download_missing_digest_preserves_integrity_failed(self, monkeypatch, tmp_path: Path):
+        _isolate_manager(monkeypatch, tmp_path)
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", "https://r2.example.com")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ACCESS_KEY", "KEY")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_SECRET_KEY", "SECRET")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", "models/v1/model.onnx")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", None)
+
+        manager = ModelLifecycleManager()
+        await manager.initialize()
+
+        assert manager.state == "MODEL_INTEGRITY_FAILED"
+        assert manager.get_engine().is_ready() is False
+        assert manager.get_status_summary()["is_ready"] is False
+        assert "missing" in (manager.error_message or "").lower()
+
+    @pytest.mark.asyncio
+    async def test_s3_download_malformed_digest_preserves_integrity_failed(self, monkeypatch, tmp_path: Path):
+        _isolate_manager(monkeypatch, tmp_path)
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", "https://r2.example.com")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ACCESS_KEY", "KEY")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_SECRET_KEY", "SECRET")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", "models/v1/model.onnx")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", "not-a-valid-sha")
+
+        manager = ModelLifecycleManager()
+        await manager.initialize()
+
+        assert manager.state == "MODEL_INTEGRITY_FAILED"
+        assert manager.get_engine().is_ready() is False
+        assert manager.get_status_summary()["is_ready"] is False
+        assert "invalid" in (manager.error_message or "").lower()
+
+    @pytest.mark.asyncio
+    async def test_s3_download_checksum_mismatch_preserves_integrity_failed(self, monkeypatch, tmp_path: Path):
+        _isolate_manager(monkeypatch, tmp_path)
+        expected_sha = "a" * 64
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ENDPOINT", "https://r2.example.com")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_ACCESS_KEY", "KEY")
+        monkeypatch.setattr(model_loader.settings, "MODEL_S3_SECRET_KEY", "SECRET")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_KEY", "models/v1/model.onnx")
+        monkeypatch.setattr(model_loader.settings, "MODEL_ARTIFACT_SHA256", expected_sha)
+        monkeypatch.setattr(tempfile, "gettempdir", lambda: str(tmp_path))
+
+        mock_s3 = MagicMock()
+
+        def _mock_download(bucket, key, target_path):
+            Path(target_path).write_bytes(b"corrupt_model_bytes")
+
+        mock_s3.download_file.side_effect = _mock_download
+
+        manager = ModelLifecycleManager()
+        with patch("boto3.client", return_value=mock_s3):
+            await manager.initialize()
+
+        assert manager.state == "MODEL_INTEGRITY_FAILED"
+        assert manager.get_engine().is_ready() is False
+        assert manager.get_status_summary()["is_ready"] is False
+        assert "mismatch" in (manager.error_message or "").lower()
+
+    def test_publish_never_overwrites_existing_object_with_mismatched_size(self, tmp_path: Path):
+        onnx_file = tmp_path / "model.onnx"
+        onnx_file.write_bytes(b"local_onnx_model_content_123")
+        expected_sha = hashlib.sha256(b"local_onnx_model_content_123").hexdigest()
+        expected_size = len(b"local_onnx_model_content_123")
+
+        manifest = {
+            "version": "v1",
+            "onnx_artifact": {
+                "key": f"models/{expected_sha}/model.onnx",
+                "sha256": expected_sha,
+                "size_bytes": expected_size,
+            },
+        }
+
+        mock_client = MagicMock()
+        # Remote existing object has different size
+        mock_client.head_object.return_value = {"ContentLength": expected_size + 500}
+
+        manifest_out = tmp_path / "manifest.json"
+        report_out = tmp_path / "report.json"
+
+        with patch("ml.scripts.publish_model_artifact.get_s3_client", return_value=(mock_client, {"bucket": "b"})):
+            report = publish_artifact(manifest, onnx_file, manifest_out, report_out)
+
+        assert report["status"] == "OBJECT_CONFLICT"
+        assert "Overwriting an existing content-addressed artifact is prohibited" in report["error"]
+        mock_client.put_object.assert_not_called()
+
+    def test_publish_never_overwrites_existing_object_with_mismatched_sha(self, tmp_path: Path):
+        onnx_file = tmp_path / "model.onnx"
+        onnx_file.write_bytes(b"local_onnx_model_content_456")
+        expected_sha = hashlib.sha256(b"local_onnx_model_content_456").hexdigest()
+        expected_size = len(b"local_onnx_model_content_456")
+
+        manifest = {
+            "version": "v1",
+            "onnx_artifact": {
+                "key": f"models/{expected_sha}/model.onnx",
+                "sha256": expected_sha,
+                "size_bytes": expected_size,
+            },
+        }
+
+        mock_client = MagicMock()
+        # Head check returns matching size so roundtrip download proceeds
+        mock_client.head_object.return_value = {"ContentLength": expected_size}
+
+        def _mock_download(bucket, key, target_path):
+            # Download returns same size but different content
+            Path(target_path).write_bytes(b"different_content_len_28___!")
+
+        mock_client.download_file.side_effect = _mock_download
+
+        manifest_out = tmp_path / "manifest.json"
+        report_out = tmp_path / "report.json"
+
+        with patch("ml.scripts.publish_model_artifact.get_s3_client", return_value=(mock_client, {"bucket": "b"})):
+            report = publish_artifact(manifest, onnx_file, manifest_out, report_out)
+
+        assert report["status"] == "OBJECT_CONFLICT"
+        assert "Overwriting an existing content-addressed artifact is prohibited" in report["error"]
+        # put_object was never called for onnx_key
+        for call in mock_client.put_object.call_args_list:
+            assert call.kwargs.get("Key") != manifest["onnx_artifact"]["key"]
+
+    def test_publish_reuses_existing_object_when_size_and_sha_match(self, tmp_path: Path):
+        content = b"identical_content_789"
+        onnx_file = tmp_path / "model.onnx"
+        onnx_file.write_bytes(content)
+        expected_sha = hashlib.sha256(content).hexdigest()
+        expected_size = len(content)
+
+        manifest = {
+            "version": "v1",
+            "onnx_artifact": {
+                "key": f"models/{expected_sha}/model.onnx",
+                "sha256": expected_sha,
+                "size_bytes": expected_size,
+            },
+        }
+
+        mock_client = MagicMock()
+        mock_client.head_object.return_value = {"ContentLength": expected_size}
+
+        def _mock_download(bucket, key, target_path):
+            Path(target_path).write_bytes(content)
+
+        mock_client.download_file.side_effect = _mock_download
+
+        manifest_out = tmp_path / "manifest.json"
+        report_out = tmp_path / "report.json"
+
+        with patch("ml.scripts.publish_model_artifact.get_s3_client", return_value=(mock_client, {"bucket": "b"})):
+            report = publish_artifact(manifest, onnx_file, manifest_out, report_out)
+
+        assert report["status"] == "SUCCESS_VERIFIED"
+        assert report["existing_object_reused"] is True
+        # ONNX put_object was never called because it already existed and matched
+        for call in mock_client.put_object.call_args_list:
+            assert call.kwargs.get("Key") != manifest["onnx_artifact"]["key"]
+
+    def test_cli_documented_arguments_parsed_correctly(self, tmp_path: Path, monkeypatch):
+        from ml.scripts import publish_model_artifact as pub
+        from ml.scripts import verify_model_artifact as ver
+
+        onnx_file = tmp_path / "model.onnx"
+        onnx_file.write_bytes(b"dummy_onnx")
+        manifest_file = tmp_path / "manifest.json"
+        manifest_file.write_text("{}", encoding="utf-8")
+
+        # Test verify CLI accepts documented args
+        test_args_verify = [
+            "verify_model_artifact.py",
+            "--onnx-path",
+            str(onnx_file),
+            "--manifest",
+            str(manifest_file),
+            "--s3-key",
+            "models/v1/model.onnx",
+            "--expected-sha",
+            "a" * 64,
+        ]
+        monkeypatch.setattr(sys, "argv", test_args_verify)
+        with patch.object(ver, "verify_s3_artifact", return_value={"status": "VERIFIED", "sha256": "a" * 64, "size_bytes": 10, "output_shape": [1, 5, 8400]}):
+            assert ver.main() == 0
+
+        # Test verify CLI also accepts alias --remote-key
+        test_args_verify_alias = [
+            "verify_model_artifact.py",
+            "--remote-key",
+            "models/v1/model.onnx",
+            "--expected-sha",
+            "a" * 64,
+        ]
+        monkeypatch.setattr(sys, "argv", test_args_verify_alias)
+        with patch.object(ver, "verify_s3_artifact", return_value={"status": "VERIFIED", "sha256": "a" * 64, "size_bytes": 10, "output_shape": [1, 5, 8400]}):
+            assert ver.main() == 0
+
+        # Test publish CLI accepts documented args
+        test_args_pub = [
+            "publish_model_artifact.py",
+            "--onnx-path",
+            str(onnx_file),
+            "--metadata",
+            str(manifest_file),
+            "--onnx-meta",
+            str(manifest_file),
+            "--equiv-report",
+            str(manifest_file),
+            "--manifest-output",
+            str(manifest_file),
+            "--report-output",
+            str(tmp_path / "report.json"),
+            "--prefix",
+            "eggvision/detection/v1",
+        ]
+        monkeypatch.setattr(sys, "argv", test_args_pub)
+        mock_manifest = {"onnx_artifact": {"key": "k", "sha256": "s"}}
+        mock_report = {"status": "LOCAL_MANIFEST_PREPARED"}
+        with (
+            patch.object(pub, "build_manifest", return_value=mock_manifest),
+            patch.object(pub, "publish_artifact", return_value=mock_report),
+        ):
+            assert pub.main() == 0
