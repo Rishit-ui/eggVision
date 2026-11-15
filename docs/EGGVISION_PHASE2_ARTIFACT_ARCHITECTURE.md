@@ -144,4 +144,16 @@ flowchart LR
 | `MODEL_S3_BUCKET` | string | `eggvision-models` | Target bucket containing model artifacts |
 | `MODEL_S3_ACCESS_KEY` | string | `""` | S3 access key with read permission on model bucket |
 | `MODEL_S3_SECRET_KEY` | string | `""` | S3 secret key with read permission on model bucket |
-| `MODEL_S3_REGION` | string | `us-east-1` | AWS region of model bucket |
+| `MODEL_S3_REGION` | string | `auto` | Storage region (defaults to `auto` for Cloudflare R2 compatibility) |
+
+---
+
+## 7. Phase 3 Integrity Hardening & Cloudflare R2 Evolution
+
+Phase 3 extends this architecture with:
+1. **Mandatory 64-hex SHA-256 verification**: Rejects missing, malformed, or mismatched checksums prior to ONNX loading.
+2. **Strict Production PyTorch Rejection**: Enforces `.onnx` only in production to protect memory boundaries.
+3. **Storage Namespace Isolation**: Models never inherit or fall back to application `S3_*` credentials.
+4. **Content-Addressed Atomic Caching**: Downloaded models are safely stored at `<tmp>/eggvision_models/<sha256>/model.onnx` via atomic `.part` replacement.
+5. **Manifest Schema Validation**: Strict verification of schema, provenance, and ONNX equivalence reports.
+6. For operational runbooks and R2 setup details, refer to `docs/EGGVISION_CLOUDFLARE_R2_SETUP.md` and `docs/EGGVISION_ARTIFACT_SECURITY_RUNBOOK.md`.

@@ -49,12 +49,12 @@ MODEL_VERSION="v1"
 MODEL_ARTIFACT_KEY="eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx"
 MODEL_ARTIFACT_SHA256="81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1"
 
-# Model S3 Storage
-MODEL_S3_ENDPOINT="https://s3.us-east-1.amazonaws.com"
+# Model S3 / Cloudflare R2 Storage (Zero Egress Costs)
+MODEL_S3_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 MODEL_S3_BUCKET="eggvision-models"
 MODEL_S3_ACCESS_KEY="<production-models-s3-access-key>"
 MODEL_S3_SECRET_KEY="<production-models-s3-secret-key>"
-MODEL_S3_REGION="us-east-1"
+MODEL_S3_REGION="auto"
 ```
 
 ---

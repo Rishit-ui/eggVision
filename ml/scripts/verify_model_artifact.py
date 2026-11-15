@@ -1,12 +1,10 @@
-"""EggVision AI — Verify Model Artifact (Local or Remote S3).
+"""EggVision AI — Verify Model Artifact (Local or Remote S3 / Cloudflare R2).
 
 Verifies byte size, cryptographic SHA-256 digest, manifest integrity,
 and runtime execution readiness for a published or downloaded model artifact.
 """
 
 import argparse
-import hashlib
-import json
 import logging
 import os
 import sys
@@ -16,6 +14,13 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+from ml.inference.manifest_validator import (
+    compute_file_sha256,
+    validate_manifest_file,
+    validate_sha256_format,
+    verify_artifact_matches_manifest,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,12 +34,8 @@ DEFAULT_MANIFEST_PATH = REPO_ROOT / "ml" / "artifacts" / "detection" / "manifest
 
 
 def compute_sha256(filepath: Path) -> str:
-    """Compute SHA-256 digest in chunks."""
-    hasher = hashlib.sha256()
-    with filepath.open("rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
+    """Compute SHA-256 digest in 64KB chunks."""
+    return compute_file_sha256(filepath)
 
 
 def verify_local_artifact(
@@ -49,19 +50,24 @@ def verify_local_artifact(
         raise FileNotFoundError(f"Model file not found at {onnx_path}")
 
     actual_size = onnx_path.stat().st_size
+    if actual_size == 0:
+        raise ValueError(f"Model file at {onnx_path} is empty (0 bytes).")
+
     actual_sha = compute_sha256(onnx_path)
 
-    manifest_data: dict[str, Any] = {}
     if manifest_path and manifest_path.exists():
-        with manifest_path.open("r", encoding="utf-8") as f:
-            manifest_data = json.load(f)
+        manifest_data = validate_manifest_file(manifest_path)
+        verify_artifact_matches_manifest(onnx_path, manifest_data)
         if not expected_sha:
-            expected_sha = (
-                manifest_data.get("onnx_artifact", {}).get("sha256")
-                or manifest_data.get("onnx_sha256")
-            )
+            expected_sha = manifest_data["onnx_artifact"]["sha256"]
 
-    if expected_sha and actual_sha != expected_sha:
+    if not expected_sha:
+        raise ValueError(
+            "Cannot verify artifact: expected SHA-256 digest or valid manifest containing sha256 is required."
+        )
+
+    expected_sha = validate_sha256_format(expected_sha)
+    if actual_sha != expected_sha:
         raise ValueError(
             f"SHA-256 integrity mismatch: expected {expected_sha}, got {actual_sha}"
         )
@@ -97,18 +103,20 @@ def verify_s3_artifact(
     expected_sha: str,
     bucket: str | None = None,
 ) -> dict[str, Any]:
-    """Download and verify remote S3 artifact without persisting locally."""
+    """Download and verify remote S3/R2 artifact without persisting in production cache."""
     import boto3
     from botocore.config import Config
 
-    endpoint = os.getenv("MODEL_S3_ENDPOINT") or os.getenv("S3_ENDPOINT")
-    bucket = bucket or os.getenv("MODEL_S3_BUCKET") or os.getenv("S3_BUCKET") or "eggvision-models"
-    access_key = os.getenv("MODEL_S3_ACCESS_KEY") or os.getenv("S3_ACCESS_KEY")
-    secret_key = os.getenv("MODEL_S3_SECRET_KEY") or os.getenv("S3_SECRET_KEY")
-    region = os.getenv("MODEL_S3_REGION") or os.getenv("S3_REGION") or "us-east-1"
+    endpoint = os.getenv("MODEL_S3_ENDPOINT")
+    bucket = bucket or os.getenv("MODEL_S3_BUCKET") or "eggvision-models"
+    access_key = os.getenv("MODEL_S3_ACCESS_KEY")
+    secret_key = os.getenv("MODEL_S3_SECRET_KEY")
+    region = os.getenv("MODEL_S3_REGION") or "auto"
 
     if not (endpoint and access_key and secret_key):
-        raise ValueError("S3 credentials not configured for remote verification.")
+        raise ValueError("MODEL_S3_* credentials not configured for remote verification.")
+
+    expected_sha = validate_sha256_format(expected_sha)
 
     client = boto3.client(
         "s3",
@@ -116,7 +124,11 @@ def verify_s3_artifact(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         region_name=region,
-        config=Config(signature_version="s3v4"),
+        config=Config(
+            signature_version="s3v4",
+            connect_timeout=10.0,
+            read_timeout=30.0,
+        ),
     )
 
     with tempfile.NamedTemporaryFile(suffix=".onnx", delete=False) as tmp_file:
@@ -156,7 +168,7 @@ def main() -> int:
         else:
             result = verify_local_artifact(
                 onnx_path=args.onnx_path,
-                manifest_path=args.manifest,
+                manifest_path=args.manifest if args.manifest.exists() else None,
                 expected_sha=args.expected_sha,
             )
 

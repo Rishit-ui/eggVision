@@ -7,6 +7,7 @@ preprocessing, coordinate decoding, and Non-Maximum Suppression.
 """
 
 import hashlib
+import hmac
 import json
 import logging
 import time
@@ -15,6 +16,8 @@ from typing import Any
 
 import cv2
 import numpy as np
+
+from ml.inference.manifest_validator import validate_sha256_format
 
 from .engine import InferenceEngine, ModelInfo, PredictionResult
 from .placeholder import PlaceholderEngine
@@ -107,17 +110,25 @@ class OnnxDetectionEngine(InferenceEngine):
                     logger.warning(f"Could not load metadata from {mp}: {e}")
 
         # Check declared SHA-256 checksum
-        expected_sha = (
+        raw_expected_sha = (
             self._metadata.get("onnx_artifact", {}).get("sha256")
             or self._metadata.get("onnx_sha256")
         )
-        if expected_sha:
-            actual_sha = compute_sha256(self.model_path)
-            if actual_sha != expected_sha:
-                logger.error(
-                    f"ONNX SHA-256 mismatch for {self.model_path.name}: "
-                    f"expected {expected_sha}, got {actual_sha}. Rejecting checkpoint."
-                )
+        if raw_expected_sha:
+            try:
+                expected_sha = validate_sha256_format(raw_expected_sha)
+                actual_sha = compute_sha256(self.model_path)
+                if not hmac.compare_digest(actual_sha, expected_sha):
+                    logger.error(
+                        f"ONNX SHA-256 mismatch for {self.model_path.name}: "
+                        f"expected {expected_sha}, got {actual_sha}. Rejecting checkpoint."
+                    )
+                    self._is_ready = False
+                    self.session = None
+                    self._metadata = {}
+                    return
+            except Exception as e:
+                logger.error(f"Invalid ONNX SHA-256 format or integrity failure: {e}")
                 self._is_ready = False
                 self.session = None
                 self._metadata = {}

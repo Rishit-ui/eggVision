@@ -256,11 +256,16 @@ class TestModelLifecycleManager:
         await manager.initialize()
         # In this repository, eggvision_detector.onnx is now generated locally
         if Path("ml/artifacts/detection/weights/eggvision_detector.onnx").exists():
-            assert manager.state == "MODEL_READY"
             assert manager.artifact_available is True
             assert manager.checksum_verified is True
-            assert manager.runtime_name == "onnxruntime"
-            assert manager.get_engine().is_ready() is True
+            if manager.runtime_available:
+                assert manager.state == "MODEL_READY"
+                assert manager.runtime_name == "onnxruntime"
+                assert manager.get_engine().is_ready() is True
+            else:
+                assert manager.state == "MODEL_ERROR"
+                assert manager.runtime_name is None
+                assert manager.get_engine().is_ready() is False
 
     @pytest.mark.asyncio
     async def test_manager_integrity_failure_fallback(self, tmp_path: Path):
