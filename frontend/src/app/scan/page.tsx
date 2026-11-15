@@ -106,9 +106,17 @@ export default function ScanPage() {
         return; // DO NOT FORCE PREDICTION
       }
 
-      // This research build has no validated egg detector/model. The report
-      // presents the evidence state instead of forcing an egg prediction.
-      // 2. Redirect to the transparent capture report.
+      // 2. Run the integrity-verified ONNX visible-shell detector against
+      // the original image saved for this scan. Detection failure must not
+      // discard the successfully persisted capture report.
+      try {
+        await api.requestPrediction(scanResponse.id);
+      } catch (predictionError) {
+        console.error("Egg detection could not be completed:", predictionError);
+      }
+
+      // 3. Show capture evidence and the detector result (or an explicit
+      // retry state if inference could not be reached).
       router.push(`/result/${scanResponse.id}`);
 
     } catch (err: any) {
