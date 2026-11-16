@@ -390,7 +390,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                   <p className="text-sm text-muted-foreground">
                     {predictionExplanation?.reason || predictionError || "Detection has not completed for this scan."}
                   </p>
-                  <Button onClick={runDetection} disabled={isPredicting} size="sm">
+                  <Button onClick={() => runDetection(false)} disabled={isPredicting} size="sm">
                     <RefreshCw className={`mr-2 h-4 w-4 ${isPredicting ? "animate-spin" : ""}`} />
                     {isPredicting ? "Running detection…" : "Run detection"}
                   </Button>
