@@ -230,9 +230,17 @@ class OnnxDetectionEngine(InferenceEngine):
             outputs = self.session.run(None, {self._input_name: blob})
             elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
-            raw_preds = np.squeeze(outputs[0]).T  # Shape: [8400, 5]
+            raw_preds = np.squeeze(outputs[0]).T  # Shape: [8400, 5] for this single-class YOLOv8 export.
+            if raw_preds.ndim != 2 or raw_preds.shape[1] < 5:
+                raise ValueError(f"Unexpected ONNX detector output shape: {np.asarray(outputs[0]).shape}")
+
             scores = raw_preds[:, 4]
-            mask = scores >= self.conf_threshold
+            finite_scores = scores[np.isfinite(scores)]
+            max_candidate_confidence = (
+                float(np.max(finite_scores)) if finite_scores.size else 0.0
+            )
+            mask = np.isfinite(scores) & (scores >= self.conf_threshold)
+            candidates_above_threshold = int(np.count_nonzero(mask))
             filtered_boxes = raw_preds[mask]
             filtered_scores = scores[mask]
 
@@ -309,6 +317,9 @@ class OnnxDetectionEngine(InferenceEngine):
                 inference_time_ms=round(elapsed_ms, 2),
                 model_version=self.get_model_info().version,
                 detections=detection_payload,
+                max_candidate_confidence=round(max_candidate_confidence, 4),
+                candidates_above_threshold=candidates_above_threshold,
+                confidence_threshold=self.conf_threshold,
                 # Candling freshness parameters intentionally left None
                 freshness_class=None,
                 freshness_score=None,

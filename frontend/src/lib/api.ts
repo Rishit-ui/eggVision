@@ -297,13 +297,14 @@ export const api = {
 
   async requestPrediction(
     scanId: string,
+    force = false,
   ): Promise<PredictionResponse> {
     return fetchWithHandler('/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ scan_id: scanId }),
+      body: JSON.stringify({ scan_id: scanId, force }),
     });
   },
 

@@ -69,6 +69,6 @@ async def predict_scan(
             )
 
     prediction = await prediction_service.create_prediction(
-        db, scan_id=request.scan_id, image=image_array
+        db, scan_id=request.scan_id, image=image_array, force=request.force
     )
     return prediction

@@ -27,6 +27,9 @@ class PredictionResult:
     inference_time_ms: float | None = None
     model_version: str | None = None
     detections: list[dict] = field(default_factory=list)
+    max_candidate_confidence: float | None = None
+    candidates_above_threshold: int | None = None
+    confidence_threshold: float | None = None
     error_message: str | None = None
 
 

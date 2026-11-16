@@ -40,12 +40,14 @@ class PredictionService:
         db: AsyncSession,
         scan_id: uuid.UUID,
         image: Any | None = None,
+        force: bool = False,
     ) -> Prediction:
         existing = await self.get_prediction_by_scan_id(db, scan_id)
         # Preserve a completed structured detection result. Older records that
         # only contain legacy prose are eligible for a fresh detector run.
         if (
-            existing
+            not force
+            and existing
             and existing.status == "COMPLETED"
             and isinstance(existing.explanation, dict)
             and existing.explanation.get("task") == "visible_shell_detection"
@@ -65,6 +67,11 @@ class PredictionService:
                     "model_status": "READY",
                     "detection_count": len(result.detections),
                     "detections": result.detections,
+                    "diagnostics": {
+                        "confidence_threshold": result.confidence_threshold,
+                        "max_candidate_confidence": result.max_candidate_confidence,
+                        "candidates_above_threshold": result.candidates_above_threshold,
+                    },
                     "detection_details": result.explanation,
                     "limitations": [
                         "Visible shell object localization only.",
@@ -80,6 +87,16 @@ class PredictionService:
                     "detection_details": result.explanation,
                 }
 
+            logger.info(
+                "prediction_inference_complete scan_id=%s status=%s detections=%s "
+                "max_candidate_confidence=%s threshold=%s candidates_above_threshold=%s",
+                scan_id,
+                status,
+                len(result.detections),
+                result.max_candidate_confidence,
+                result.confidence_threshold,
+                result.candidates_above_threshold,
+            )
             values = {
                 "status": status,
                 "model_version": result.model_version or model_info.version,

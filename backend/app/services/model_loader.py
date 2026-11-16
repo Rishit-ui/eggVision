@@ -244,7 +244,10 @@ class ModelLifecycleManager:
             try:
                 from ml.inference.onnx_detection_engine import OnnxDetectionEngine
 
-                engine = OnnxDetectionEngine(model_path=self.resolved_model_path)
+                engine = OnnxDetectionEngine(
+                    model_path=self.resolved_model_path,
+                    conf_threshold=settings.MODEL_CONFIDENCE_THRESHOLD,
+                )
                 if engine.is_ready():
                     self.engine = engine
                     self.state = "MODEL_READY"
