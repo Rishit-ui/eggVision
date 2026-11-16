@@ -372,6 +372,9 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                           </div>
                         </div>
                       )}
+                      {predictionError && (
+                        <p className="text-xs text-destructive">{predictionError}</p>
+                      )}
                       <Button onClick={() => runDetection(true)} disabled={isPredicting} size="sm" variant="outline">
                         <RefreshCw className={`mr-2 h-4 w-4 ${isPredicting ? "animate-spin" : ""}`} />
                         {isPredicting ? "Re-running detector…" : "Re-run detector"}
