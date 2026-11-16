@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     MODEL_ARTIFACT_MAX_BYTES: int = 100_000_000
     MODEL_ARTIFACT_SHA256: str | None = None
     MODEL_VERSION: str = "1.0.0"
+    MODEL_CONFIDENCE_THRESHOLD: float = 0.25
     INFERENCE_DEVICE: str = "cpu"
 
     APP_ENV: str = "development"
@@ -74,6 +75,13 @@ class Settings(BaseSettings):
             if "*" in parsed.netloc:
                 raise ValueError("CORS_ORIGINS must not contain wildcard domain patterns")
         return ",".join(origins)
+
+    @field_validator("MODEL_CONFIDENCE_THRESHOLD")
+    @classmethod
+    def validate_model_confidence_threshold(cls, value: float) -> float:
+        if not 0.0 < value < 1.0:
+            raise ValueError("MODEL_CONFIDENCE_THRESHOLD must be greater than 0 and less than 1")
+        return value
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
