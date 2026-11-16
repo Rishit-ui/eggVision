@@ -29,7 +29,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
         // Attempt inference once on page entry, then reload the persisted result.
         if (!data.prediction) {
           try {
-            await api.requestPrediction(params.id, force);
+            await api.requestPrediction(params.id);
             data = await api.getScanResult(params.id);
           } catch (predictionErr) {
             setPredictionError(predictionErr instanceof Error ? predictionErr.message : "Detection could not be completed.");
@@ -100,7 +100,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
     setIsPredicting(true);
     setPredictionError(null);
     try {
-      await api.requestPrediction(params.id);
+      await api.requestPrediction(params.id, force);
       const refreshed = await api.getScanResult(params.id);
       setScan(refreshed);
     } catch (err) {
