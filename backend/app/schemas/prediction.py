@@ -10,6 +10,7 @@ __all__ = ["PredictRequest", "ModelInfoResponse", "PredictionResponse"]
 
 class PredictRequest(BaseModel):
     scan_id: uuid.UUID
+    force: bool = False
     
     model_config = ConfigDict(from_attributes=True)
 
