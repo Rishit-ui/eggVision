@@ -29,7 +29,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
         // Attempt inference once on page entry, then reload the persisted result.
         if (!data.prediction) {
           try {
-            await api.requestPrediction(params.id);
+            await api.requestPrediction(params.id, force);
             data = await api.getScanResult(params.id);
           } catch (predictionErr) {
             setPredictionError(predictionErr instanceof Error ? predictionErr.message : "Detection could not be completed.");
@@ -87,8 +87,16 @@ export default function ResultPage({ params }: { params: { id: string } }) {
     ? predictionExplanation.detection_count
     : detections.length;
   const predictionCompleted = prediction?.status === "COMPLETED";
+  const detectorDiagnostics =
+    predictionExplanation?.diagnostics && typeof predictionExplanation.diagnostics === "object"
+      ? predictionExplanation.diagnostics as {
+          confidence_threshold?: number | null;
+          max_candidate_confidence?: number | null;
+          candidates_above_threshold?: number | null;
+        }
+      : null;
 
-  const runDetection = async () => {
+  const runDetection = async (force = false) => {
     setIsPredicting(true);
     setPredictionError(null);
     try {
@@ -337,9 +345,41 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                       </p>
                     </div>
                   ) : (
-                    <p className="rounded-md border p-3 text-sm">
-                      No eggs were detected at the current model confidence threshold. Try a clearer, closer image with the full egg visible.
-                    </p>
+                    <div className="space-y-3 rounded-md border p-3">
+                      <p className="text-sm">
+                        No egg box passed the current confidence threshold for this image.
+                      </p>
+                      {detectorDiagnostics && (
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded bg-muted/40 p-2">
+                            <span className="block text-muted-foreground">Highest raw candidate score</span>
+                            <strong>
+                              {detectorDiagnostics.max_candidate_confidence != null
+                                ? `${(detectorDiagnostics.max_candidate_confidence * 100).toFixed(2)}%`
+                                : "Unavailable"}
+                            </strong>
+                          </div>
+                          <div className="rounded bg-muted/40 p-2">
+                            <span className="block text-muted-foreground">Configured threshold</span>
+                            <strong>
+                              {detectorDiagnostics.confidence_threshold != null
+                                ? `${(detectorDiagnostics.confidence_threshold * 100).toFixed(0)}%`
+                                : "Unavailable"}
+                            </strong>
+                          </div>
+                          <div className="col-span-2 text-muted-foreground">
+                            Candidates at or above threshold: {detectorDiagnostics.candidates_above_threshold ?? "Unavailable"}
+                          </div>
+                        </div>
+                      )}
+                      <Button onClick={() => runDetection(true)} disabled={isPredicting} size="sm" variant="outline">
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isPredicting ? "animate-spin" : ""}`} />
+                        {isPredicting ? "Re-running detector…" : "Re-run detector"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        A repeat run uses the current model and threshold. Do not interpret a low-confidence candidate as a confirmed egg.
+                      </p>
+                    </div>
                   )}
                 </>
               ) : (
