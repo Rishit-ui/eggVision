@@ -245,6 +245,46 @@ class TestOnnxDetectionEngine:
             assert result.freshness_class is None  # Honesty check: detector does not fake candling
             assert any("Detected 1 egg(s)" in exp for exp in result.explanation)
             assert any("Primary egg localized" in exp for exp in result.explanation)
+            assert result.max_candidate_confidence == 0.945
+            assert result.candidates_above_threshold == 1
+            assert result.confidence_threshold == 0.25
+            assert len(result.detections) == 1
+
+
+    @pytest.mark.asyncio
+    async def test_below_threshold_prediction_retains_raw_confidence_diagnostics(self, tmp_path: Path):
+        fake_bytes = b"onnx_model_low_confidence_test"
+        sha = hashlib.sha256(fake_bytes).hexdigest()
+        model_file = tmp_path / "model.onnx"
+        model_file.write_bytes(fake_bytes)
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text(json.dumps({"onnx_artifact": {"sha256": sha}}), encoding="utf-8")
+
+        mock_ort = MagicMock()
+        mock_session = MagicMock()
+        mock_input = MagicMock()
+        mock_input.name = "images"
+        mock_session.get_inputs.return_value = [mock_input]
+
+        raw = np.zeros((1, 5, 8400), dtype=np.float32)
+        raw[0, 0, 100] = 320.0
+        raw[0, 1, 100] = 320.0
+        raw[0, 2, 100] = 120.0
+        raw[0, 3, 100] = 140.0
+        raw[0, 4, 100] = 0.12
+        mock_session.run.return_value = [raw]
+        mock_ort.InferenceSession.return_value = mock_session
+
+        with patch.dict(sys.modules, {"onnxruntime": mock_ort}):
+            engine = OnnxDetectionEngine(model_path=model_file, metadata_path=manifest)
+            result = await engine.predict(np.zeros((480, 640, 3), dtype=np.uint8))
+
+        assert result.status == "completed"
+        assert result.detections == []
+        assert result.confidence == 0.0
+        assert result.max_candidate_confidence == 0.12
+        assert result.candidates_above_threshold == 0
+        assert result.confidence_threshold == 0.25
 
 
 class TestModelLifecycleManager:
@@ -365,7 +405,7 @@ class TestPredictEndpointAndStorageRetrieval:
             patch("app.routers.predict.logger.info") as info_log,
         ):
             result = await predict_scan(
-                PredictRequest(scan_id=scan_id),
+                PredictRequest(scan_id=scan_id, force=True),
                 db=mock_db,
                 current_user=None,
             )
@@ -373,6 +413,7 @@ class TestPredictEndpointAndStorageRetrieval:
         assert result.status == "COMPLETED"
         create_prediction.assert_awaited_once()
         assert create_prediction.call_args.kwargs["image"].shape == (120, 160, 3)
+        assert create_prediction.call_args.kwargs["force"] is True
         assert any("prediction_capture_screening_advisory" in call.args[0] for call in info_log.call_args_list)
 
     @pytest.mark.asyncio
