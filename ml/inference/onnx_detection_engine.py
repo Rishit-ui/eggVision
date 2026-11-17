@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 
 from ml.inference.manifest_validator import validate_sha256_format
+from ml.inference.onnx_postprocess import decode_and_nms_yolov8, letterbox_image
 
 from .engine import InferenceEngine, ModelInfo, PredictionResult
 from .placeholder import PlaceholderEngine
@@ -37,28 +38,6 @@ def compute_sha256(filepath: Path) -> str:
         for chunk in iter(lambda: f.read(65536), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
-
-
-def letterbox_image(
-    image: np.ndarray,
-    target_size: int = 640,
-) -> tuple[np.ndarray, float, tuple[int, int]]:
-    """Resize image to square target size with aspect-ratio preserving padding."""
-    h, w = image.shape[:2]
-    scale = min(target_size / h, target_size / w)
-    nw, nh = int(round(w * scale)), int(round(h * scale))
-    pad_x = (target_size - nw) / 2
-    pad_y = (target_size - nh) / 2
-    top = int(round(pad_y - 0.1))
-    bottom = int(round(pad_y + 0.1))
-    left = int(round(pad_x - 0.1))
-    right = int(round(pad_x + 0.1))
-
-    resized = cv2.resize(image, (nw, nh), interpolation=cv2.INTER_LINEAR)
-    letterboxed = cv2.copyMakeBorder(
-        resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114)
-    )
-    return letterboxed, scale, (left, top)
 
 
 class OnnxDetectionEngine(InferenceEngine):
@@ -241,44 +220,17 @@ class OnnxDetectionEngine(InferenceEngine):
             )
             mask = np.isfinite(scores) & (scores >= self.conf_threshold)
             candidates_above_threshold = int(np.count_nonzero(mask))
-            filtered_boxes = raw_preds[mask]
-            filtered_scores = scores[mask]
 
-            detected_boxes: list[list[float]] = []
-            detected_scores: list[float] = []
-
-            if len(filtered_boxes) > 0:
-                cx = filtered_boxes[:, 0]
-                cy = filtered_boxes[:, 1]
-                bw = filtered_boxes[:, 2]
-                bh = filtered_boxes[:, 3]
-
-                x1 = np.clip((cx - bw / 2 - left) / scale, 0, w)
-                y1 = np.clip((cy - bh / 2 - top) / scale, 0, h)
-                x2 = np.clip((cx + bw / 2 - left) / scale, 0, w)
-                y2 = np.clip((cy + bh / 2 - top) / scale, 0, h)
-
-                cv_boxes = [
-                    [float(x1[i]), float(y1[i]), float(x2[i] - x1[i]), float(y2[i] - y1[i])]
-                    for i in range(len(x1))
-                ]
-                indices = cv2.dnn.NMSBoxes(
-                    cv_boxes,
-                    filtered_scores.tolist(),
-                    score_threshold=self.conf_threshold,
-                    nms_threshold=self.iou_threshold,
-                )
-
-                flat_indices = np.array(indices).flatten() if len(indices) > 0 else []
-                for idx in flat_indices:
-                    i = int(idx)
-                    detected_boxes.append([
-                        round(float(x1[i]), 1),
-                        round(float(y1[i]), 1),
-                        round(float(x2[i]), 1),
-                        round(float(y2[i]), 1),
-                    ])
-                    detected_scores.append(round(float(filtered_scores[i]), 4))
+            detected_boxes, detected_scores = decode_and_nms_yolov8(
+                raw_preds=outputs[0],
+                orig_shape=(h, w),
+                pad_info=(left, top),
+                scale=scale,
+                conf_threshold=self.conf_threshold,
+                iou_threshold=self.iou_threshold,
+                max_det=300,
+                box_precision=1,
+            )
 
             n_detected = len(detected_boxes)
             detection_payload = [

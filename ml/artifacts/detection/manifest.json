@@ -79,16 +79,16 @@
     }
   },
   "onnx_equivalence": {
-    "total_images": 10,
-    "count_matches": 10,
-    "total_box_pairs": 59,
-    "mean_iou": 0.9975,
-    "min_iou": 0.9714,
-    "mean_confidence_diff": 0.0028,
-    "max_confidence_diff": 0.0376,
-    "mean_pt_latency_ms": 436.88,
-    "mean_onnx_latency_ms": 56.41,
-    "speedup_factor": 7.74
+    "total_images": 27,
+    "count_matches": 27,
+    "total_box_pairs": 172,
+    "mean_iou": 1.0,
+    "min_iou": 0.9998,
+    "mean_confidence_diff": 0.0,
+    "max_confidence_diff": 0.0001,
+    "mean_pt_latency_ms": 219.96,
+    "mean_onnx_latency_ms": 50.25,
+    "speedup_factor": 4.38
   },
   "manifest_key": "eggvision/detection/v1/a71d9045091f023114181cc4dbd3871c2e7b7ecc04dc86554ffc809c431909a4/manifest.json",
   "created_at": "2026-11-17T08:00:16.573001+00:00",

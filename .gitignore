@@ -91,3 +91,7 @@ ml/data/fiftyone_cache/
 # Ultralytics YOLO cache files
 ml/data/processed/**/*.cache
 ml/data/external/**/*.cache
+
+# Cloudflare Wrangler
+.wrangler/
+
