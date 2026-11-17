@@ -53,7 +53,7 @@ def run_onnx_inference(
     session: Any,
     image: np.ndarray,
     conf_threshold: float = 0.25,
-    iou_threshold: float = 0.70,
+    iou_threshold: float = 0.50,
     target_size: int = 640,
 ) -> tuple[list[list[float]], list[float], float]:
     """Run ONNX detector with letterboxing, decoding, and NMS."""
@@ -177,7 +177,7 @@ def verify_equivalence(
 
         # ONNX inference
         onnx_boxes, onnx_confs, onnx_lat = run_onnx_inference(
-            onnx_session, img, conf_threshold=conf_threshold
+            onnx_session, img, conf_threshold=conf_threshold, iou_threshold=0.50
         )
         onnx_latencies.append(onnx_lat)
 

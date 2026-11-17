@@ -69,7 +69,7 @@ class OnnxDetectionEngine(InferenceEngine):
         model_path: Path = DEFAULT_ONNX_PATH,
         metadata_path: Path | None = None,
         conf_threshold: float = 0.25,
-        iou_threshold: float = 0.70,
+        iou_threshold: float = 0.50,
         target_size: int = 640,
     ) -> None:
         self.model_path = Path(model_path)
