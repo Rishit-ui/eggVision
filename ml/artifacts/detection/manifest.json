@@ -13,17 +13,17 @@
   "input_color_format": "RGB",
   "input_normalization": "scale_0_to_1",
   "onnx_artifact": {
-    "key": "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/model.onnx",
+    "key": "eggvision/detection/v1/a71d9045091f023114181cc4dbd3871c2e7b7ecc04dc86554ffc809c431909a4/model.onnx",
     "filename": "eggvision_detector.onnx",
-    "sha256": "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1",
+    "sha256": "a71d9045091f023114181cc4dbd3871c2e7b7ecc04dc86554ffc809c431909a4",
     "size_bytes": 12746280,
     "format": "onnx",
     "opset": 17
   },
   "original_checkpoint": {
     "filename": "best.pt",
-    "sha256": "dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732",
-    "size_bytes": 6492138,
+    "sha256": "b5ddda3c997c4960a6c7132371123f8af3f67c66f3ee59b75cef8465a24177fd",
+    "size_bytes": 6504234,
     "architecture": "yolov8n"
   },
   "provenance": {
@@ -33,9 +33,9 @@
     "training_library": "ultralytics==8.4.212",
     "runtime_library": "onnxruntime>=1.17.0",
     "training_epochs": 30,
-    "training_samples": 36,
-    "validation_samples": 8,
-    "test_samples": 7
+    "training_samples": 126,
+    "validation_samples": 27,
+    "test_samples": 27
   },
   "evaluation_metrics": {
     "mAP50": 0.995,
@@ -69,28 +69,28 @@
       }
     ],
     "latency_benchmark": {
-      "mean_ms": 46.38,
-      "median_ms": 44.47,
-      "p95_ms": 56.13,
-      "min_ms": 42.06,
-      "max_ms": 69.8,
+      "mean_ms": 45.83,
+      "median_ms": 45.98,
+      "p95_ms": 48.73,
+      "min_ms": 43.34,
+      "max_ms": 49.29,
       "runs": 20,
       "device": "CPU"
     }
   },
   "onnx_equivalence": {
-    "total_images": 8,
-    "count_matches": 8,
-    "total_box_pairs": 73,
-    "mean_iou": 0.9961,
-    "min_iou": 0.9658,
-    "mean_confidence_diff": 0.0022,
-    "max_confidence_diff": 0.01,
-    "mean_pt_latency_ms": 405.96,
-    "mean_onnx_latency_ms": 48.27,
-    "speedup_factor": 8.41
+    "total_images": 10,
+    "count_matches": 10,
+    "total_box_pairs": 59,
+    "mean_iou": 0.9975,
+    "min_iou": 0.9714,
+    "mean_confidence_diff": 0.0028,
+    "max_confidence_diff": 0.0376,
+    "mean_pt_latency_ms": 436.88,
+    "mean_onnx_latency_ms": 56.41,
+    "speedup_factor": 7.74
   },
-  "manifest_key": "eggvision/detection/v1/81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1/manifest.json",
-  "created_at": "2026-11-14T18:36:52.454275+00:00",
+  "manifest_key": "eggvision/detection/v1/a71d9045091f023114181cc4dbd3871c2e7b7ecc04dc86554ffc809c431909a4/manifest.json",
+  "created_at": "2026-11-17T08:00:16.573001+00:00",
   "status": "VALIDATED"
 }
