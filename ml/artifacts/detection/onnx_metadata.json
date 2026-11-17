@@ -14,9 +14,9 @@
   "input_normalization": "scale_0_to_1",
   "output_layout": "yolov8_raw_candidates [batch, 4_box_coords_plus_1_cls, 8400_anchors]",
   "nms_strategy": "runtime_postprocessing_nms",
-  "pt_checkpoint_sha256": "dee854f1b36b16d2076c66a372c00517b961750d90e8115ac726bab7d0055732",
-  "pt_checkpoint_size_bytes": 6492138,
-  "onnx_sha256": "81ee288a717ce922d195399244678d94596a6fab3adc4fc8a2eb46abf25678c1",
+  "pt_checkpoint_sha256": "b5ddda3c997c4960a6c7132371123f8af3f67c66f3ee59b75cef8465a24177fd",
+  "pt_checkpoint_size_bytes": 6504234,
+  "onnx_sha256": "a71d9045091f023114181cc4dbd3871c2e7b7ecc04dc86554ffc809c431909a4",
   "onnx_size_bytes": 12746280,
   "graph_validation": {
     "ir_version": 8,
@@ -54,15 +54,15 @@
       }
     ],
     "latency_benchmark": {
-      "mean_ms": 46.38,
-      "median_ms": 44.47,
-      "p95_ms": 56.13,
-      "min_ms": 42.06,
-      "max_ms": 69.8,
+      "mean_ms": 45.83,
+      "median_ms": 45.98,
+      "p95_ms": 48.73,
+      "min_ms": 43.34,
+      "max_ms": 49.29,
       "runs": 20,
       "device": "CPU"
     }
   },
-  "exported_at": "2026-11-14T18:33:08.226191+00:00",
+  "exported_at": "2026-11-17T07:53:16.902517+00:00",
   "status": "VALIDATED"
 }

@@ -17,43 +17,29 @@ from typing import Any
 import cv2
 import numpy as np
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from ml.inference.onnx_postprocess import decode_and_nms_yolov8, letterbox_image
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("verify_equivalence")
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PT_WEIGHTS = REPO_ROOT / "ml" / "artifacts" / "detection" / "weights" / "best.pt"
 DEFAULT_ONNX_WEIGHTS = REPO_ROOT / "ml" / "artifacts" / "detection" / "weights" / "eggvision_detector.onnx"
 DEFAULT_IMAGES_DIR = REPO_ROOT / "ml" / "data" / "processed" / "egg_detection_yolo" / "images" / "val"
 DEFAULT_REPORT_PATH = REPO_ROOT / "ml" / "artifacts" / "detection" / "onnx_equivalence_report.json"
 
 
-def letterbox_image(image: np.ndarray, target_size: int = 640) -> tuple[np.ndarray, float, tuple[int, int]]:
-    """Letterbox resize image to target static square while preserving aspect ratio."""
-    h, w = image.shape[:2]
-    scale = min(target_size / h, target_size / w)
-    nw, nh = int(round(w * scale)), int(round(h * scale))
-    pad_x = (target_size - nw) / 2
-    pad_y = (target_size - nh) / 2
-    top = int(round(pad_y - 0.1))
-    bottom = int(round(pad_y + 0.1))
-    left = int(round(pad_x - 0.1))
-    right = int(round(pad_x + 0.1))
-
-    resized = cv2.resize(image, (nw, nh), interpolation=cv2.INTER_LINEAR)
-    letterboxed = cv2.copyMakeBorder(
-        resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114)
-    )
-    return letterboxed, scale, (left, top)
-
-
 def run_onnx_inference(
     session: Any,
     image: np.ndarray,
     conf_threshold: float = 0.25,
-    iou_threshold: float = 0.70,
+    iou_threshold: float = 0.50,
     target_size: int = 640,
 ) -> tuple[list[list[float]], list[float], float]:
     """Run ONNX detector with letterboxing, decoding, and NMS."""
@@ -69,41 +55,16 @@ def run_onnx_inference(
     outputs = session.run(None, {input_name: blob})
     latency_ms = (time.perf_counter() - t0) * 1000.0
 
-    raw_preds = np.squeeze(outputs[0]).T  # shape: [8400, 5]
-    scores = raw_preds[:, 4]
-    mask = scores >= conf_threshold
-    filtered_boxes = raw_preds[mask]
-    filtered_scores = scores[mask]
-
-    if len(filtered_boxes) == 0:
-        return [], [], latency_ms
-
-    cx = filtered_boxes[:, 0]
-    cy = filtered_boxes[:, 1]
-    bw = filtered_boxes[:, 2]
-    bh = filtered_boxes[:, 3]
-
-    x1 = np.clip((cx - bw / 2 - left) / scale, 0, w)
-    y1 = np.clip((cy - bh / 2 - top) / scale, 0, h)
-    x2 = np.clip((cx + bw / 2 - left) / scale, 0, w)
-    y2 = np.clip((cy + bh / 2 - top) / scale, 0, h)
-
-    cv_boxes = [
-        [float(x1[i]), float(y1[i]), float(x2[i] - x1[i]), float(y2[i] - y1[i])]
-        for i in range(len(x1))
-    ]
-    indices = cv2.dnn.NMSBoxes(
-        cv_boxes, filtered_scores.tolist(), score_threshold=conf_threshold, nms_threshold=iou_threshold
+    boxes_out, confs_out = decode_and_nms_yolov8(
+        raw_preds=outputs[0],
+        orig_shape=(h, w),
+        pad_info=(left, top),
+        scale=scale,
+        conf_threshold=conf_threshold,
+        iou_threshold=iou_threshold,
+        max_det=300,
+        box_precision=2,
     )
-
-    boxes_out: list[list[float]] = []
-    confs_out: list[float] = []
-    flat_indices = np.array(indices).flatten() if len(indices) > 0 else []
-
-    for idx in flat_indices:
-        i = int(idx)
-        boxes_out.append([round(float(x1[i]), 2), round(float(y1[i]), 2), round(float(x2[i]), 2), round(float(y2[i]), 2)])
-        confs_out.append(round(float(filtered_scores[i]), 4))
 
     return boxes_out, confs_out, latency_ms
 
@@ -165,7 +126,7 @@ def verify_equivalence(
 
         # PyTorch inference
         t0 = time.perf_counter()
-        pt_res = pt_model.predict(img, conf=conf_threshold, verbose=False)[0]
+        pt_res = pt_model.predict(img, conf=conf_threshold, rect=False, verbose=False)[0]
         pt_lat = (time.perf_counter() - t0) * 1000.0
         pt_latencies.append(pt_lat)
 
@@ -177,7 +138,7 @@ def verify_equivalence(
 
         # ONNX inference
         onnx_boxes, onnx_confs, onnx_lat = run_onnx_inference(
-            onnx_session, img, conf_threshold=conf_threshold
+            onnx_session, img, conf_threshold=conf_threshold, iou_threshold=0.50
         )
         onnx_latencies.append(onnx_lat)
 
